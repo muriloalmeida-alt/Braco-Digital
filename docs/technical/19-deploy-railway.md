@@ -15,14 +15,21 @@ Railpack não consegue decidir sozinho qual dos dois buildar, e o erro
 típico é a etapa `railpack prepare` falhar sem detalhe útil no log.
 
 Cada diretório já tem seu próprio `railway.json` com `buildCommand`
-(`npm run build`) e `startCommand` **explícitos** — em monorepo com
-workspaces npm (`apps/api` e `apps/web` não têm `package-lock.json`
-próprio, só o da raiz), deixar o Railpack detectar o build sozinho pode
-resultar em deploy "bem-sucedido" que na verdade nunca rodou `nest
-build`/`vite build`, e a API crasha na subida com
-`Error: Cannot find module '/app/dist/main.js'` (o `dist/` nunca foi
-gerado). Sempre que mexer nesses `railway.json`, mantenha os dois campos
-(`build.buildCommand` e `deploy.startCommand`) explícitos.
+(`npm run build`) e `startCommand` **explícitos**, pra não depender de
+detecção automática do Railpack em monorepo com workspaces npm
+(`apps/api` e `apps/web` não têm `package-lock.json` próprio, só o da
+raiz).
+
+> **Incidente registrado:** o `apps/api` ficou crashando na subida com
+> `Error: Cannot find module '/app/dist/main.js'` mesmo com o build
+> "bem-sucedido" (`nest build` rodava e terminava sem erro). Causa real:
+> faltava `apps/api/tsconfig.build.json` — sem ele, o `tsc` compila
+> junto `src/`, `test/` e `prisma/seed.ts`, calcula a raiz comum como a
+> pasta do projeto inteiro e gera `dist/src/main.js` (aninhado) em vez
+> de `dist/main.js` (que é o caminho fixo usado no `start:railway`). O
+> `tsconfig.build.json` restaurado exclui `test`/`prisma` da compilação
+> de produção, deixando `src/` como única raiz e o output plano de
+> novo. Ver seção 7.
 
 ## 1. Criar o projeto e o banco
 
@@ -122,7 +129,7 @@ nunca como parte automática do deploy.
 | Sintoma | Causa provável |
 |---|---|
 | `railpack prepare` falha sem detalhe | Root Directory não configurado (serviço apontando pra raiz do monorepo) |
-| `Error: Cannot find module '/app/dist/main.js'` na subida | Build não gerou `dist/` (comum em monorepo sem `buildCommand` explícito no `railway.json`) — confirme `build.buildCommand: "npm run build"` no `railway.json` do serviço e olhe a aba **Build Logs** (não a de runtime) pra ver se `nest build`/`vite build` de fato rodou |
+| `Error: Cannot find module '/app/dist/main.js'` na subida | `dist/` existe mas está aninhado (`dist/src/main.js`) por falta de `apps/api/tsconfig.build.json` — confirme que o arquivo existe e exclui `test`/`prisma`, e que `ls dist` no runtime mostra `main.js` direto na raiz, não uma subpasta `src/` |
 | Erro de CORS no console do navegador | `CORS_ORIGIN` na API não bate **exatamente** com a URL do web (protocolo `https://` incluso, sem barra final) |
 | Frontend chama `localhost:3001` em produção | `VITE_API_BASE_URL` não foi definida antes do build, ou mudou sem novo deploy (é lida em build-time) |
 | API não sobe / erro de conexão com banco | `DATABASE_URL` não está referenciando o plugin Postgres corretamente |
