@@ -1,0 +1,75 @@
+# BRAÇO — Content Design
+
+## 1. Voz
+
+BRAÇO fala de forma:
+
+- clara;
+- direta;
+- humana;
+- profissional;
+- simples.
+
+## 2. Vocabulário preferido
+
+Usar:
+- funcionário;
+- equipe;
+- preparar;
+- trabalhar;
+- acompanhar;
+- resultado;
+- conversa;
+- tarefa;
+- agenda;
+- responsável;
+- regra;
+- limite;
+- autonomia.
+
+Evitar na experiência principal:
+- prompt;
+- token;
+- LLM;
+- agente;
+- webhook;
+- API;
+- automação;
+- modelo.
+
+## 3. CTAs
+
+CTAs devem descrever ação real.
+
+Preferir:
+- Contratar funcionário
+- Continuar preparação
+- Ativar funcionário
+- Assumir conversa
+- Reagendar
+- Resolver pendência
+
+Evitar:
+- Continuar
+- Confirmar
+- Executar
+quando houver alternativa mais específica.
+
+## 4. Erros
+
+Estrutura:
+1. o que aconteceu;
+2. impacto;
+3. o que fazer.
+
+## 5. Alertas
+
+Estrutura:
+- título objetivo;
+- contexto;
+- consequência;
+- ação.
+
+## 6. Transparência digital
+
+No canal com cliente, sempre manter identidade digital clara sem repetir de forma robótica a cada mensagem.

@@ -1,0 +1,16 @@
+{
+  "versao": "v2-product-design-final",
+  "markdown_total": 140,
+  "design_markdown": 27,
+  "user_stories": 76,
+  "epicos": 10,
+  "sprints": 6,
+  "design_system": "Google Material Design 3",
+  "design_gate": "Product Ready + Design Ready + Tech Ready",
+  "roles": {
+    "Murilo": "Product Owner / Sponsor",
+    "GPT": "Product Manager + Product Designer",
+    "Claude": "Engineering / Development"
+  },
+  "validation": "OK"
+}
