@@ -1,5 +1,7 @@
 .braco-card {
-  background: var(--md-sys-color-surface-container-low);
+  /* Cards usam Branco puro (surfaceContainerLowest), raio 12px e sombra
+   * mínima — docs/design/20-brand-ui-integration.md §10. */
+  background: var(--md-sys-color-surface-container-lowest);
   color: var(--md-sys-color-on-surface);
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: var(--md-sys-shape-corner-medium);

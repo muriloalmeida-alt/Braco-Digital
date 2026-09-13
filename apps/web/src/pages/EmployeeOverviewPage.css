@@ -3,10 +3,12 @@
 }
 
 .braco-employee-overview__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   color: var(--md-sys-color-on-surface-variant);
   text-decoration: none;
   font-size: var(--md-sys-typescale-body-medium-size);
-  display: inline-block;
   margin-bottom: var(--braco-space-4);
 }
 
@@ -22,18 +24,20 @@
   font-size: var(--md-sys-typescale-body-medium-size);
 }
 
+/* Próximo passo é informação de apoio, não alerta — superfície informativa
+ * Azul Claro (docs/design/20-brand-ui-integration.md §7). */
 .braco-employee-overview__next-step {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--braco-space-3);
-  background: var(--md-sys-color-surface-container);
+  background: var(--braco-color-surface-secondary);
   border-radius: var(--md-sys-shape-corner-medium);
   padding: var(--braco-space-4);
   margin-top: var(--braco-space-4);
 }
 
 .braco-employee-overview__next-step span {
-  font-weight: 500;
-  color: var(--md-sys-color-on-surface-variant);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  color: var(--braco-color-on-surface-secondary);
 }

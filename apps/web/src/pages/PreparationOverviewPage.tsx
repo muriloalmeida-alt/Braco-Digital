@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ArrowLeft, CheckCircle2, Circle, Clock } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import { api, type WorkManual } from '../api/client';
 import { Card } from '../components/Card';
@@ -8,6 +9,14 @@ const SECTION_STATE_LABEL: Record<WorkManual['sections'][number]['status'], stri
   not_started: 'Não iniciado',
   in_progress: 'Em andamento',
   complete: 'Completo',
+};
+
+/* Ícone nunca substitui o label de status — é só reforço visual, o texto
+ * completo sempre acompanha (docs/design/06-shape-elevation-iconography.md §7). */
+const SECTION_STATE_ICON: Record<WorkManual['sections'][number]['status'], typeof Circle> = {
+  not_started: Circle,
+  in_progress: Clock,
+  complete: CheckCircle2,
 };
 
 /**
@@ -46,12 +55,13 @@ export function PreparationOverviewPage() {
   return (
     <div className="braco-preparation-page">
       <Link to={`/equipe/${id}`} className="braco-preparation-page__back">
-        ← Voltar
+        <ArrowLeft size={16} aria-hidden="true" /> Voltar
       </Link>
 
       <h1 className="braco-page-title">Preparar funcionário</h1>
       <p className="braco-page-subtitle">
-        {completed} de {total} seções completas
+        <strong className="braco-numeric">{completed}</strong> de{' '}
+        <strong className="braco-numeric">{total}</strong> seções completas
       </p>
 
       {nextSection && (
@@ -61,16 +71,20 @@ export function PreparationOverviewPage() {
       )}
 
       <ul className="braco-preparation-page__sections">
-        {manual.sections.map((section) => (
-          <li key={section.key} className="braco-preparation-page__section">
-            <span>{section.label}</span>
-            <span
-              className={`braco-preparation-page__section-status braco-preparation-page__section-status--${section.status}`}
-            >
-              {SECTION_STATE_LABEL[section.status]}
-            </span>
-          </li>
-        ))}
+        {manual.sections.map((section) => {
+          const StatusIcon = SECTION_STATE_ICON[section.status];
+          return (
+            <li key={section.key} className="braco-preparation-page__section">
+              <span>{section.label}</span>
+              <span
+                className={`braco-preparation-page__section-status braco-preparation-page__section-status--${section.status}`}
+              >
+                <StatusIcon size={16} aria-hidden="true" />
+                {SECTION_STATE_LABEL[section.status]}
+              </span>
+            </li>
+          );
+        })}
       </ul>
 
       <p className="braco-preparation-page__note">

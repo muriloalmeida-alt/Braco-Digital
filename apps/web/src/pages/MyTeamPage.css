@@ -11,8 +11,23 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--braco-space-3);
+  gap: var(--braco-space-2);
   max-width: 480px;
+}
+
+.braco-my-team-page__empty-icon {
+  color: var(--md-sys-color-on-surface-variant);
+  margin-bottom: var(--braco-space-1);
+}
+
+.braco-my-team-page__empty-title {
+  margin: 0;
+  font-size: var(--md-sys-typescale-title-medium-size);
+  font-weight: var(--md-sys-typescale-title-medium-weight);
+}
+
+.braco-my-team-page__empty p {
+  margin: 0 0 var(--braco-space-2);
 }
 
 .braco-my-team-page__grid {

@@ -2,45 +2,89 @@
 
 ## 1. Fonte
 
-A base tipográfica recomendada é **Roboto / Roboto Flex**, utilizando a escala tipográfica e os roles do Material 3.
+Tipografia oficial:
 
-A escolha final de implementação pode considerar plataforma e performance, desde que preserve a escala e legibilidade.
+> **Manrope**
 
-## 2. Roles M3
+Fallback:
 
-Usar os roles:
+> **Inter**
 
-### Display
-Somente comunicação institucional ou superfícies de grande destaque.
+Fallback de sistema pode ser usado depois de Inter quando necessário.
 
-### Headline
-Títulos de páginas e momentos importantes.
+A adoção de Manrope substitui a recomendação provisória anterior de
+Roboto/Roboto Flex.
 
-### Title
-Cards, seções, dialogs e elementos de estrutura.
+## 2. Relação com Material 3
+
+Os **typography roles M3 continuam canônicos**.
+
+O que muda é a família e os pesos usados pelo Tema BRAÇO.
+
+## 3. Pesos
+
+### Display / Headline
+- Manrope Bold / ExtraBold
+- peso recomendado: 700–800
+
+### Title / Subtítulo
+- Manrope SemiBold
+- peso recomendado: 600–700
 
 ### Body
-Conteúdo operacional, textos e descrições.
+- Manrope Regular / Medium
+- peso recomendado: 400–500
+
+### Label / Controls
+- Manrope Medium / SemiBold
+- peso recomendado: 500–600
+
+### Números e indicadores
+- Manrope SemiBold
+- peso recomendado: 600
+
+## 4. Roles M3
+
+### Display
+Uso institucional/onboarding e destaques raros.
+
+### Headline
+Títulos de página.
+
+### Title
+Cards, seções, dialogs.
+
+### Body
+Conteúdo operacional.
 
 ### Label
-Botões, chips, campos e metadados.
+Botões, labels, campos, metadados.
 
-## 3. Diretriz
+## 5. Diretriz
 
 BRAÇO é produto de trabalho.
 
-A tipografia deve priorizar:
+Priorizar:
 
 1. leitura;
 2. hierarquia;
 3. escaneabilidade;
-4. consistência.
+4. proximidade;
+5. consistência.
 
-Não usar grandes títulos decorativos em telas densas.
+Não usar títulos exageradamente grandes em telas operacionais.
 
-## 4. Conteúdo operacional
+## 6. Aplicação de marca
 
-Dados críticos devem possuir hierarquia forte:
+A logo já possui lettering próprio.
+
+Não tentar recriar a logo usando Manrope.
+
+Manrope é a tipografia da interface e comunicação, não o desenho da marca.
+
+## 7. Conteúdo operacional
+
+Dar hierarquia forte a:
 
 - nome do funcionário;
 - status;
@@ -49,6 +93,13 @@ Dados críticos devem possuir hierarquia forte:
 - valor;
 - ação requerida.
 
-## 5. Números
+## 8. Implementação
 
-Indicadores devem usar alinhamento e destaque que facilitem comparação, sem competir com ações operacionais.
+Engenharia decide a forma de carregamento da fonte.
+
+Requisitos:
+
+- não bloquear leitura se a fonte falhar;
+- usar `Manrope, Inter, system-ui, sans-serif`;
+- evitar layout shift significativo;
+- não misturar famílias sem necessidade.

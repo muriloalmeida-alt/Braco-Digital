@@ -3,7 +3,8 @@
   font-size: var(--md-sys-typescale-label-medium-size);
   font-weight: var(--md-sys-typescale-label-medium-weight);
   padding: 4px 10px;
-  border-radius: var(--md-sys-shape-corner-small);
+  /* Badges: pill/999px — docs/design/06-shape-elevation-iconography.md §1 */
+  border-radius: var(--md-sys-shape-corner-full);
   white-space: nowrap;
 }
 

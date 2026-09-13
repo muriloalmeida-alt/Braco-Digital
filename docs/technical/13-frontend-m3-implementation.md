@@ -39,18 +39,36 @@ troca ao componente, não ao produto inteiro.
 
 ## 2. Design tokens e tema
 
-Seeds de cor definidos pelo Design (`03-theme-strategy.md`,
-`04-color-system.md`: `#3156A3` primary, `#586578` secondary, `#006B5E`
-tertiary) são processados pelo utilitário oficial do Material
-(`@material/material-color-utilities`) para gerar os Color Schemes Light e
-Dark completos — não se deriva a paleta manualmente. Isso garante que os
-color roles (primary/onPrimary/surface/outline/error etc.) fiquem
-matematicamente consistentes com o algoritmo M3, em vez de aproximados à
-mão.
+**Atualizado — Brand UI Foundation.** Seeds provisórias substituídas pelas
+seeds oficiais de marca (`03-theme-strategy.md`, `04-color-system.md`:
+`#0B4F86` primary/Azul BRAÇO, `#66717D` secondary/Cinza Médio, `#32B44A`
+tertiary/Verde Capacidade). São processadas pelo utilitário oficial do
+Material (`@material/material-color-utilities`) para gerar os Color
+Schemes Light e Dark completos — não se deriva a paleta manualmente. Isso
+garante que os color roles (primary/onPrimary/surface/outline/error etc.)
+fiquem matematicamente consistentes com o algoritmo M3, em vez de
+aproximados à mão.
+
+O Light Scheme fixa como âncoras de marca (em vez de puramente
+algorítmico) os roles `surface` (#F7F9FA), `onSurface` (#1C2530),
+`onSurfaceVariant` (#66717D), `outlineVariant` (#E8ECEF) e
+`tertiaryContainer`/success-background (#DDF5E2) — conforme
+`03-theme-strategy.md` §3. O role `primary` também é fixado no hex de
+marca exato; ver a justificativa completa e por que `tertiary` não recebeu
+o mesmo tratamento em `17-technical-decisions.md` TD11. Um token de marca
+fora do conjunto de roles M3, `--braco-color-nav-surface` (#07345A, Azul
+Profundo), cobre a superfície do Navigation Drawer/Rail
+(`04-color-system.md` §5), fixo nos dois schemes.
 
 Tokens de extensão de domínio (`success/working`, `attention/warning`,
 descritos em `04-color-system.md` §4) são implementados como tokens
-adicionais no mesmo sistema de tema — nunca como cores soltas em componentes.
+adicionais no mesmo sistema de tema — nunca como cores soltas em
+componentes. `--braco-color-surface-secondary` (Azul Claro, #E8F3FB no
+Light) segue o mesmo padrão para áreas informativas (`04-color-system.md`
+§7).
+
+Tipografia (Manrope/Inter via Google Fonts) e iconografia (Lucide) — ver
+`17-technical-decisions.md` TD12.
 
 ## 3. Light/Dark Scheme
 

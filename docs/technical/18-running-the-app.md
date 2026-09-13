@@ -154,3 +154,27 @@ Vida" + Owner com senha conhecida) — **não rodar em produção real** com
 dados de cliente. Adequado apenas para ambiente de demonstração/piloto
 controlado (PD1). Rodar manualmente via `railway run npm run prisma:seed`
 (CLI do Railway) quando for o caso, nunca como parte automática do deploy.
+
+## 8. Brand UI Foundation
+
+Identidade visual aplicada conforme `docs/design/20-brand-ui-integration.md`
+e `docs/design/21-logo-usage.md`. Mapeamento de onde cada asset de
+`apps/web/public/brand/` é referenciado no código:
+
+| Asset | Usado em | Contexto |
+|---|---|---|
+| `06_logo_negativa_branca.png` | `components/AppShell.tsx`, `pages/LoginPage.tsx` | Navigation Drawer (Expanded) e painel institucional do Login (Expanded) — superfícies em Azul Profundo |
+| `03_logo_horizontal_colorida.png` | `components/AppShell.tsx` | Top App Bar (Compact/Medium), quando a largura comporta a assinatura |
+| `09_icone_aplicativo.png` | `components/AppShell.tsx`, `index.html` | Top App Bar quando não há largura para a logo horizontal; `apple-touch-icon` |
+| `02_logo_vertical_sem_assinatura.png` | `pages/LoginPage.tsx` | Login em Compact (sem o painel institucional escuro) |
+| `10_favicon_32.png` | `index.html` | Favicon (`<link rel="icon">`) |
+
+Os demais assets do pacote (`01`, `04`, `05`, `07`, `08`) não têm uso na
+aplicação web nesta etapa — são materiais institucionais/redes sociais
+(`docs/design/21-logo-usage.md` §4/§6), copiados para o repositório por
+completude do pacote de marca, não referenciados em código.
+
+Tema (seeds, âncoras de marca), tipografia (Manrope) e iconografia
+(Lucide): decisões técnicas completas em
+`docs/technical/17-technical-decisions.md` TD11/TD12 e
+`docs/technical/13-frontend-m3-implementation.md` §2.
