@@ -84,3 +84,14 @@
 | US74 | Visualizar trabalho concluído | E10 — Resultados e Relatórios | P1 | Sprint 06 |
 | US75 | Visualizar período | E10 — Resultados e Relatórios | P1 | Sprint 06 |
 | US76 | Comparar resultado | E10 — Resultados e Relatórios | P1 | Sprint 06 |
+
+## Nota — Onboarding de conta (PD1)
+
+As Sprints 01–06 acima operam em **piloto com onboarding manual**: empresa
+e primeiro usuário Owner são provisionados administrativamente pela equipe
+BRAÇO (nenhuma história deste backlog cobre criação de conta/empresa
+self-service). O fluxo self-service será formalizado como um futuro
+**E11 — Registro e Onboarding** (PRD 03), com planejamento inicial na
+**Sprint 07** — fora do backlog atual de 10 épicos/76 histórias até ser
+priorizado. Ver `docs/10-product-roadmap.md` e
+`docs/technical/16-product-decisions-required.md` (PD1).

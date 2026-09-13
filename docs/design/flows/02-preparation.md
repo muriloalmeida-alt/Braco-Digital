@@ -34,6 +34,11 @@ Mostrar:
 - estado de cada seção;
 - próximo item recomendado.
 
+> **Nota de escopo (US06 vs. US07–US15):** entrar na preparação e ver esta
+> home (visão geral, seções, estado inicial/incompleto, próximo passo) é o
+> escopo de US06 (Sprint 01). O preenchimento de cada seção abaixo
+> pertence a US07–US15 (Sprint 02).
+
 ## Formulários
 
 Usar M3 Text Fields, Select/Menu, Checkbox, Radio, Switch e componentes equivalentes adequados.

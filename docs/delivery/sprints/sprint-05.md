@@ -32,6 +32,13 @@ O gestor opera o funcionário na rotina real, inclusive alterações/cancelament
 ## Dependências
 - Sprints anteriores ou dependências equivalentes disponíveis.
 - Histórias com Definition of Ready.
+- **Templates de WhatsApp aprovados (PD2):** as 5 intenções de template de
+  follow-up/lembrete (follow-up de interesse, agendamento incompleto,
+  lembrete de agendamento, reagendamento, recuperação de oportunidade)
+  devem estar submetidas e aprovadas pela Meta/BSP antes do início desta
+  sprint (submissão exigida antes do início da Sprint 03, conteúdo Design
+  Ready até o fim da Sprint 02). A implementação de US40–US45 fora da
+  janela ativa de 24h fica condicionada ao template aplicável já aprovado.
 
 ## Critérios de sucesso
 - fluxo principal executável;

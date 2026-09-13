@@ -99,7 +99,7 @@ sobre o `Integration Hub`:
 
 | Tool | Efeito | Adapter |
 |---|---|---|
-| `send_message` | Responder ao cliente | MessagingAdapter (WhatsApp) |
+| `send_message` | Responder ao cliente (dentro da janela ativa) ou disparar template pré-aprovado (fora da janela — `docs/design/19-whatsapp-template-library.md`, PD2) | MessagingAdapter (WhatsApp) |
 | `check_availability` | Consultar horários livres | ScheduleAdapter (Calendar) |
 | `create_appointment` / `update_appointment` / `cancel_appointment` | Agendar/alterar/cancelar | ScheduleAdapter (Calendar) |
 | `create_task` | Criar tarefa/follow-up | TaskAdapter (Tasks) |
@@ -108,6 +108,19 @@ sobre o `Integration Hub`:
 
 Nenhuma tool executa chamada de rede diretamente a partir da Language Layer
 — sempre passa pelo Policy Engine primeiro.
+
+### 6.1 Guardrails de contato proativo (PD2)
+
+Os limites de contato do MVP (`docs/design/19-whatsapp-template-library.md`
+§11) são avaliados pelo Policy Engine como `Rule`/`Limit` do
+`AutonomyPolicy`, não como lógica hardcoded na tool: máximo de 1 mensagem
+proativa por cliente em 24h (global); follow-up/recuperação com no máximo
+2 tentativas automáticas e intervalo mínimo de 48h, encerrando a automação
+após a 2ª tentativa sem resposta; agendamento incompleto com 1 retomada
+automática; lembrete com 1 envio automático por compromisso; reagendamento
+event-driven, sem repetição em sequência. Um pedido de opt-out do cliente é
+tratado como `Rule` de bloqueio permanente para follow-up/recuperação
+daquele `Customer` — nunca contornável trocando de `template_key`.
 
 ## 7. Memória operacional
 

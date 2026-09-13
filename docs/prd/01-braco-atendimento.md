@@ -73,6 +73,15 @@ Novo, em atendimento, aguardando cliente, aguardando humano, concluído e follow
 ## 11. Follow-up
 Identificar continuidade e registrar próxima ação.
 
+Mensagens de follow-up/lembrete iniciadas fora da janela de atendimento do
+WhatsApp (24h desde a última mensagem do cliente) usam **templates
+pré-aprovados pela Meta/BSP**, não texto livre gerado pelo funcionário
+digital. MVP com 5 intenções de template: follow-up de interesse,
+agendamento incompleto, lembrete de agendamento, reagendamento e
+recuperação de oportunidade — conteúdo e variáveis definidos em
+`docs/design/flows/06-follow-up.md` e `docs/design/13-content-design.md`;
+detalhe técnico em `docs/technical/05-whatsapp.md` (PD2).
+
 ## 12. Minha Equipe
 Mostrar nome, função, status, atenção necessária e detalhe.
 
@@ -106,6 +115,13 @@ Função antes de tecnologia; responsabilidade; limites; transparência; fluidez
 
 ## 22. Transparência
 > **Digital na identidade. Humano na experiência.**
+
+### Retenção e exclusão de dados
+
+Conversas, dados de agendamento e demais dados do cliente final seguem
+política de retenção/exclusão configurável por categoria, pendente de
+validação jurídica — ver `docs/13-data-privacy-and-retention.md`. Gate:
+nenhum dado real de cliente final antes do início da Sprint 03.
 
 ## 23. Google
 Calendar para agenda. Tasks para tarefas e follow-ups.

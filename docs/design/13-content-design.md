@@ -73,3 +73,41 @@ Estrutura:
 ## 6. Transparência digital
 
 No canal com cliente, sempre manter identidade digital clara sem repetir de forma robótica a cada mensagem.
+
+## 7. Conteúdo de templates de WhatsApp (PD2)
+
+Fora da janela ativa permitida pelo WhatsApp, mensagens proativas usam
+templates pré-aprovados, não texto livre.
+
+Biblioteca oficial v1 de Product Design:
+
+- `docs/design/19-whatsapp-template-library.md`
+
+As 5 intenções do MVP são:
+1. follow-up de interesse;
+2. agendamento incompleto;
+3. lembrete de agendamento;
+4. reagendamento;
+5. recuperação de oportunidade.
+
+Para cada intenção, a biblioteca define:
+- texto v1;
+- variáveis controladas;
+- transparência digital;
+- condição de uso;
+- regra para dados sensíveis;
+- fallback;
+- limites de contato;
+- estados visíveis ao gestor.
+
+### Estado
+
+O conteúdo v1 está:
+
+> **Content Design Ready**
+
+A disponibilidade operacional de cada template continua condicionada à
+aprovação/configuração no Meta/BSP.
+
+Engenharia não deve alterar texto, variável ou intenção para contornar
+rejeição do provedor sem retornar a Produto/Design.

@@ -11,7 +11,8 @@ Esta história detalha a capacidade **contratar funcionário**.
 Como **gestor**, quero **contratar funcionário**, para **iniciar a contratação e entender o próximo passo**.
 
 ## Critérios de aceitação
-- [ ] A capacidade 'Contratar funcionário' pode ser executada no fluxo previsto.
+- [ ] Somente Braço Atendimento (único com disponibilidade **Disponível**) pode ser contratado nesta fase.
+- [ ] Uma tentativa de contratar um funcionário "Em breve" não é possível pela interface (nenhum CTA de contratação é exibido para eles — ver US02).
 - [ ] O resultado fica persistido e visível quando aplicável.
 - [ ] Impedimentos são apresentados de forma compreensível e acionável.
 - [ ] Regras, limites e permissões são respeitados.
@@ -19,6 +20,7 @@ Como **gestor**, quero **contratar funcionário**, para **iniciar a contrataçã
 ## Regras de negócio
 - A contratação deve usar linguagem de equipe e função, não de tecnologia.
 - O próximo passo deve ser sempre claro.
+- Apenas funcionários com disponibilidade Disponível podem ser contratados.
 
 ## Dependências
 - PRD aplicável.

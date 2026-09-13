@@ -14,6 +14,14 @@ essa experiência com fidelidade ao M3.
 | **MUI (Material UI)** | Média — historicamente M2, suporte a M3 ainda parcial/evoluindo | Alta — ecossistema React maduro, muitos componentes prontos | Risco de a fidelidade ao M3 real ficar comprometida sem esforço extra de tema |
 | **Construir do zero sobre tokens M3 + primitivos acessíveis (Radix/shadcn-like)** | Alta, se bem executado | Alta em produtividade para padrões adaptativos custom | Mais esforço inicial de construção de componentes-base; risco de reinventar o que o M3 já resolve, contrariando `02-m3-governance.md` |
 
+**Referência de composição aprovada:** `docs/design/18-catalog-availability-
+ui-spec.md` (Catalog Availability — Disponível/Em breve) é o primeiro
+padrão de domínio com especificação visual completa aprovada por Produto/
+Design (anatomia, wireframes, responsividade, estados, acessibilidade).
+Serve de modelo de composição M3 (Card/Outlined Card + Filled/Text Button
++ Surface/Container para o label informativo) a ser seguido por futuros
+padrões de domínio equivalentes.
+
 **Recomendação:** **Material Web Components como base de componentes**
 (cumpre a governança de "usar o padrão M3 quando existir, sem criar sistema
 paralelo"), envolvidos em wrappers React finos para integração ergonômica,

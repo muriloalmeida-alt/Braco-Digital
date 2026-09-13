@@ -19,6 +19,7 @@ Como **funcionário digital**, quero **criar follow-up**, para **garantir contin
 ## Regras de negócio
 - Follow-ups devem respeitar limites de contato.
 - Toda tentativa relevante deve ser registrada.
+- Contato proativo fora da janela de 24h do WhatsApp depende de template pré-aprovado pela Meta/BSP (PD2) — ver `docs/design/flows/06-follow-up.md`.
 
 ## Dependências
 - PRD aplicável.

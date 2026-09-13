@@ -35,8 +35,52 @@ Todo envio passa pelo `MessagingAdapter`, que:
    mensagem do cliente) ou se precisa de **template pré-aprovado**;
 2. enfileira com retry exponencial em caso de falha de rede/rate limit do
    provedor;
-3. grava o status retornado (enviando → enviado → entregue/falha) via
-   callbacks de status do provedor.
+3. grava o status retornado (enviando → enviado → entregue/falha/
+   **rejeitado**) via callbacks de status do provedor.
+
+### 3.1 Templates de follow-up/lembrete (PD2 — RESOLVED, conteúdo Content Design Ready)
+
+Decisão de produto (`16-product-decisions-required.md`, PD2): mensagens
+proativas fora da janela de 24h nunca são texto livre gerado pelo LLM —
+sempre um template pré-aprovado pela Meta/BSP. Conteúdo v1 (texto,
+variáveis, condições de uso, guardrails de contato, fallback) formalizado
+por Produto/Design em `docs/design/19-whatsapp-template-library.md` —
+Status: **Content Design Ready** (não confundir com aprovado pela
+Meta/BSP). MVP com 5 intenções de template, cada uma mapeada a uma
+`template_key` estável no `MessagingAdapter`:
+
+| Intenção | `template_key` | Épico/US |
+|---|---|---|
+| Follow-up de interesse | `follow_up_interest` | US40, US41 |
+| Agendamento incompleto | `follow_up_incomplete_booking` | US40, US41 |
+| Lembrete de agendamento | `appointment_reminder` | E05 |
+| Reagendamento | `appointment_reschedule` | US36 |
+| Recuperação de oportunidade | `opportunity_recovery` | US44 |
+
+O `MessagingAdapter` decide: se a `Attendance` está dentro da janela de 24h
+→ mensagem livre; se fora da janela → resolve a `template_key` aplicável à
+intenção e envia com as variáveis controladas (sempre vindas de dados
+estruturados — `Customer`, `Appointment`, `Product/Service` — nunca geradas
+pelo LLM, ver `09-ai-llm.md` §8); se não há template aprovado para a
+intenção → **não envia texto livre como fallback**, e o produto expõe o
+estado "Precisa de atenção — template de WhatsApp indisponível"
+(`docs/design/19-whatsapp-template-library.md` §12).
+
+**Decisão de conteúdo (Produto/Design):** os 5 templates são inicialmente
+**body-only** — sem quick reply, CTA externo, link ou botão de telefone
+nesta primeira submissão. Engenharia não adiciona botões por conta própria.
+
+**Vocabulário de estado exposto ao gestor** (`19-whatsapp-template-
+library.md` §13) — Programado, Enviando, Enviado, Entregue, Não enviado,
+Precisa de atenção — mapeia para os estados técnicos internos do
+`MessagingAdapter` (`sending/sent/delivered/failed/rejected`); o gestor
+nunca vê o código técnico, só a linguagem de produto.
+
+Submissão à Meta/BSP deve ocorrer antes do início da Sprint 03, dado o
+lead time de aprovação (dias). Um template rejeitado pela Meta gera estado
+`rejected`, nunca é substituído automaticamente por outra copy nem por
+texto gerado por LLM — o caso retorna a Produto/Design para revisão
+(`19-whatsapp-template-library.md` §12).
 
 ## 4. Identificação do cliente e contexto
 
@@ -99,6 +143,8 @@ mesmo WhatsApp; o que muda é quem está autorizado a responder.
 ## 11. Limitações que impactam o PRD → Product Decisions Required
 
 Ver `16-product-decisions-required.md`, itens:
-- **Janela de 24h e mensagens de template** (follow-up/lembretes proativos).
+- **Janela de 24h e mensagens de template** (follow-up/lembretes proativos)
+  — **PD2: RESOLVED**, ver seção 3.1 acima.
 - **Tempo de aprovação de número e templates** pela Meta/BSP (impacta o
-  "tempo até ativação" — métrica de `docs/09-metrics.md`).
+  "tempo até ativação" — métrica de `docs/09-metrics.md`); submissão dos 5
+  templates do MVP deve iniciar antes do início da Sprint 03.

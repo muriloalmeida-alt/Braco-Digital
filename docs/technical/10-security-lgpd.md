@@ -71,14 +71,16 @@ auditoria (`Intervention`, e um log de alterações de configuração sensível
 
 ## 9. Retenção e exclusão
 
-**Decisão de produto ainda pendente** — ver `16-product-decisions-
-required.md`: por quanto tempo reter conversas de clientes finais, e o que
-acontece quando uma empresa cancela o BRAÇO (retenção mínima legal vs.
-exclusão). Recomendação de engenharia: definir período de retenção
-configurável por tipo de dado (mensagens, eventos de auditoria, dados de
-agendamento) com exclusão automática programada, mais um caminho de
-exclusão sob demanda mediante solicitação do titular (direito de
-apagamento LGPD).
+**Status: PD3 — PRODUCT DIRECTION DEFINED / LEGAL VALIDATION REQUIRED.**
+Direção de produto formalizada em `docs/13-data-privacy-and-retention.md`:
+sem retenção indefinida por padrão, sem número arbitrário adotado agora,
+retenção configurável por categoria de dado, exclusão sob demanda, exclusão
+no encerramento de empresa cliente, e conservação restrita apenas por
+obrigação legal legítima. O período final por categoria depende de
+validação jurídica — gate **antes do início da Sprint 03**, não bloqueia
+Sprint 01/02. A arquitetura já suporta retention policies, soft/hard
+delete, exclusão por tenant e auditoria da própria exclusão (ver
+`03-data-model.md`, seção "Suporte a retenção e exclusão").
 
 ## 10. Acesso humano
 

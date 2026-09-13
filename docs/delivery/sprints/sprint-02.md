@@ -9,6 +9,12 @@ Parte do plano de entrega dos PRDs 01 e 02.
 ## Resultado esperado
 O Manual de Trabalho fica completo e o funcionário pronto para ativação.
 
+## Continuidade a partir da Sprint 01
+
+A Sprint 01 (US06) entregou apenas a entrada na preparação e a visão geral
+das seções vazias. Esta sprint (US07–US17) é onde o conteúdo de cada seção
+é efetivamente preenchido.
+
 ## Histórias selecionadas
 - US07 — Informar dados da empresa
 - US08 — Cadastrar produtos e serviços

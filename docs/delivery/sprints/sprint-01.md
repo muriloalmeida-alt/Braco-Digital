@@ -7,7 +7,24 @@
 Parte do plano de entrega dos PRDs 01 e 02.
 
 ## Resultado esperado
-O gestor escolhe Atendimento, contrata e visualiza o funcionário em Minha Equipe como preparando.
+O gestor vê os 5 funcionários do portfólio no catálogo (Atendimento
+Disponível; Vendas, Orçamentos, Pós-venda e Financeiro Em breve), escolhe
+e contrata Atendimento, e visualiza o funcionário em Minha Equipe como
+preparando.
+
+## Onboarding (PD1)
+
+Esta sprint opera com **empresa e usuário Owner pré-provisionados**
+(onboarding manual/piloto — ver `docs/06-mvp.md` e
+`docs/technical/16-product-decisions-required.md` PD1). Nenhuma história
+desta sprint cobre criação de conta/empresa.
+
+## Escopo de US06 confirmado
+
+US06 cobre apenas entrar na preparação, ver a visão geral e a estrutura de
+seções com estado inicial/incompleto, e identificar o próximo passo. Não
+inclui preencher nenhuma seção (isso pertence a US07–US15, Sprint 02) —
+ver `docs/delivery/epics/E02-preparacao-do-funcionario/US06-iniciar-preparacao.md`.
 
 ## Histórias selecionadas
 - US01 — Visualizar funcionários disponíveis

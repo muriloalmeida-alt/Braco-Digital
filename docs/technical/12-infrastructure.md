@@ -52,6 +52,15 @@ time recovery quando o provedor gerenciado oferecer. Teste de restauração
 periódico — não documentado como "feito" até ser exercitado ao menos uma
 vez antes de GA.
 
+**Backups e exclusão (PD3):** backups seguem o mesmo compromisso de
+exclusão de `docs/13-data-privacy-and-retention.md` — um registro excluído
+(por solicitação do titular ou expiração de política) não pode permanecer
+recuperável indefinidamente via backup. O prazo exato de expurgo em backup
+depende do valor final da política (pendente de validação jurídica) e das
+capacidades da ferramenta de backup do provedor gerenciado escolhido; até
+lá, o design assume que esse prazo será curto e limitado, não "para
+sempre".
+
 ## 6. Escalonamento
 
 - App Service e workers escalam horizontalmente de forma independente
