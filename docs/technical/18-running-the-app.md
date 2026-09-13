@@ -102,4 +102,55 @@ transparência, não alterações de produto:
   priorizar velocidade de entrega. A fidelidade visual ao M3 (color roles,
   shape, typography) é a mesma; o que fica pendente é a adoção do web
   component oficial — decisão tecnicamente reversível, isolada nos
-  arquivos de `src/components/`.
+  arquivos de `src/components/`. Revisado e aceito por PM/Product Design
+  em `docs/delivery/sprints/sprint-01-review.md` §6.5: sem exigência de
+  migração para `@material/web`.
+
+## 7. Deploy no Railway
+
+`apps/api` e `apps/web` são dois deployáveis independentes
+(`01-architecture.md`) — no Railway, cada um deve ser um **serviço
+separado**, com o *Root Directory* apontando para o respectivo diretório
+(`apps/api` / `apps/web`). Um único serviço apontando para a raiz do
+monorepo não funciona: o Railpack não consegue decidir sozinho qual dos
+dois buildar, e o erro típico é a etapa `railpack prepare` falhar sem
+detalhe útil no log.
+
+Cada diretório já tem seu próprio `railway.json` com build/start
+explícitos, para não depender de detecção automática.
+
+### 7.1 Serviço `apps/api`
+
+1. Criar o serviço com **Root Directory = `apps/api`**.
+2. Adicionar o plugin **PostgreSQL** do Railway ao projeto.
+3. Variáveis de ambiente do serviço:
+   - `DATABASE_URL` → referenciar o plugin Postgres (`${{Postgres.DATABASE_URL}}`), nunca hardcoded.
+   - `JWT_SECRET` → valor forte gerado por ambiente (nunca reaproveitar o de dev).
+   - `JWT_EXPIRES_IN` → ex.: `900s`.
+   - `CORS_ORIGIN` → URL pública do serviço `apps/web` (preencher depois de criá-lo).
+   - `PORT` → não definir; o Railway injeta automaticamente e `main.ts` já lê `process.env.PORT`.
+4. `npm install` roda `postinstall: prisma generate` automaticamente — o Prisma Client é sempre gerado no build, mesmo em ambiente limpo.
+5. O start command (`start:railway`, já configurado em `railway.json`) roda `prisma migrate deploy` antes de subir a API — as migrações do banco de produção são aplicadas a cada deploy, sem passo manual.
+
+### 7.2 Serviço `apps/web`
+
+1. Criar o serviço com **Root Directory = `apps/web`**.
+2. Variável de ambiente:
+   - `VITE_API_BASE_URL` → URL pública do serviço `apps/api` (sem `/api` no final — a API não usa esse prefixo nas rotas). Como é lida em build-time pelo Vite, qualquer mudança nessa variável exige um novo deploy/build, não só um restart.
+3. O start command (`npm run start`, já configurado) serve o build estático via `serve -s dist` — o `-s` habilita fallback de SPA (necessário para as rotas do React Router funcionarem em acesso direto/refresh).
+
+### 7.3 Ordem recomendada
+
+Suba `apps/api` primeiro (para ter a URL pública dele), configure
+`VITE_API_BASE_URL` no `apps/web` apontando para essa URL, depois volte no
+`apps/api` e preencha `CORS_ORIGIN` com a URL pública do `apps/web`. Sem
+isso, o navegador bloqueia as chamadas do frontend por CORS mesmo com tudo
+rodando.
+
+### 7.4 Seed em produção
+
+O seed (`prisma/seed.ts`) cria dados de demonstração (empresa "Clínica
+Vida" + Owner com senha conhecida) — **não rodar em produção real** com
+dados de cliente. Adequado apenas para ambiente de demonstração/piloto
+controlado (PD1). Rodar manualmente via `railway run npm run prisma:seed`
+(CLI do Railway) quando for o caso, nunca como parte automática do deploy.
