@@ -26,10 +26,13 @@ entrega.
 ### R3 — Janela de 24h do WhatsApp quebrando follow-up/lembrete proativo
 **Impacto:** alto — afeta diretamente PRD 01 (follow-up, recuperação,
 lembretes) e métricas-chave (`docs/09-metrics.md`). **Status: PD2
-RESOLVED** — mitigado por 5 templates pré-aprovados (Design Ready até fim
-da Sprint 02, submissão à Meta/BSP antes do início da Sprint 03). Risco
-residual: atraso ou rejeição na aprovação dos templates pela Meta pode
-atrasar o início efetivo de E06 — acompanhar prazo de submissão.
+RESOLVED, conteúdo Content Design Ready** — os 5 templates têm texto v1,
+variáveis, guardrails de contato e fallback formalizados em
+`docs/design/19-whatsapp-template-library.md` (antecipado do gate original
+de fim da Sprint 02). Risco residual: submissão à Meta/BSP (antes do
+início da Sprint 03) ainda não ocorreu — atraso ou rejeição na aprovação
+externa pode atrasar o início efetivo de E06. Content Design Ready ≠
+Meta/BSP Approved.
 
 ## Altos
 

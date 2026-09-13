@@ -24,6 +24,20 @@ agora Product Ready + Design Ready + Tech Ready** — ver
 conteúdo original desta Discovery (v1) permanece abaixo como histórico;
 apenas as seções 10 e 12 foram atualizadas para refletir o novo status.
 
+## Atualização v1.2 — Product Design Patch 03
+
+Produto/Design entregou dois documentos que fecham pendências visuais e de
+conteúdo mencionadas no fechamento da v1.1: `docs/design/18-catalog-
+availability-ui-spec.md` (especificação visual completa de Catalog
+Availability, aplicada a US01/US02/US03) e `docs/design/19-whatsapp-
+template-library.md` (conteúdo v1 dos 5 templates de PD2 — texto,
+variáveis, guardrails de contato, regra de dados sensíveis, fallback;
+Status: **Content Design Ready**, submissão à Meta/BSP ainda pendente).
+Nenhuma decisão de produto foi alterada — apenas detalhada e aprovada.
+Impacto técnico registrado em `05-whatsapp.md`, `08-digital-employee-
+runtime.md` §6.1, `09-ai-llm.md` §8, `03-data-model.md` e
+`13-frontend-m3-implementation.md`.
+
 ## 1. Executive Summary
 
 BRAÇO é tecnicamente viável com uma arquitetura deliberadamente simples para

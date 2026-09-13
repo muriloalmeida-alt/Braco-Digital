@@ -34,40 +34,82 @@ O gestor deve saber:
 ## Recuperação
 O produto deve diferenciar trabalho ativo de spam.
 
-Regras e limites de contato fazem parte do Manual de Trabalho.
+Regras e limites de contato fazem parte do Manual de Trabalho e dos
+guardrails do canal.
 
 ## Templates de WhatsApp (PD2)
 
-Fora da janela de 24h de atendimento, o contato proativo com o cliente só
-pode ocorrer via **template pré-aprovado pela Meta/BSP** — não é texto
-livre gerado pelo funcionário digital. MVP com 5 intenções de template:
+Fora da janela ativa permitida pelo WhatsApp, o contato proativo com o
+cliente só pode ocorrer via **template pré-aprovado pela Meta/BSP** — não é
+texto livre gerado pelo funcionário digital.
 
+MVP com 5 intenções:
 1. Follow-up de interesse
 2. Agendamento incompleto
 3. Lembrete de agendamento
 4. Reagendamento
 5. Recuperação de oportunidade
 
-Cada template tem: texto e variáveis controladas ainda a definir (Design
-Ready até o fim da Sprint 02); condições de uso (qual intenção dispara qual
-template); fallback (o que o produto faz quando a intenção não tem template
-aplicável ou o template foi rejeitado); limites de contato (herdados das
-regras de follow-up do Manual de Trabalho); estados de envio — enviando,
-enviado, entregue, falha, **rejeitado pela Meta**.
+Conteúdo v1, variáveis, guardrails e fallback:
+
+- `docs/design/19-whatsapp-template-library.md`
+
+### Decisão v1
+
+Os templates são inicialmente **body-only**, sem botões.
+
+A ação principal é o cliente responder à mensagem, reabrindo a conversa
+para continuidade do atendimento.
+
+## Guardrails do MVP
+
+Resumo; a especificação oficial está em
+`docs/design/19-whatsapp-template-library.md`.
+
+- no máximo 1 mensagem proativa por cliente em 24h;
+- follow-up/recuperação: no máximo 2 tentativas automáticas por oportunidade,
+  com intervalo mínimo recomendado de 48h;
+- agendamento incompleto: 1 retomada automática;
+- lembrete: 1 lembrete automático no MVP;
+- reagendamento: envio event-driven, sem repetição automática em sequência;
+- opt-out interrompe follow-up e recuperação proativos;
+- conteúdo sensível não deve ser exposto em template proativo.
+
+## Fallback
+
+Quando não existe template aplicável aprovado:
+
+- **não enviar texto livre**;
+- manter a ação como não executada;
+- gerar `Precisa de atenção — template de WhatsApp indisponível`.
+
+Quando um template for rejeitado:
+
+- não substituir automaticamente por outra copy;
+- registrar estado;
+- devolver para Produto/Design se houver necessidade de revisão.
 
 ## Estados de envio de template
 
-- enviando;
-- enviado;
-- entregue;
-- falha de envio;
-- rejeitado (template não aprovado/rejeitado pela Meta) — deve ser
-  distinguível de falha técnica comum e tratado como Atenção necessária.
+Estados técnicos podem existir internamente, mas a visão principal do
+gestor usa linguagem de produto:
+
+- Programado
+- Enviando
+- Enviado
+- Entregue
+- Não enviado
+- Precisa de atenção
+
+`Precisa de atenção` deve distinguir no detalhe:
+- template indisponível/rejeitado;
+- integração;
+- falha técnica persistente.
 
 ## M3
 - List
 - Cards
-- Chips quando semanticamente adequados
+- labels/status informativos
 - Menus
 - Snackbar
 - Dialog apenas quando necessário

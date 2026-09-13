@@ -16,7 +16,7 @@
 - Toda decisão relevante é formalizada em Markdown.
 - Governança: **Docs definem. Issues operacionalizam. Código implementa.**
 - Murilo = PO/Sponsor.
-- ChatGPT = PM.
+- GPT = PM + Product Designer.
 - Claude = Engineering.
 - Engenharia não altera comportamento aprovado silenciosamente.
 
@@ -30,6 +30,37 @@
 - Experiência responsiva segue o princípio **Simples no celular. Completo no desktop.**
 - Histórias com interface exigem **Product Ready + Design Ready + Tech Ready**.
 - Arquitetura de informação, fluxos, estados e padrões estão em `docs/design/`.
+
+### Catalog Availability — fechamento visual
+
+- `Catalog Availability` permanece separado de `Employee Status`.
+- `Em breve` é estado informativo/navegável, não estado disabled.
+- Card `Em breve` mantém contraste e conteúdo normais, possui `Ver detalhes`
+  e não possui CTA de contratação.
+- Card `Disponível` possui `Ver detalhes` e `Contratar funcionário`.
+- Não usar botão de contratação desabilitado para `Em breve`.
+- Não usar lista de espera/"Avise-me" nesta fase.
+- Especificação visual aprovada:
+  `docs/design/18-catalog-availability-ui-spec.md`.
+
+### WhatsApp Template Library v1 — Content Design
+
+- Conteúdo v1 dos 5 templates de PD2 foi definido em
+  `docs/design/19-whatsapp-template-library.md`.
+- Todos preservam transparência digital com a expressão
+  **"Aqui é o atendimento digital da {{empresa}}."**
+- Templates são inicialmente body-only, sem botões.
+- Variáveis são controladas e não podem ser inventadas livremente pelo LLM.
+- Em contexto sensível (ex.: clínicas), o template não deve expor
+  diagnóstico/condição/procedimento sensível.
+- Guardrail global do MVP: no máximo 1 mensagem proativa por cliente em 24h.
+- Follow-up/recuperação: máximo de 2 tentativas automáticas por oportunidade,
+  com intervalo mínimo recomendado de 48h.
+- Agendamento incompleto: 1 retomada automática.
+- Lembrete: 1 lembrete automático no MVP.
+- Falta/rejeição de template nunca autoriza fallback para texto livre.
+- Status de conteúdo: **Content Design Ready**; disponibilidade operacional
+  depende de aprovação/configuração Meta/BSP.
 
 ## Product Decisions Required — resolução (pós Technical Discovery v1)
 
@@ -56,10 +87,12 @@ nada foi apagado, apenas resolvido.
 - MVP com 5 intenções de template: (1) Follow-up de interesse,
   (2) Agendamento incompleto, (3) Lembrete de agendamento,
   (4) Reagendamento, (5) Recuperação de oportunidade.
-- Conteúdo final **Design Ready até o fim da Sprint 02**; submissão à
-  Meta/BSP **antes do início da Sprint 03**. E06 permanece na Sprint 05;
-  follow-up proativo fora da janela fica condicionado ao template aprovado
-  aplicável.
+- Conteúdo v1 agora está **Content Design Ready** em
+  `docs/design/19-whatsapp-template-library.md`.
+- Próximo gate externo: preparar placeholders/exemplos no formato do BSP e
+  submeter à Meta/BSP antes do início da Sprint 03.
+- E06 permanece na Sprint 05; follow-up proativo fora da janela fica
+  condicionado ao template aprovado aplicável.
 - Detalhe em `docs/prd/01-braco-atendimento.md`,
   `docs/delivery/epics/E06-follow-up-e-recuperacao/epic.md`, US40–US45,
   `docs/delivery/sprints/sprint-05.md`, `docs/design/flows/06-follow-up.md`,
@@ -92,9 +125,9 @@ nada foi apagado, apenas resolvido.
   (Vendas, Orçamentos, Pós-venda, Financeiro) estão **Em breve**.
 - **Em breve não é Employee Status** — é um conceito novo e separado,
   **Catalog Availability** (`Disponível` / `Em breve`), documentado em
-  `docs/design/09-product-patterns.md`. Card "Em breve" mantém conteúdo
-  legível e acesso ao detalhe, sem CTA de contratação e sem lista de
-  espera/"Avise-me" nesta fase.
+  `docs/design/09-product-patterns.md`.
+- Especificação visual completa aprovada em
+  `docs/design/18-catalog-availability-ui-spec.md`.
 - Aplicado antes do início de US01/US02/US03.
 
 ### US06 — Iniciar preparação — escopo confirmado

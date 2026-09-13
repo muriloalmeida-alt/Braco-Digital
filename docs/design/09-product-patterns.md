@@ -19,7 +19,7 @@ Base M3:
 - Card;
 - List-like content;
 - Icon/Avatar;
-- Badge/Chip quando aplicável;
+- Badge/label quando aplicável;
 - Button/Menu.
 
 > **Nota:** este é o Employee Card de **Minha Equipe** (funcionário já
@@ -36,6 +36,10 @@ Estados:
 - **Disponível**
 - **Em breve**
 
+Especificação visual completa:
+
+- `docs/design/18-catalog-availability-ui-spec.md`
+
 ### Employee Card — Disponível
 Conteúdo mínimo:
 - identidade;
@@ -44,26 +48,40 @@ Conteúdo mínimo:
 - resultado esperado;
 - principais responsabilidades;
 - disponibilidade;
+- ação secundária `Ver detalhes`;
 - CTA de contratação: **Contratar funcionário**.
 
 ### Employee Card — Em breve
 Não é um card tradicionalmente `disabled`. Não:
 - reduzir opacity de todo o card;
 - prejudicar leitura;
-- mostrar botão aparentemente quebrado.
+- mostrar botão aparentemente quebrado;
+- usar semântica de erro/warning para a indisponibilidade futura.
 
 Deve possuir:
 - conteúdo legível (missão, responsabilidades, resultado esperado, como os
   demais cards);
-- label/badge M3 **Em breve**;
-- possibilidade de acessar o detalhe;
+- label M3/BRAÇO **Em breve**, informativo e não interativo;
+- ação `Ver detalhes`;
 - nenhum CTA de contratação.
 
 Na página de detalhe de um funcionário "Em breve", mostrar normalmente
 missão, responsabilidades e resultado esperado, com uma mensagem objetiva
-de indisponibilidade (ex.: "Em breve. Este funcionário ainda não está
-disponível para contratação."). Não implementar nesta fase lista de
-espera ou cadastro de interesse ("Avise-me") — exigiria histórias próprias.
+de indisponibilidade:
+
+> **Este funcionário ainda não está disponível para contratação.**
+
+Não implementar nesta fase lista de espera ou cadastro de interesse
+("Avise-me") — exigiria histórias próprias.
+
+### Regra de interação
+
+O card do catálogo não deve depender de toda a superfície ser clicável
+quando houver ações explícitas, evitando interação aninhada.
+
+- `Ver detalhes` navega para o detalhe;
+- `Contratar funcionário` inicia a contratação;
+- `Em breve` possui apenas `Ver detalhes`.
 
 ## 2. Employee Status
 

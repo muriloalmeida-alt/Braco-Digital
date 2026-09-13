@@ -41,7 +41,10 @@ PRD, e permanecem Tech Ready sem caveat.
   `EmployeeType` semeado no banco com os 5 tipos do portfólio.
 - **Componentes:** Employee Card com Catalog Availability
   (`09-product-patterns.md` §1.1 — Disponível/Em breve), grid/list de
-  catálogo (`flows/01-hiring.md`).
+  catálogo (`flows/01-hiring.md`). Especificação visual completa e
+  aprovada (anatomia, wireframes, responsividade, estados, acessibilidade):
+  `docs/design/18-catalog-availability-ui-spec.md` — fecha o detalhamento
+  visual desta história (nada pendente de mockup).
 - **Entidades:** `EmployeeType` (leitura) + campo de disponibilidade
   (`available | coming_soon`), distinto de `DigitalEmployee.status`.
 - **API:** `GET /employee-types` — retorna os 5 tipos (nome, função,

@@ -76,13 +76,38 @@ No canal com cliente, sempre manter identidade digital clara sem repetir de form
 
 ## 7. Conteúdo de templates de WhatsApp (PD2)
 
-Fora da janela de 24h, mensagens proativas usam templates pré-aprovados,
-não texto livre. Cada template precisa definir: texto final; variáveis
-controladas (ex.: `{{nome}}`, `{{serviço}}`, `{{data}}`); intenção que o
-dispara; condições de uso; comportamento de fallback quando não há template
-aplicável; limites de contato (frequência máxima); e como o estado de
-envio/falha/rejeição é comunicado ao gestor. As 5 intenções do MVP são:
-follow-up de interesse, agendamento incompleto, lembrete de agendamento,
-reagendamento e recuperação de oportunidade — conteúdo final a ser Design
-Ready até o fim da Sprint 02 (ver `docs/design/flows/06-follow-up.md` e
-`docs/technical/16-product-decisions-required.md`, PD2).
+Fora da janela ativa permitida pelo WhatsApp, mensagens proativas usam
+templates pré-aprovados, não texto livre.
+
+Biblioteca oficial v1 de Product Design:
+
+- `docs/design/19-whatsapp-template-library.md`
+
+As 5 intenções do MVP são:
+1. follow-up de interesse;
+2. agendamento incompleto;
+3. lembrete de agendamento;
+4. reagendamento;
+5. recuperação de oportunidade.
+
+Para cada intenção, a biblioteca define:
+- texto v1;
+- variáveis controladas;
+- transparência digital;
+- condição de uso;
+- regra para dados sensíveis;
+- fallback;
+- limites de contato;
+- estados visíveis ao gestor.
+
+### Estado
+
+O conteúdo v1 está:
+
+> **Content Design Ready**
+
+A disponibilidade operacional de cada template continua condicionada à
+aprovação/configuração no Meta/BSP.
+
+Engenharia não deve alterar texto, variável ou intenção para contornar
+rejeição do provedor sem retornar a Produto/Design.

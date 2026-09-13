@@ -38,13 +38,16 @@ Todo envio passa pelo `MessagingAdapter`, que:
 3. grava o status retornado (enviando → enviado → entregue/falha/
    **rejeitado**) via callbacks de status do provedor.
 
-### 3.1 Templates de follow-up/lembrete (PD2 — RESOLVED)
+### 3.1 Templates de follow-up/lembrete (PD2 — RESOLVED, conteúdo Content Design Ready)
 
 Decisão de produto (`16-product-decisions-required.md`, PD2): mensagens
 proativas fora da janela de 24h nunca são texto livre gerado pelo LLM —
-sempre um template pré-aprovado pela Meta/BSP. MVP com 5 intenções de
-template, cada uma mapeada a uma `template_key` estável no
-`MessagingAdapter`:
+sempre um template pré-aprovado pela Meta/BSP. Conteúdo v1 (texto,
+variáveis, condições de uso, guardrails de contato, fallback) formalizado
+por Produto/Design em `docs/design/19-whatsapp-template-library.md` —
+Status: **Content Design Ready** (não confundir com aprovado pela
+Meta/BSP). MVP com 5 intenções de template, cada uma mapeada a uma
+`template_key` estável no `MessagingAdapter`:
 
 | Intenção | `template_key` | Épico/US |
 |---|---|---|
@@ -56,14 +59,28 @@ template, cada uma mapeada a uma `template_key` estável no
 
 O `MessagingAdapter` decide: se a `Attendance` está dentro da janela de 24h
 → mensagem livre; se fora da janela → resolve a `template_key` aplicável à
-intenção e envia com as variáveis controladas; se não há template
-aprovado para a intenção → **não envia texto livre como fallback** (a ação
-fica pendente/gera `Alert`, nunca contorna a política da Meta). Conteúdo e
-variáveis de cada template são Design Ready até o fim da Sprint 02
-(`docs/design/flows/06-follow-up.md`); submissão à Meta/BSP deve ocorrer
-antes do início da Sprint 03, dado o lead time de aprovação (dias).
-Templates rejeitados pela Meta geram estado `rejected` distinto de falha
-técnica comum, visível como Atenção necessária.
+intenção e envia com as variáveis controladas (sempre vindas de dados
+estruturados — `Customer`, `Appointment`, `Product/Service` — nunca geradas
+pelo LLM, ver `09-ai-llm.md` §8); se não há template aprovado para a
+intenção → **não envia texto livre como fallback**, e o produto expõe o
+estado "Precisa de atenção — template de WhatsApp indisponível"
+(`docs/design/19-whatsapp-template-library.md` §12).
+
+**Decisão de conteúdo (Produto/Design):** os 5 templates são inicialmente
+**body-only** — sem quick reply, CTA externo, link ou botão de telefone
+nesta primeira submissão. Engenharia não adiciona botões por conta própria.
+
+**Vocabulário de estado exposto ao gestor** (`19-whatsapp-template-
+library.md` §13) — Programado, Enviando, Enviado, Entregue, Não enviado,
+Precisa de atenção — mapeia para os estados técnicos internos do
+`MessagingAdapter` (`sending/sent/delivered/failed/rejected`); o gestor
+nunca vê o código técnico, só a linguagem de produto.
+
+Submissão à Meta/BSP deve ocorrer antes do início da Sprint 03, dado o
+lead time de aprovação (dias). Um template rejeitado pela Meta gera estado
+`rejected`, nunca é substituído automaticamente por outra copy nem por
+texto gerado por LLM — o caso retorna a Produto/Design para revisão
+(`19-whatsapp-template-library.md` §12).
 
 ## 4. Identificação do cliente e contexto
 

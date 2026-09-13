@@ -93,19 +93,29 @@ espontâneo fora da janela ativa.
   proativas fora da janela nunca são texto livre gerado pelo LLM.
 - MVP com **5 intenções de template**: (1) Follow-up de interesse,
   (2) Agendamento incompleto, (3) Lembrete de agendamento,
-  (4) Reagendamento, (5) Recuperação de oportunidade — conteúdo, variáveis,
-  condições de uso, fallback, limites de contato e estados de envio/falha/
-  rejeição ainda a definir em detalhe.
+  (4) Reagendamento, (5) Recuperação de oportunidade.
 - Conteúdo final **Design Ready até o fim da Sprint 02**; submissão à
   Meta/BSP **antes do início da Sprint 03**. E06 permanece na Sprint 05;
   follow-up proativo fora da janela fica condicionado ao template aprovado
   aplicável.
 
+**Atualização (Patch 03 — Product Design):** conteúdo v1 completo
+formalizado antecipadamente em `docs/design/19-whatsapp-template-library.md`
+— texto, variáveis, transparência digital, regra de dados sensíveis
+(vertical clínicas), fallback, guardrails de contato do MVP, estados de
+envio e opt-out. Templates inicialmente **body-only** (sem botões/quick
+reply/link). Status atualizado: **Content Design Ready**. Isso não
+significa aprovado pela Meta/BSP — submissão e aprovação externa
+permanecem pendentes, como próximo passo antes da Sprint 03.
+
 **Arquivos atualizados:** `docs/11-decision-log.md`,
 `docs/prd/01-braco-atendimento.md`,
 `docs/delivery/epics/E06-follow-up-e-recuperacao/epic.md`, US40–US45,
 `docs/delivery/sprints/sprint-05.md`, `docs/design/flows/06-follow-up.md`,
-`docs/design/13-content-design.md`, `docs/technical/05-whatsapp.md`.
+`docs/design/13-content-design.md`, `docs/design/19-whatsapp-template-
+library.md` (novo), `docs/technical/05-whatsapp.md`,
+`docs/technical/08-digital-employee-runtime.md`,
+`docs/technical/09-ai-llm.md`, `docs/technical/03-data-model.md`.
 
 ---
 
@@ -224,10 +234,23 @@ estado "bloqueado" do Employee Card.
 - **Aplicada antes do início de US01/US02/US03** (já refletida nas
   histórias e nos documentos de Design).
 
+**Atualização (Patch 03 — Product Design):** especificação visual completa
+e aprovada em `docs/design/18-catalog-availability-ui-spec.md` — anatomia
+do card, wireframes (Disponível/Em breve), hierarquia tipográfica M3,
+página de detalhe, responsividade (Compact/Medium/Expanded), estados de
+interação/loading/error e critérios de aceite visual. Princípio
+confirmado: **"Em breve é informação, não incapacidade da interface"** —
+sem opacity reduzida, sem botão desabilitado, sem lock icon. Fecha
+definitivamente o detalhamento visual de US01/US02/US03 (nenhuma pendência
+de mockup restante).
+
 **Arquivos atualizados:** `docs/11-decision-log.md`,
 `docs/04-employee-catalog.md`, `docs/06-mvp.md`,
 `docs/design/09-product-patterns.md`, `docs/design/flows/01-hiring.md`,
-US01, US02, US03, `docs/delivery/sprints/sprint-01.md`.
+`docs/design/18-catalog-availability-ui-spec.md` (novo), US01, US02, US03,
+`docs/delivery/sprints/sprint-01.md`,
+`docs/technical/13-frontend-m3-implementation.md`,
+`docs/technical/14-sprint-01-tech-readiness.md`.
 
 ---
 

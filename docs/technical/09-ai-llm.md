@@ -66,6 +66,14 @@ fallback), nunca é executada "melhor esforço".
   por prompt).
 - Policy Engine determinístico como autoridade final (não confia no
   julgamento do modelo sobre autonomia).
+- **Variáveis de template de WhatsApp nunca são geradas livremente pelo
+  LLM** (`docs/design/19-whatsapp-template-library.md`, PD2): o modelo pode
+  identificar a intenção (ex.: "este é um caso de recuperação de
+  oportunidade"), mas o preenchimento de `{{nome}}`, `{{empresa}}`,
+  `{{servico}}`, `{{data}}`, `{{horario}}` etc. vem sempre de dados
+  estruturados e validados (`Customer`, `Appointment`, `Product/Service`),
+  nunca de texto inventado pelo modelo — reforço direto do princípio de
+  Guardrails determinísticos já descrito acima.
 - Filtro de conteúdo para tópicos explicitamente fora do escopo (PRD 01,
   seção 20 — diagnóstico, decisão médica, condição não autorizada): tratado
   como `Rule` de bloqueio, não como instrução de prompt isolada — reforço em

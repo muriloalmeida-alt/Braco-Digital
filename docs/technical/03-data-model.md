@@ -123,7 +123,15 @@ related_attendance_id (opcional), type (follow_up|generic), status
 ### FollowUp
 `id, company_id, customer_id, origin_attendance_id, scheduled_at, status
 (pending|executed|resulted), result, contact_attempt_count` (usado para
-"respeitar limites de contato" — US45).
+"respeitar limites de contato" — US45). Os limites default do MVP (PD2,
+`docs/design/19-whatsapp-template-library.md` §11) — máx. 2 tentativas
+automáticas por oportunidade com intervalo mínimo de 48h para follow-up/
+recuperação, 1 retomada para agendamento incompleto, 1 lembrete por
+compromisso, 1 mensagem proativa por cliente a cada 24h (global) — são
+configurados como `Rule`/`Limit` (ver `04-multi-tenancy.md` e
+`08-digital-employee-runtime.md` §6.1), não hardcoded no `FollowUp`. Um
+pedido de opt-out do cliente marca o `Customer` com bloqueio permanente
+para follow-up/recuperação automáticos.
 
 ### Handoff
 `id, attendance_id, requested_by (digital_employee_id), reason,
