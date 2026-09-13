@@ -1,0 +1,31 @@
+import { Body, Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
+import { Role } from '@prisma/client';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { Roles } from '../common/decorators/roles.decorator';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { JwtPayload } from '../auth/jwt-payload.interface';
+import { CommunicationService } from './communication.service';
+import { UpdateCommunicationDto } from './dto/update-communication.dto';
+
+/** US13 — Definir estilo de comunicação. */
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Controller('digital-employees/:employeeId/communication-style')
+export class CommunicationController {
+  constructor(private readonly service: CommunicationService) {}
+
+  @Get()
+  get(@CurrentUser() user: JwtPayload, @Param('employeeId') employeeId: string) {
+    return this.service.get(user.companyId, employeeId);
+  }
+
+  @Patch()
+  @Roles(Role.OWNER, Role.ADMIN)
+  update(
+    @CurrentUser() user: JwtPayload,
+    @Param('employeeId') employeeId: string,
+    @Body() dto: UpdateCommunicationDto,
+  ) {
+    return this.service.update(user.companyId, employeeId, dto);
+  }
+}

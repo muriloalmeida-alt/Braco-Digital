@@ -9,6 +9,7 @@ export class ApiError extends Error {
   constructor(
     public status: number,
     message: string,
+    public body?: unknown,
   ) {
     super(message);
   }
@@ -30,7 +31,7 @@ export function loadStoredToken(): string | null {
   return authToken;
 }
 
-async function request<T>(
+export async function request<T>(
   path: string,
   options: RequestInit & { idempotencyKey?: string } = {},
 ): Promise<T> {
@@ -45,13 +46,14 @@ async function request<T>(
 
   if (!res.ok) {
     let message = res.statusText;
+    let body: unknown;
     try {
-      const body = await res.json();
-      message = body.message ?? message;
+      body = await res.json();
+      message = (body as { message?: string })?.message ?? message;
     } catch {
       // resposta sem corpo JSON — mantém statusText
     }
-    throw new ApiError(res.status, message);
+    throw new ApiError(res.status, message, body);
   }
 
   if (res.status === 204) return undefined as T;
@@ -137,4 +139,31 @@ export const api = {
     request<WorkManual>(`/digital-employees/${employeeId}/work-manual`),
   startPreparation: (employeeId: string) =>
     request<WorkManual>(`/digital-employees/${employeeId}/work-manual`, { method: 'POST' }),
+
+  getManualOverview: (employeeId: string) =>
+    request<ManualOverview>(`/digital-employees/${employeeId}/work-manual/overview`),
+  completePreparation: (employeeId: string) =>
+    request<ManualOverview>(`/digital-employees/${employeeId}/work-manual/complete`, { method: 'POST' }),
 };
+
+export type StepKey =
+  | 'empresa'
+  | 'produtos_servicos'
+  | 'responsabilidades'
+  | 'regras_limites'
+  | 'autonomia'
+  | 'pessoas_responsaveis'
+  | 'comunicacao'
+  | 'recursos_trabalho';
+
+export type StepStatus = 'not_started' | 'in_progress' | 'complete';
+export type ReviewStatus = 'bloqueada' | 'disponivel' | 'concluida';
+
+export interface ManualOverview {
+  steps: Record<StepKey, StepStatus>;
+  completedCount: number;
+  totalSteps: 8;
+  review: ReviewStatus;
+  pendingSteps: StepKey[];
+  employeeStatus: EmployeeStatus;
+}

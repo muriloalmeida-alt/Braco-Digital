@@ -1,0 +1,271 @@
+.braco-prep {
+  display: flex;
+  flex-direction: column;
+  gap: var(--braco-space-4);
+}
+
+.braco-numeric {
+  font-weight: var(--braco-weight-numeric);
+}
+
+.braco-prep__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--md-sys-color-on-surface-variant);
+  text-decoration: none;
+  font-size: var(--md-sys-typescale-body-medium-size);
+}
+
+.braco-prep__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--braco-space-3);
+  flex-wrap: wrap;
+}
+
+.braco-prep__progress {
+  color: var(--md-sys-color-on-surface-variant);
+  margin: 4px 0 0;
+}
+
+.braco-prep__body {
+  display: grid;
+  gap: var(--braco-space-4);
+  grid-template-columns: 1fr;
+}
+
+/* Expanded — lista-detalhe persistente (docs/design/23-preparation-experience-spec.md §3) */
+@media (min-width: 900px) {
+  .braco-prep__body {
+    grid-template-columns: 280px 1fr;
+    align-items: start;
+  }
+}
+
+.braco-prep__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Compact/Medium: a navegação só aparece na tela de overview, não ao lado
+ * do formulário — docs/design/23-preparation-experience-spec.md §3. */
+@media (max-width: 899px) {
+  .braco-prep__nav--with-detail {
+    display: none;
+  }
+}
+
+.braco-prep__nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--braco-space-2);
+  padding: var(--braco-space-3);
+  border-radius: var(--md-sys-shape-corner-small);
+  text-decoration: none;
+  color: var(--md-sys-color-on-surface);
+  background: var(--md-sys-color-surface-container-lowest);
+  border: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.braco-prep__nav-item.is-active {
+  border-color: var(--md-sys-color-primary);
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.braco-prep__nav-item--review {
+  margin-top: var(--braco-space-2);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+}
+
+.braco-prep__nav-status {
+  font-size: var(--md-sys-typescale-label-medium-size);
+  color: var(--md-sys-color-on-surface-variant);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.braco-prep__nav-status--complete {
+  color: var(--md-ext-color-success);
+}
+
+.braco-prep__next-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--braco-space-2);
+  align-items: flex-start;
+}
+
+.braco-prep__next-card h2 {
+  margin: 0;
+  font-size: var(--md-sys-typescale-title-medium-size);
+}
+
+.braco-prep__step-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--braco-space-3);
+  flex-wrap: wrap;
+}
+
+.braco-prep__step-header h1 {
+  margin: 0;
+}
+
+.braco-prep__shared-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--braco-space-2);
+  background: var(--braco-color-surface-secondary);
+  color: var(--braco-color-on-surface-secondary);
+  border-radius: var(--md-sys-shape-corner-small);
+  padding: var(--braco-space-3);
+  font-size: var(--md-sys-typescale-body-medium-size);
+}
+
+.braco-prep__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: var(--braco-space-3);
+}
+
+.braco-prep__field label {
+  font-size: var(--md-sys-typescale-label-large-size);
+  color: var(--md-sys-color-on-surface-variant);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+}
+
+.braco-prep__field input[type='text'],
+.braco-prep__field input[type='url'],
+.braco-prep__field input[type='number'],
+.braco-prep__field textarea,
+.braco-prep__field select {
+  font: inherit;
+  padding: 10px 12px;
+  border-radius: var(--md-sys-shape-corner-small);
+  border: 1px solid var(--md-sys-color-outline);
+  background: var(--md-sys-color-surface-container-lowest);
+  color: var(--md-sys-color-on-surface);
+}
+
+.braco-prep__field-error {
+  color: var(--md-sys-color-error);
+  font-size: var(--md-sys-typescale-label-medium-size);
+  margin: 0;
+}
+
+.braco-prep__radio-group,
+.braco-prep__checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--braco-space-2);
+}
+
+.braco-prep__radio-option,
+.braco-prep__checkbox-option {
+  display: flex;
+  align-items: center;
+  gap: var(--braco-space-2);
+  font-size: var(--md-sys-typescale-body-medium-size);
+}
+
+.braco-prep__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--braco-space-3);
+  margin-top: var(--braco-space-4);
+}
+
+.braco-prep__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--braco-space-3);
+}
+
+.braco-prep__list-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--braco-space-3);
+}
+
+.braco-prep__list-item-actions {
+  display: flex;
+  gap: var(--braco-space-2);
+  flex-shrink: 0;
+}
+
+.braco-prep__list-item-actions button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--md-sys-color-primary);
+  text-decoration: underline;
+  font: inherit;
+  cursor: pointer;
+}
+
+.braco-prep__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--braco-space-2);
+}
+
+.braco-prep__system-limit {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--braco-space-2);
+  padding: var(--braco-space-3);
+  background: var(--md-sys-color-surface-container);
+  border-radius: var(--md-sys-shape-corner-small);
+  margin-bottom: var(--braco-space-2);
+  font-size: var(--md-sys-typescale-body-medium-size);
+}
+
+.braco-prep__resource-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--braco-space-2);
+  margin-bottom: var(--braco-space-3);
+}
+
+.braco-prep__resource-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--braco-space-2);
+}
+
+.braco-prep__preview {
+  background: var(--braco-color-surface-secondary);
+  color: var(--braco-color-on-surface-secondary);
+  padding: var(--braco-space-3);
+  border-radius: var(--md-sys-shape-corner-small);
+}
+
+.braco-prep__review-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--braco-space-3);
+  padding: var(--braco-space-3);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.braco-prep__review-item:last-child {
+  border-bottom: none;
+}
+
+.braco-prep__pending-reason {
+  color: var(--md-ext-color-attention);
+  font-size: var(--md-sys-typescale-body-medium-size);
+}
