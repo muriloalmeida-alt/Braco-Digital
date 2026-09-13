@@ -557,3 +557,78 @@ para `tx.lead.create()` é local a `LeadsService`.
 **Impacto futuro:** documentar isso explicitamente evita que uma
 refatoração futura "simplifique" para `tx.lead.create()` sem perceber
 que isso reabriria a superfície de leitura pública.
+
+## TD21 — Captação de lead: três modos explícitos (DISABLED/SYNTHETIC/REAL), não um booleano
+
+**Contexto:** Product + Product Design Review 01 apontou que
+`PUBLIC_LEAD_CAPTURE_REAL=false` (booleano) ainda aceitava e persistia
+PII real (nome, empresa, WhatsApp, e-mail), só marcando
+`isSynthetic=true` no registro gravado. Um booleano com esse
+comportamento não é fail-closed: dado pessoal real não vira sintético
+por causa de uma flag, e "desligado" continuava significando "grava do
+mesmo jeito, só rotula diferente".
+
+**Decisão:** substituir o booleano por `PUBLIC_LEAD_CAPTURE_MODE` com
+três valores (`getPublicLeadCaptureMode()`,
+`apps/api/src/public/public-launch-gate.ts`):
+- **DISABLED** (default fail-closed — valor ausente, vazio ou não
+  reconhecido resolve para este modo): `POST /public/leads` rejeita a
+  submissão inteira com 403 **antes** de qualquer normalização de
+  WhatsApp, chamada ao motor de recomendação ou gravação — nenhuma PII
+  é tocada, não só "não persistida ao final".
+- **SYNTHETIC** (aceita o sinônimo `TEST`): formulário habilitado,
+  grava `isSynthetic=true`.
+- **REAL** (só quando o valor é explicitamente `REAL`): grava
+  `isSynthetic=false`.
+
+`GET /public/leads/capture-mode` expõe o modo atual como autoridade de
+backend — o frontend nunca infere produção/captação sozinho, mesmo
+princípio de `canSimulateConnection` do Track A (TD19 da branch
+`feature/sprint-02-track-a-preparation`; ver nota de numeração abaixo).
+Em `DiagnosticPage.tsx`, o passo `resultado` troca o CTA de captura por
+um estado não capturante sob `DISABLED` (sem prometer contato
+posterior), e o passo `contato` tem uma guarda independente que nunca
+renderiza o formulário sob `DISABLED` — mesmo que o usuário force a
+URL/estado de navegação client-side, sem depender só da decisão já
+tomada em `resultado`.
+
+**Justificativa:** fail-closed real precisa impedir a PII de entrar no
+sistema, não só rotulá-la depois de já ter entrado. Três modos
+nomeados (em vez de um booleano com um "modo verdadeiro implícito" e
+um "modo falso que ainda captura") tornam o estado de produção
+inequívoco e auditável — o valor da variável de ambiente já diz o que
+vai acontecer, sem precisar ler o código para saber que `false` ainda
+grava.
+
+**Trade-offs:** mais um valor possível de configurar corretamente por
+ambiente (três em vez de dois), mitigado pelo fail-closed no parsing —
+qualquer valor não reconhecido cai em `DISABLED`, nunca em `SYNTHETIC`
+ou `REAL` por acidente de digitação.
+
+**Reversibilidade:** alta — é uma troca local ao parsing da variável de
+ambiente e às leituras de `getPublicLeadCaptureMode()`/
+`getLeadCaptureMode()`; nenhum dado gravado depende do mecanismo de
+leitura do modo, só do valor de `isSynthetic` já persistido por linha.
+
+**Impacto futuro:** a copy exibida em `SYNTHETIC`
+("Ambiente de teste — use apenas dados fictícios.") e em `REAL` (ainda
+a mesma frase provisória de antes desta revisão) **não** é aviso
+jurídico aprovado e **não** deve ser tratada como a solução final de
+PD6 — o aviso/copy/link legal definitivos para `REAL` ficam para
+Produto/Design depois do Jurídico, antes de `REAL` ser ativado em
+produção.
+
+**Nota de numeração:** esta entrada nasceu como TD20 na branch
+`feature/sprint-02-track-b-growth`, numerada antes do rebase sobre
+`main` pós-merge de Track A. `feature/sprint-02-track-a-preparation`
+tinha sua própria TD19 (guarda de produção contra conexão simulada,
+Product Review 01) — as duas branches divergiram antes de qualquer uma
+mergear em `main`, então numeraram de forma independente e colidiram
+com a TD19 já existente nesta branch (TD15/bootstrap de role pública).
+Resolução aditiva aplicada no rebase de Track B sobre a nova `main`
+(depois do merge de #20): a TD19 de Track A (guarda de produção) foi
+preservada como TD19; a TD19 original desta branch (bootstrap de role
+pública/`RETURNING`) foi renumerada para TD20; esta entrada, que tinha
+nascido como a segunda TD20 desta branch, virou **TD21** — nenhuma das
+três teve seu conteúdo alterado, só o número desta e da de bootstrap de
+role.
