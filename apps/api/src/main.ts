@@ -1,16 +1,32 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { json } from 'express';
 import { AppModule } from './app.module';
+import { assertZernioEnvValid } from './integrations/zernio/zernio-config';
+import { applyZernioWebhookRawBody } from './integrations/zernio/zernio-webhook.middleware';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // Issue #30: falha cedo e claro se a integração estiver parcialmente
+  // configurada (ZERNIO_API_KEY presente mas faltando alguma outra
+  // variável obrigatória) — nunca em silêncio, nunca só descoberto no
+  // primeiro request real. Sem ZERNIO_API_KEY, não faz nada (integração
+  // simplesmente desabilitada, não é um erro de ambiente).
+  assertZernioEnvValid();
+
+  // `bodyParser: false` — o parser JSON automático do Nest roda ANTES de
+  // qualquer `app.use()` adicionado depois de `create()` e já consome o
+  // stream da requisição; com ele ligado, o `raw()` do webhook do Zernio
+  // (abaixo) sempre recebia um corpo vazio/já processado, quebrando a
+  // verificação HMAC silenciosamente (só descoberto testando de verdade
+  // contra a app montada, não só typecheck/build). Registramos os dois
+  // parsers nós mesmos, na ordem certa, via `applyZernioWebhookRawBody`.
+  const app = await NestFactory.create(AppModule, { bodyParser: false });
 
   // Limite de payload (docs/technical/20-sprint-02-tech-readiness.md §7):
   // nenhum campo de Track A/B justifica um corpo maior que isto — reduz
   // superfície de DoS de aplicação nas rotas públicas novas sem afetar
-  // payloads legítimos existentes.
-  app.use(json({ limit: '20kb' }));
+  // payloads legítimos existentes. `/webhooks/zernio` fica de fora (corpo
+  // bruto, próprio limite) — ver `zernio-webhook.middleware.ts`.
+  applyZernioWebhookRawBody(app, '20kb');
 
   // CORS_ORIGIN: lista separada por vírgula de origens exatas permitidas em
   // produção (ex.: a URL pública do serviço apps/web no Railway). Localhost
