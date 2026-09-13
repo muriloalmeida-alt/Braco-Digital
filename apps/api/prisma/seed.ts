@@ -5,11 +5,26 @@
  * (PD1 — onboarding manual): cria uma empresa e um usuário Owner
  * provisionados administrativamente, já que não há fluxo self-service
  * de criação de conta/empresa nesta fase.
+ *
+ * A empresa/usuário de teste vêm de variáveis de ambiente (com defaults
+ * de desenvolvimento) — nunca de um script/comando ad-hoc rodado à mão.
+ * `npm run seed` sozinho já funciona (defaults abaixo); para um valor
+ * diferente, configure a variável no `.env` do ambiente (dev/staging/CI),
+ * não passe um valor pontual por linha de comando. Ver `.env.example`.
  */
 import { CatalogAvailability, PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
+
+const SEED_COMPANY_ID = process.env.SEED_COMPANY_ID ?? '00000000-0000-0000-0000-000000000001';
+const SEED_COMPANY_NAME = process.env.SEED_COMPANY_NAME ?? 'Clínica Vida (demo)';
+const SEED_COMPANY_DOCUMENT = process.env.SEED_COMPANY_DOCUMENT ?? '00.000.000/0001-00';
+const SEED_COMPANY_VERTICAL = process.env.SEED_COMPANY_VERTICAL ?? 'clinica';
+const SEED_COMPANY_TIMEZONE = process.env.SEED_COMPANY_TIMEZONE ?? 'America/Sao_Paulo';
+const SEED_OWNER_EMAIL = process.env.SEED_OWNER_EMAIL ?? 'owner@clinicavida.demo';
+const SEED_OWNER_NAME = process.env.SEED_OWNER_NAME ?? 'Murilo (Owner demo)';
+const SEED_OWNER_PASSWORD = process.env.SEED_OWNER_PASSWORD ?? 'braco123';
 
 const EMPLOYEE_TYPES = [
   {
@@ -96,24 +111,24 @@ async function main() {
   console.log(`Seed: ${EMPLOYEE_TYPES.length} EmployeeType(s) semeados.`);
 
   const company = await prisma.company.upsert({
-    where: { id: '00000000-0000-0000-0000-000000000001' },
+    where: { id: SEED_COMPANY_ID },
     update: {},
     create: {
-      id: '00000000-0000-0000-0000-000000000001',
-      name: 'Clínica Vida (demo)',
-      document: '00.000.000/0001-00',
-      vertical: 'clinica',
-      timezone: 'America/Sao_Paulo',
+      id: SEED_COMPANY_ID,
+      name: SEED_COMPANY_NAME,
+      document: SEED_COMPANY_DOCUMENT,
+      vertical: SEED_COMPANY_VERTICAL,
+      timezone: SEED_COMPANY_TIMEZONE,
     },
   });
 
-  const passwordHash = await bcrypt.hash('braco123', 10);
+  const passwordHash = await bcrypt.hash(SEED_OWNER_PASSWORD, 10);
   const owner = await prisma.user.upsert({
-    where: { email: 'owner@clinicavida.demo' },
+    where: { email: SEED_OWNER_EMAIL },
     update: {},
     create: {
-      email: 'owner@clinicavida.demo',
-      name: 'Murilo (Owner demo)',
+      email: SEED_OWNER_EMAIL,
+      name: SEED_OWNER_NAME,
       passwordHash,
     },
   });
@@ -134,7 +149,7 @@ async function main() {
   });
 
   console.log(`Seed: empresa "${company.name}" (${company.id}) com Owner ${owner.email}.`);
-  console.log('Login de demonstração: owner@clinicavida.demo / braco123');
+  console.log(`Login de demonstração: ${owner.email} / ${SEED_OWNER_PASSWORD}`);
 }
 
 main()

@@ -90,10 +90,6 @@ export function LoginPage() {
               {loading ? 'Entrando…' : 'Entrar'}
             </Button>
           </form>
-          <p className="braco-login-page__hint">
-            Onboarding manual (PD1): use as credenciais de demonstração criadas pelo seed —
-            owner@clinicavida.demo / braco123.
-          </p>
         </Card>
       </div>
     </div>

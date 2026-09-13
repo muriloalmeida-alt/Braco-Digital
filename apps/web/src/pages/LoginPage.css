@@ -19,7 +19,11 @@
 }
 
 .braco-login-page__brand-logo {
-  height: 96px;
+  /* Login é "o momento mais institucional do app" (ver comentário em
+   * LoginPage.tsx) — logo com mais destaque que o padrão de navegação,
+   * dentro do permitido por docs/design/21-logo-usage.md §9 (manter
+   * reconhecível, preservar proporção). */
+  height: 160px;
   width: auto;
 }
 
@@ -43,8 +47,14 @@
 }
 
 .braco-login-page__compact-logo {
-  height: 56px;
-  width: auto;
+  /* Escala com a largura da viewport em vez de um px fixo — é a ÚNICA
+   * referência de marca na tela no Compact (o painel institucional só
+   * existe em Expanded), então precisa ler como destaque em qualquer
+   * aparelho, de um celular pequeno (~360px) a um tablet perto do
+   * breakpoint de 900px, não só num tamanho testado manualmente.
+   * docs/design/21-logo-usage.md §9 (permanecer reconhecível). */
+  width: clamp(160px, 42vw, 240px);
+  height: auto;
 }
 
 .braco-login-page__card {
@@ -83,12 +93,6 @@
   color: var(--md-sys-color-error);
   font-size: var(--md-sys-typescale-body-medium-size);
   margin: 0;
-}
-
-.braco-login-page__hint {
-  margin-top: var(--braco-space-4);
-  font-size: var(--md-sys-typescale-label-medium-size);
-  color: var(--md-sys-color-on-surface-variant);
 }
 
 /* Expanded: mostra o painel institucional; esconde a logo compacta acima
