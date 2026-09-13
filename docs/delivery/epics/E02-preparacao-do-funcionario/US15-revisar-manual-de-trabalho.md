@@ -2,62 +2,87 @@
 
 **Épico:** E02 — Preparação do Funcionário  
 **Prioridade:** P0  
-**Sprint planejada:** Sprint 02
+**Sprint planejada:** Sprint 02  
+**Product Ready:** YES  
+**Design Ready:** YES  
+**Tech Ready:** TECH READY
 
 ## Contexto
-Esta história detalha a capacidade **revisar manual de trabalho**.
+
+A revisão é o gate explícito entre preencher informações e declarar que
+o funcionário está preparado.
 
 ## História de usuário
-Como **gestor**, quero **revisar manual de trabalho**, para **preparar o funcionário para trabalhar corretamente**.
+
+Como **gestor**, quero **revisar o Manual de Trabalho e concluir a
+preparação**, para que **eu saiba exatamente o que o Braço aprendeu antes de
+levá-lo à ativação**.
 
 ## Critérios de aceitação
-- [ ] A capacidade 'Revisar Manual de Trabalho' pode ser executada no fluxo previsto.
-- [ ] O resultado fica persistido e visível quando aplicável.
-- [ ] Impedimentos são apresentados de forma compreensível e acionável.
-- [ ] Regras, limites e permissões são respeitados.
+
+- [ ] Revisão fica bloqueada enquanto alguma das oito etapas estiver incompleta.
+- [ ] A revisão apresenta resumo de todas as etapas.
+- [ ] Etapa incompleta exibe pendência e Corrigir.
+- [ ] Etapa completa oferece Revisar.
+- [ ] Com tudo completo, Concluir preparação é habilitado.
+- [ ] A confirmação diz que ficará Pronto mas ainda não começará a trabalhar.
+- [ ] Concluir preparação muda Employee Status para PRONTO.
+- [ ] A ação não ativa nem inicia WhatsApp.
+- [ ] Após sucesso, há confirmação de Preparação concluída.
+- [ ] Se dado obrigatório for invalidado antes da ativação, status volta a PREPARANDO.
 
 ## Regras de negócio
-- A preparação alimenta o Manual de Trabalho.
-- Informações incompletas devem permanecer identificáveis.
+
+- Conclusão é explícita, não automática.
+- Revisão não conta nas 8 etapas.
+- `PRONTO` não é operação.
 
 ## Dependências
-- PRD aplicável.
-- E02 — Preparação do Funcionário.
-- Configurações e permissões necessárias.
+
+- US07–US14.
+- US16 — pendências.
+- US17 — status.
 
 ## Fora do escopo
-- Mudanças de produto não aprovadas.
-- Decisões técnicas de implementação.
-- Customização específica sem decisão de produto.
+
+- Checklist de ativação US18.
+- Ativação US19.
+- Atendimento real.
 
 ## Design
 
-        Esta história está sujeita ao gate:
+Gate:
 
-        > **Product Ready + Design Ready + Tech Ready**
+> **Product Ready + Design Ready + Tech Ready**
 
-        ### Referências
+### Referências
 
-        - `docs/design/flows/02-preparation.md`
-- `docs/design/09-product-patterns.md`
-- `docs/design/12-status-and-states.md`
+- `docs/design/flows/02-preparation.md`
+- `docs/design/22-work-manual-content-model.md`
+- `docs/design/23-preparation-experience-spec.md`
 
-        ### Design Ready
+### Design Ready
 
-        - [ ] fluxo e interação definidos;
-        - [ ] padrão M3/padrão BRAÇO identificado;
-        - [ ] estados relevantes considerados;
-        - [ ] comportamento responsivo considerado;
-        - [ ] acessibilidade considerada.
+- [x] fluxo definido;
+- [x] campos/conteúdo definidos;
+- [x] obrigatoriedade definida;
+- [x] validação definida;
+- [x] estados definidos;
+- [x] responsividade definida;
+- [x] acessibilidade considerada;
+- [x] Brand UI Foundation aplicável.
 
 ## Definition of Done
+
 - critérios atendidos;
 - testes adequados;
-- comportamento validado;
+- autosave/estado validados quando aplicável;
+- Compact/Medium/Expanded validados;
+- acessibilidade validada;
 - documentação atualizada quando necessário;
 - nenhuma mudança de produto feita silenciosamente.
 
-## Referências
+## Referências de Produto
+
 - `docs/prd/01-braco-atendimento.md`
 - `docs/prd/02-plataforma-gerencial.md`
-- `docs/delivery/epics/E02-preparacao-do-funcionario/epic.md`

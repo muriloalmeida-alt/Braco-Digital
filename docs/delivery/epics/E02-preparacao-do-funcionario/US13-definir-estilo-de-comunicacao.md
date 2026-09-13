@@ -2,62 +2,86 @@
 
 **Épico:** E02 — Preparação do Funcionário  
 **Prioridade:** P0  
-**Sprint planejada:** Sprint 02
+**Sprint planejada:** Sprint 02  
+**Product Ready:** YES  
+**Design Ready:** YES  
+**Tech Ready:** TECH READY
 
 ## Contexto
-Esta história detalha a capacidade **definir estilo de comunicação**.
+
+O gestor escolhe como o funcionário conversa sem escrever prompts
+técnicos. A transparência digital continua obrigatória.
 
 ## História de usuário
-Como **gestor**, quero **definir estilo de comunicação**, para **preparar o funcionário para trabalhar corretamente**.
+
+Como **gestor**, quero **definir o estilo de comunicação**, para que **o
+Braço converse de forma coerente com minha empresa e com a identidade
+digital transparente do produto**.
 
 ## Critérios de aceitação
-- [ ] A capacidade 'Definir estilo de comunicação' pode ser executada no fluxo previsto.
-- [ ] O resultado fica persistido e visível quando aplicável.
-- [ ] Impedimentos são apresentados de forma compreensível e acionável.
-- [ ] Regras, limites e permissões são respeitados.
+
+- [ ] Transparência digital aparece como regra fixa e não pode ser desativada.
+- [ ] O gestor escolhe Tom base entre as quatro opções aprovadas.
+- [ ] O gestor escolhe Forma de tratamento.
+- [ ] O gestor escolhe Tamanho das respostas.
+- [ ] O gestor escolhe política de Emojis.
+- [ ] Termos preferidos e a evitar são opcionais.
+- [ ] A interface apresenta preview sem depender de LLM.
+- [ ] O preview não é apresentado como conversa real.
+- [ ] Continuar conclui quando as quatro escolhas obrigatórias estiverem válidas.
 
 ## Regras de negócio
-- A preparação alimenta o Manual de Trabalho.
-- Informações incompletas devem permanecer identificáveis.
+
+- O funcionário nunca finge ser humano.
+- Opções recomendadas podem ser destacadas, mas a escolha é do gestor.
+- Não expor prompt/modelo.
 
 ## Dependências
-- PRD aplicável.
-- E02 — Preparação do Funcionário.
-- Configurações e permissões necessárias.
+
+- Brand/content design.
+- PRD de transparência digital.
 
 ## Fora do escopo
-- Mudanças de produto não aprovadas.
-- Decisões técnicas de implementação.
-- Customização específica sem decisão de produto.
+
+- Editor de prompt.
+- Personalidade arbitrária de IA.
+- Treinamento de modelo.
+- LLM obrigatório para preview.
 
 ## Design
 
-        Esta história está sujeita ao gate:
+Gate:
 
-        > **Product Ready + Design Ready + Tech Ready**
+> **Product Ready + Design Ready + Tech Ready**
 
-        ### Referências
+### Referências
 
-        - `docs/design/flows/02-preparation.md`
-- `docs/design/09-product-patterns.md`
-- `docs/design/12-status-and-states.md`
+- `docs/design/flows/02-preparation.md`
+- `docs/design/22-work-manual-content-model.md`
+- `docs/design/23-preparation-experience-spec.md`
 
-        ### Design Ready
+### Design Ready
 
-        - [ ] fluxo e interação definidos;
-        - [ ] padrão M3/padrão BRAÇO identificado;
-        - [ ] estados relevantes considerados;
-        - [ ] comportamento responsivo considerado;
-        - [ ] acessibilidade considerada.
+- [x] fluxo definido;
+- [x] campos/conteúdo definidos;
+- [x] obrigatoriedade definida;
+- [x] validação definida;
+- [x] estados definidos;
+- [x] responsividade definida;
+- [x] acessibilidade considerada;
+- [x] Brand UI Foundation aplicável.
 
 ## Definition of Done
+
 - critérios atendidos;
 - testes adequados;
-- comportamento validado;
+- autosave/estado validados quando aplicável;
+- Compact/Medium/Expanded validados;
+- acessibilidade validada;
 - documentação atualizada quando necessário;
 - nenhuma mudança de produto feita silenciosamente.
 
-## Referências
+## Referências de Produto
+
 - `docs/prd/01-braco-atendimento.md`
 - `docs/prd/02-plataforma-gerencial.md`
-- `docs/delivery/epics/E02-preparacao-do-funcionario/epic.md`

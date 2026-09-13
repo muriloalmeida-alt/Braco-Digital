@@ -2,62 +2,86 @@
 
 **Épico:** E02 — Preparação do Funcionário  
 **Prioridade:** P0  
-**Sprint planejada:** Sprint 02
+**Sprint planejada:** Sprint 02  
+**Product Ready:** YES  
+**Design Ready:** YES  
+**Tech Ready:** TECH READY WITH CAVEATS
 
 ## Contexto
-Esta história detalha a capacidade **cadastrar produtos e serviços**.
+
+O Braço precisa conhecer o que a empresa oferece e exatamente o que pode
+explicar sobre cada oferta.
 
 ## História de usuário
-Como **gestor**, quero **cadastrar produtos e serviços**, para **preparar o funcionário para trabalhar corretamente**.
+
+Como **gestor**, quero **cadastrar produtos e serviços**, para que **meu
+Braço apresente ofertas, preços e condições sem inventar informações**.
 
 ## Critérios de aceitação
-- [ ] A capacidade 'Cadastrar produtos e serviços' pode ser executada no fluxo previsto.
-- [ ] O resultado fica persistido e visível quando aplicável.
-- [ ] Impedimentos são apresentados de forma compreensível e acionável.
-- [ ] Regras, limites e permissões são respeitados.
+
+- [ ] Existe lista de produtos/serviços.
+- [ ] O gestor pode adicionar, editar e excluir itens.
+- [ ] Cada item exige Nome, Tipo, Descrição para o cliente e regra de preço.
+- [ ] As opções de preço são Fixo, A partir de, Sob consulta e Não informar.
+- [ ] Valor é obrigatório somente em Fixo/A partir de.
+- [ ] Serviço pode ser agendável; quando agendável, Duração é obrigatória.
+- [ ] A etapa exige pelo menos um item válido.
+- [ ] Preço não cadastrado não autoriza inventar informação.
+- [ ] Excluir item persistido exige confirmação.
+- [ ] A etapa conclui via Continuar e mantém autosave.
 
 ## Regras de negócio
-- A preparação alimenta o Manual de Trabalho.
-- Informações incompletas devem permanecer identificáveis.
+
+- Conteúdo é compartilhado.
+- Item Sob consulta/Não informar nunca recebe preço inventado.
+- Duração é requisito de serviço agendável.
 
 ## Dependências
-- PRD aplicável.
-- E02 — Preparação do Funcionário.
-- Configurações e permissões necessárias.
+
+- Contexto de empresa existente.
+- Permissão de edição.
 
 ## Fora do escopo
-- Mudanças de produto não aprovadas.
-- Decisões técnicas de implementação.
-- Customização específica sem decisão de produto.
+
+- Estoque.
+- ERP/CRM.
+- Preço dinâmico.
+- Múltiplas tabelas comerciais.
 
 ## Design
 
-        Esta história está sujeita ao gate:
+Gate:
 
-        > **Product Ready + Design Ready + Tech Ready**
+> **Product Ready + Design Ready + Tech Ready**
 
-        ### Referências
+### Referências
 
-        - `docs/design/flows/02-preparation.md`
-- `docs/design/09-product-patterns.md`
-- `docs/design/12-status-and-states.md`
+- `docs/design/flows/02-preparation.md`
+- `docs/design/22-work-manual-content-model.md`
+- `docs/design/23-preparation-experience-spec.md`
 
-        ### Design Ready
+### Design Ready
 
-        - [ ] fluxo e interação definidos;
-        - [ ] padrão M3/padrão BRAÇO identificado;
-        - [ ] estados relevantes considerados;
-        - [ ] comportamento responsivo considerado;
-        - [ ] acessibilidade considerada.
+- [x] fluxo definido;
+- [x] campos/conteúdo definidos;
+- [x] obrigatoriedade definida;
+- [x] validação definida;
+- [x] estados definidos;
+- [x] responsividade definida;
+- [x] acessibilidade considerada;
+- [x] Brand UI Foundation aplicável.
 
 ## Definition of Done
+
 - critérios atendidos;
 - testes adequados;
-- comportamento validado;
+- autosave/estado validados quando aplicável;
+- Compact/Medium/Expanded validados;
+- acessibilidade validada;
 - documentação atualizada quando necessário;
 - nenhuma mudança de produto feita silenciosamente.
 
-## Referências
+## Referências de Produto
+
 - `docs/prd/01-braco-atendimento.md`
 - `docs/prd/02-plataforma-gerencial.md`
-- `docs/delivery/epics/E02-preparacao-do-funcionario/epic.md`

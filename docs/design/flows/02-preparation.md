@@ -1,7 +1,8 @@
 # Fluxo 02 — Preparação do Funcionário
 
 ## Objetivo
-Transformar contexto da empresa em Manual de Trabalho utilizável.
+
+Transformar contexto da empresa em um Manual de Trabalho utilizável e revisado.
 
 ## Estrutura
 
@@ -18,59 +19,143 @@ Preparação
 └── Revisão
 ```
 
-## Princípios
-- progressão clara;
-- salvar progresso;
-- permitir retornar;
-- distinguir obrigatório de opcional;
-- explicar por que cada informação importa;
-- mostrar incompletude.
+As oito primeiras etapas contêm conteúdo. `Revisão` é o gate final e não
+entra no denominador do progresso.
 
-## Home da preparação
+## Princípios
+
+- progressão clara;
+- autosave;
+- permitir retornar;
+- obrigatório vs. opcional explícito;
+- explicar por que cada informação importa;
+- mostrar incompletude;
+- linguagem de trabalho, não tecnologia;
+- proteger limites de sistema;
+- concluir preparação não é ativar.
+
+## Overview
 
 Mostrar:
-- progresso;
-- seções;
-- estado de cada seção;
-- próximo item recomendado.
+- nome/função;
+- Employee Status;
+- `X de 8 etapas completas`;
+- próximo item recomendado;
+- estado de cada etapa;
+- Revisão.
 
-> **Nota de escopo (US06 vs. US07–US15):** entrar na preparação e ver esta
-> home (visão geral, seções, estado inicial/incompleto, próximo passo) é o
-> escopo de US06 (Sprint 01). O preenchimento de cada seção abaixo
-> pertence a US07–US15 (Sprint 02).
+### Status de etapa
+- Não iniciada
+- Em andamento
+- Completa
 
-## Formulários
+### Revisão
+- Bloqueada
+- Disponível
+- Concluída
 
-Usar M3 Text Fields, Select/Menu, Checkbox, Radio, Switch e componentes equivalentes adequados.
+## Continuidade
+
+US06 (Sprint 01) entregou:
+- entrada;
+- overview;
+- estrutura vazia.
+
+US07–US16 tornam a preparação funcional.
+US17, no E03, fecha a ponte de status para `Pronto`.
+
+## Fluxo principal
+
+```text
+Overview
+→ Empresa
+→ Produtos e serviços
+→ Responsabilidades
+→ Regras e limites
+→ Autonomia
+→ Pessoas e responsáveis
+→ Comunicação
+→ Recursos de trabalho
+→ Revisão
+→ Concluir preparação
+→ Status: Pronto
+```
+
+## Autosave
+
+Alterações válidas são salvas progressivamente.
+
+Feedback:
+- Salvando…
+- Salvo
+- Não foi possível salvar
+
+Não existe botão `Salvar`.
+
+## Conclusão de etapa
+
+CTA:
+
+> **Continuar**
+
+Se válida:
+- etapa = Completa;
+- navegar para próxima.
+
+Se inválida:
+- permanecer;
+- exibir erros;
+- foco no primeiro erro.
+
+## Conteúdo
+
+- `docs/design/22-work-manual-content-model.md`
+- `docs/design/23-preparation-experience-spec.md`
+- `docs/design/24-work-resources-ui-spec.md`
 
 ## Autonomia
-
-Representar três níveis:
 
 - 🟢 Pode decidir
 - 🟡 Pode decidir sob regras
 - 🔴 Precisa de humano
 
-Não depender das cores.
+Não depender de cor.
+
+Toda opção 🟡 exige condição.
 
 ## Revisão
 
 Antes de Pronto:
 - resumo;
 - pendências;
-- atalhos para corrigir;
-- clareza do que será usado pelo funcionário.
+- atalhos;
+- confirmação explícita.
 
-## Compact
-Uma seção por vez.
+CTA:
+
+> **Concluir preparação**
+
+Mensagem deixa claro que ficará Pronto, mas ainda não começará a trabalhar.
+
+## Compact / Medium
+Uma etapa por vez.
 
 ## Expanded
-Navegação lateral da preparação + conteúdo.
+Navegação interna persistente + conteúdo.
 
 ## Estados
-- não iniciado;
+- loading;
+- não iniciada;
 - em andamento;
-- seção completa;
-- incompleto;
+- completa;
+- erro de validação;
 - erro de salvamento;
-- pronto para revisão.
+- integração precisa de atenção;
+- pronto para revisão;
+- preparação concluída.
+
+## Regra de segurança
+
+Se configuração obrigatória for invalidada antes da ativação:
+
+> `Pronto` → `Preparando`

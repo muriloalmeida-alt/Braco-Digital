@@ -249,3 +249,194 @@ frontend para ícones (mitigado por ser tree-shakeable e ter apenas
 não muda a variável `--md-ref-typeface`; trocar de biblioteca de ícones
 fica isolado aos `import` de cada tela, sem API própria por cima.
 **Impacto futuro:** nenhum bloqueio.
+
+---
+
+## TD13 — WorkManual: tabelas relacionais por domínio + autoridade de completude recomputada no backend
+
+**Contexto:** Sprint 02 (Track A, US07-US17) — Technical Readiness em
+`docs/technical/20-sprint-02-tech-readiness.md` §4/§10. O schema da
+Sprint 01 modela `WorkManual.sections` como um JSON opaco com só
+`status`; US07-US16 exigem conteúdo real (empresa, produtos, regras,
+autonomia, pessoas, comunicação, recursos).
+**Opções:** (a) continuar em JSON, um blob por seção; (b) tabela
+relacional própria por domínio, com um serviço que recomputa a
+completude de cada etapa a partir delas.
+**Decisão:** (b). `WorkManual` vira um "cabeçalho" (status geral,
+timestamps); o conteúdo vive em tabelas próprias (`ProductService`,
+`EmployeeResponsibility`, `CompanyRule`, `EmployeeAutonomyPolicy`,
+`EmployeeResponsible`, `EmployeeCommunicationStyle`, `Integration`) mais
+novos campos em `Company`. Um `PreparationReadinessService` novo
+recomputa o status de cada etapa a partir dessas tabelas sempre que algo
+muda, e é a única autoridade sobre `PREPARANDO ⇄ PRONTO` — nunca um
+campo cacheado isolado, nunca o frontend.
+**Justificativa:** instrução explícita do PO/PM ("a autoridade de
+readiness precisa existir no backend, não somente no frontend") e
+necessidade de o Policy Engine (Sprint 03+) consultar regras/autonomia
+com garantias transacionais e índices — não é possível avaliar isso
+performaticamente parseando JSON a cada decisão (mesmo raciocínio já
+antecipado em `03-data-model.md`, seção WorkManual).
+**Trade-offs:** mais migrations/tabelas do que um blob único; exige que
+toda mutação em qualquer etapa invoque o mesmo serviço de recomputo
+(disciplina de código, não tecnicamente forçado pelo schema).
+**Reversibilidade:** média — voltar a um blob JSON exigiria migração de
+dados reais depois de a Sprint 02 estar em produção; seguir com tabelas
+relacionais desde já evita essa migração futura.
+**Impacto futuro:** é a mesma base de dados que o Policy Engine do
+Runtime (Sprint 03+, `08-digital-employee-runtime.md`) vai consultar em
+tempo real — construir relacional agora evita reescrita depois.
+
+---
+
+## TD14 — Teto de autonomia por responsabilidade: constante de código validada no backend, não só na UI
+
+**Contexto:** Sprint 02, US11 — `docs/design/22-work-manual-content-
+model.md` §8 exige "produto pode definir nível máximo permitido; gestor
+pode ser mais conservador, nunca mais permissivo". Na versão original
+desta TD, o valor exato desse teto por responsabilidade ainda não estava
+tabulado separadamente da recomendação inicial (PD7,
+`16-product-decisions-required.md`, então **PENDING PO/DESIGN
+CONFIRMATION**).
+**Opções:** (a) validar o teto só na UI (desabilitar opção mais
+permissiva no formulário); (b) validar também no backend, com uma
+constante por responsabilidade.
+**Decisão:** (b), sempre. A UI pode (e deve) já impedir a seleção
+inválida, mas o `PATCH` do backend revalida contra a mesma constante
+antes de persistir — mesmo padrão de "nunca confiar só no frontend" já
+aplicado a `PreparationReadinessService` (TD13).
+**Justificativa:** autonomia é uma garantia de segurança do produto
+("nunca mais permissiva que o limite"), não uma conveniência de UX —
+merece a mesma defesa em profundidade que RLS já dá ao isolamento de
+tenant.
+**Trade-offs:** nenhum relevante — é validação de payload, custo
+desprezível.
+**Reversibilidade:** alta — é uma constante única reaproveitada nos dois
+lados (idealmente compartilhada via um pacote/arquivo único para não
+divergir UI vs. backend).
+**Impacto futuro:** nenhum bloqueio.
+
+**Atualização — PD7 RESOLVED (patch "Sprint 02 PD6/PD7 Closure"):** o
+mecanismo acima está confirmado e **não muda** — a novidade é só o valor
+de negócio, agora explícito. Duas correções ao desenho original desta
+TD, ambas de nomenclatura/modelo, não de arquitetura:
+- **Recomendação e teto são duas constantes distintas**
+  (`RESPONSIBILITY_RECOMMENDED_AUTONOMY` e
+  `RESPONSIBILITY_MAX_AUTONOMY`), não a mesma lida duas vezes — mesmo
+  que, para o Braço Atendimento v1, os dois arrays tenham exatamente os
+  mesmos valores nas 14 responsabilidades (tabela oficial em
+  `docs/design/22-work-manual-content-model.md` §8). Isso já antecipa
+  sem custo uma recomendação futura mais conservadora que o teto.
+- **Mensagem de UI padronizada** para o nível bloqueado: "Este nível de
+  autonomia não está disponível para esta responsabilidade." — a opção
+  continua visível (não desaparece do seletor), só fica desabilitada,
+  nunca dependendo apenas de opacity/cor.
+- **US11 é TECH READY** (não mais "with caveats") — nenhuma parte do
+  mecanismo de enforcement precisou mudar, só o dado que faltava.
+
+---
+
+## TD15 — Track B: terceiro modo de acesso a dados (público), com role de banco dedicada
+
+**Contexto:** Sprint 02 (Track B) é o primeiro fluxo público e não
+autenticado do produto com escrita de dados
+(`20-sprint-02-tech-readiness.md` §7/§16). Hoje só existem dois modos de
+acesso ao banco: `withTenant` (empresa ativa) e `withUser` (login, usado
+no fluxo de auth). Nenhum dos dois serve para uma requisição sem tenant
+e sem usuário.
+**Opções:** (a) reaproveitar a role de aplicação existente e confiar
+apenas na validação da camada de aplicação para as rotas públicas; (b)
+criar uma terceira role de banco, dedicada ao caminho público, com
+policies de RLS que só permitem `INSERT` em `leads` e `SELECT` em
+`employee_types` — nenhuma outra tabela alcançável, nem em teoria.
+**Decisão:** (b).
+**Justificativa:** defesa em profundidade — este é o primeiro endpoint
+público com escrita do produto; um bug de autorização na camada de
+aplicação não deve conseguir, sozinho, ler dado de tenant. A mesma
+filosofia que já justifica RLS como "última linha de defesa" para
+multi-tenancy (TD1, `04-multi-tenancy.md` §4) se aplica aqui com um risco
+ainda maior (a superfície é pública, não só multiempresa).
+**Trade-offs:** mais uma role de banco para gerenciar/migrar; o
+`PrismaService` ganha um terceiro helper (`withPublicAccess` ou
+equivalente).
+**Reversibilidade:** alta — é infraestrutura de acesso a dado, não
+modelo de domínio; pode ser reforçada ou relaxada sem migração de dados.
+**Impacto futuro:** qualquer endpoint público futuro (ex.: outras
+landings/growth loops) reaproveita o mesmo mecanismo em vez de inventar
+um novo por feature.
+
+---
+
+## TD16 — Motor de recomendação de Track B: função pura versionada em código, computada no servidor
+
+**Contexto:** Sprint 02, US81 — `docs/design/27-team-diagnostic-model.md`
+exige um motor determinístico, auditável e reproduzível, sem LLM.
+**Opções:** (a) função pura em código, versionada via constante +
+histórico do git, computada no cliente; (b) idem, computada no servidor;
+(c) motor configurável em banco (tabela de regras/pesos editável sem
+deploy).
+**Decisão:** (b) — função pura (mesmo padrão de
+`digital-employees/next-step.ts`, já testado unitariamente na Sprint 01),
+mas **computada no backend**, atrás de `POST /public/diagnostics/
+recommendation`, nunca no cliente.
+**Justificativa:** computar no servidor evita duplicar a leitura de
+Catalog Availability no cliente (reabriria o risco que o PRD 04 pede
+para evitar — "o motor não possui sua própria cópia de Disponível/Em
+breve") e não expõe a tabela de pesos no bundle JS sem necessidade. (c)
+foi descartado por complexidade desnecessária no MVP — não há requisito
+de mudar a regra sem deploy nesta sprint.
+**Trade-offs:** qualquer ajuste de peso/regra exige deploy (aceitável no
+MVP); nenhuma edição de regra pelo PM sem Engenharia.
+**Reversibilidade:** alta — migrar de função em código para tabela
+configurável é aditivo, não exige reescrever o contrato do endpoint
+público.
+**Impacto futuro:** a versão da regra (`rule_version`) já é persistida
+por lead desde o v1, então uma futura migração para múltiplas versões
+simultâneas (ex.: A/B) não perde histórico.
+
+---
+
+## TD17 — Analytics de Track B via eventos relayados pelo servidor, sem SDK de terceiro no MVP
+
+**Contexto:** Sprint 02, PRD 04 §20 exige funil mensurável sem enviar PII
+para analytics, sem definir fornecedor (decisão de Engenharia).
+**Opções:** (a) SDK de analytics de terceiro carregado direto no
+navegador (ex. GA4, Mixpanel); (b) endpoint próprio (`POST /public/
+analytics/events`) que relaya para o pipeline de observabilidade já
+existente (`11-observability.md`).
+**Decisão:** (b) para o MVP da Sprint 02.
+**Justificativa:** garante PII-scrubbing por allowlist de propriedades
+no servidor (não depende de configurar corretamente um SDK de terceiro
+client-side); zero custo/contrato novo; desacopla a escolha final de
+fornecedor de funil (pode trocar o destino do relay sem tocar no
+contrato de evento do frontend).
+**Trade-offs:** sem dashboards prontos de um produto de analytics
+dedicado — leitura do funil depende do pipeline de observabilidade
+existente até uma ferramenta dedicada ser adotada.
+**Reversibilidade:** alta — o contrato de evento (`{ event, sessionId,
+properties }`) não muda ao trocar o destino do relay.
+**Impacto futuro:** se o funil de Growth crescer em importância, plugar
+um produto de analytics dedicado no `AnalyticsRelay` é aditivo.
+
+---
+
+## TD18 — Landing/diagnóstico de Track B como rota CSR da SPA existente (SEO tratado como caveat, não bloqueio)
+
+**Contexto:** Sprint 02, US77 — `apps/web` é uma SPA Vite/React sem SSR.
+A landing pública precisa decidir onde/como é servida
+(`20-sprint-02-tech-readiness.md` §8/§15).
+**Opções:** (a) nova rota client-side na mesma SPA; (b) aplicação
+separada com SSR/SSG dedicado só para a landing.
+**Decisão:** (a) para a Sprint 02.
+**Justificativa:** menor esforço/risco para o MVP; a Sprint 02 não é
+ainda uma aposta de aquisição orgânica por SEO (canal inicial é
+direto/pago/social) — otimizar SEO agora seria antecipar um requisito
+sem evidência de necessidade ainda.
+**Trade-offs:** indexabilidade e Core Web Vitals ficam abaixo do que uma
+página SSR/SSG entregaria; documentado explicitamente em
+`20-sprint-02-tech-readiness.md` §15 como caveat, não bloqueio.
+**Reversibilidade:** média — migrar só a rota da landing para
+pré-renderização (ex. `vite-plugin-ssg`) no futuro é isolado, não exige
+reescrever o restante da SPA autenticada.
+**Impacto futuro:** se SEO orgânico virar métrica relevante de Growth,
+a evolução natural é pré-renderizar essa rota específica, não migrar o
+produto inteiro para SSR.

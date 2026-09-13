@@ -2,62 +2,85 @@
 
 **Épico:** E02 — Preparação do Funcionário  
 **Prioridade:** P1  
-**Sprint planejada:** Sprint 02
+**Sprint planejada:** Sprint 02  
+**Product Ready:** YES  
+**Design Ready:** YES  
+**Tech Ready:** TECH READY
 
 ## Contexto
-Esta história detalha a capacidade **informar equipe e responsáveis**.
+
+O funcionário precisa saber qual pessoa do negócio é responsável quando
+uma decisão precisa sair do Braço.
 
 ## História de usuário
-Como **gestor**, quero **informar equipe e responsáveis**, para **preparar o funcionário para trabalhar corretamente**.
+
+Como **gestor**, quero **definir uma pessoa responsável e, opcionalmente,
+uma reserva**, para que **o Braço saiba para quem encaminhar situações que
+precisam de humano**.
 
 ## Critérios de aceitação
-- [ ] A capacidade 'Informar equipe e responsáveis' pode ser executada no fluxo previsto.
-- [ ] O resultado fica persistido e visível quando aplicável.
-- [ ] Impedimentos são apresentados de forma compreensível e acionável.
-- [ ] Regras, limites e permissões são respeitados.
+
+- [ ] Responsável principal é selecionado entre usuários ativos da empresa no BRAÇO.
+- [ ] Responsável principal é obrigatório.
+- [ ] Nome, role e e-mail são apresentados.
+- [ ] Um único Owner elegível pode aparecer como recomendação, mas exige confirmação.
+- [ ] Responsável reserva é opcional e diferente do principal.
+- [ ] A UI informa quando não existe usuário elegível.
+- [ ] A etapa fica incompleta sem responsável principal.
+- [ ] Autosave e Continuar seguem o padrão.
 
 ## Regras de negócio
-- A preparação alimenta o Manual de Trabalho.
-- Informações incompletas devem permanecer identificáveis.
+
+- Não criar contatos paralelos ao cadastro de usuários.
+- O responsável é atribuição específica do funcionário.
+- Usuário desativado deixa de satisfazer o requisito.
 
 ## Dependências
-- PRD aplicável.
-- E02 — Preparação do Funcionário.
-- Configurações e permissões necessárias.
+
+- Usuários da empresa existentes.
+- RBAC/company membership.
 
 ## Fora do escopo
-- Mudanças de produto não aprovadas.
-- Decisões técnicas de implementação.
-- Customização específica sem decisão de produto.
+
+- Convidar/criar usuários.
+- Plantão.
+- Roteamento por departamento.
+- Distribuição avançada.
 
 ## Design
 
-        Esta história está sujeita ao gate:
+Gate:
 
-        > **Product Ready + Design Ready + Tech Ready**
+> **Product Ready + Design Ready + Tech Ready**
 
-        ### Referências
+### Referências
 
-        - `docs/design/flows/02-preparation.md`
-- `docs/design/09-product-patterns.md`
-- `docs/design/12-status-and-states.md`
+- `docs/design/flows/02-preparation.md`
+- `docs/design/22-work-manual-content-model.md`
+- `docs/design/23-preparation-experience-spec.md`
 
-        ### Design Ready
+### Design Ready
 
-        - [ ] fluxo e interação definidos;
-        - [ ] padrão M3/padrão BRAÇO identificado;
-        - [ ] estados relevantes considerados;
-        - [ ] comportamento responsivo considerado;
-        - [ ] acessibilidade considerada.
+- [x] fluxo definido;
+- [x] campos/conteúdo definidos;
+- [x] obrigatoriedade definida;
+- [x] validação definida;
+- [x] estados definidos;
+- [x] responsividade definida;
+- [x] acessibilidade considerada;
+- [x] Brand UI Foundation aplicável.
 
 ## Definition of Done
+
 - critérios atendidos;
 - testes adequados;
-- comportamento validado;
+- autosave/estado validados quando aplicável;
+- Compact/Medium/Expanded validados;
+- acessibilidade validada;
 - documentação atualizada quando necessário;
 - nenhuma mudança de produto feita silenciosamente.
 
-## Referências
+## Referências de Produto
+
 - `docs/prd/01-braco-atendimento.md`
 - `docs/prd/02-plataforma-gerencial.md`
-- `docs/delivery/epics/E02-preparacao-do-funcionario/epic.md`
