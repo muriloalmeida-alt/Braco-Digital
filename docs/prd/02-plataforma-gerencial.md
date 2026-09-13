@@ -61,6 +61,13 @@ O gestor pode visualizar e assumir conversas. Intervenção humana faz parte da 
 ## 15. Tarefas e agenda
 Visibilidade operacional sem exigir uso direto de sistemas externos.
 
+**Confirmado (PD4):** toda a experiência de gestão de tarefas acontece
+dentro do BRAÇO. Google Tasks é um recurso operacional integrado, não uma
+superfície de gestão — o produto não garante que abrir o Google Tasks
+diretamente mostre cliente, atendimento, conversa ou funcionário
+relacionados. Princípio: o gestor configura e acompanha no BRAÇO; as
+integrações trabalham nos bastidores.
+
 ## 16. Resultados
 Medir valor, não vaidade.
 
@@ -90,6 +97,10 @@ O gestor executa a jornada principal sem conhecimento técnico.
 
 ## 25. Decisões pendentes
 Implementação técnica fica para engenharia. Mudança de comportamento retorna ao produto.
+
+Retenção e exclusão de dados: ver `docs/13-data-privacy-and-retention.md`
+(Status: Pending Legal Validation) — gate antes do início da Sprint 03,
+não bloqueia Sprint 01/02.
 
 ## Conclusão
 O gestor deve sentir que administra uma equipe, não que configura software.

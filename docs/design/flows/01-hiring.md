@@ -32,12 +32,19 @@ Minha Equipe
 
 ## Catálogo
 
-Cada opção apresenta:
+Exibe os 5 funcionários do portfólio (`docs/04-employee-catalog.md`). Cada
+opção apresenta:
 - nome;
 - função;
 - missão;
 - resultado esperado;
-- principais responsabilidades.
+- principais responsabilidades;
+- disponibilidade (Catalog Availability — `09-product-patterns.md` §1.1):
+  **Disponível** (Braço Atendimento) ou **Em breve** (Vendas, Orçamentos,
+  Pós-venda, Financeiro).
+
+Apenas o card **Disponível** mostra CTA de contratação. Cards **Em breve**
+permanecem com conteúdo legível e acessível ao detalhe.
 
 ## Detalhe do funcionário
 
@@ -47,7 +54,13 @@ Priorizar:
 - responsabilidades;
 - limites;
 - como trabalha;
-- CTA de contratação.
+- CTA de contratação — **somente quando Disponível**.
+
+Todos os 5 funcionários têm detalhe visualizável. Para um funcionário **Em
+breve**, mostrar normalmente missão, responsabilidades e resultado
+esperado, mais uma mensagem objetiva de indisponibilidade (ex.: "Em breve.
+Este funcionário ainda não está disponível para contratação."), sem CTA de
+contratação e sem lista de espera/"Avise-me" nesta fase.
 
 Não mostrar detalhes técnicos.
 

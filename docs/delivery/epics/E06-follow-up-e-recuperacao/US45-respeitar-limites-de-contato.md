@@ -19,6 +19,7 @@ Como **funcionário digital**, quero **respeitar limites de contato**, para **ga
 ## Regras de negócio
 - Follow-ups devem respeitar limites de contato.
 - Toda tentativa relevante deve ser registrada.
+- Limites de contato se aplicam também à frequência de envio de templates de WhatsApp fora da janela de 24h (PD2) — ver `docs/design/flows/06-follow-up.md`.
 
 ## Dependências
 - PRD aplicável.

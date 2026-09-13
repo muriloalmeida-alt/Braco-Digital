@@ -11,14 +11,17 @@ Esta história detalha a capacidade **visualizar detalhes do funcionário**.
 Como **gestor**, quero **visualizar detalhes do funcionário**, para **iniciar a contratação e entender o próximo passo**.
 
 ## Critérios de aceitação
-- [ ] A capacidade 'Visualizar detalhes do funcionário' pode ser executada no fluxo previsto.
-- [ ] O resultado fica persistido e visível quando aplicável.
+- [ ] Todos os 5 funcionários do catálogo podem ter o detalhe visualizado, independentemente da disponibilidade.
+- [ ] Apenas Braço Atendimento (Disponível) exibe CTA de contratação no detalhe.
+- [ ] Os 4 funcionários "Em breve" exibem missão, responsabilidades e resultado esperado normalmente, mais uma mensagem objetiva de indisponibilidade (ex.: "Em breve. Este funcionário ainda não está disponível para contratação."), sem CTA de contratação.
+- [ ] Nenhuma lista de espera/cadastro de interesse ("Avise-me") é exibida nesta fase.
 - [ ] Impedimentos são apresentados de forma compreensível e acionável.
 - [ ] Regras, limites e permissões são respeitados.
 
 ## Regras de negócio
 - A contratação deve usar linguagem de equipe e função, não de tecnologia.
 - O próximo passo deve ser sempre claro.
+- Disponibilidade no catálogo (Disponível/Em breve) é um conceito separado de Employee Status.
 
 ## Dependências
 - PRD aplicável.

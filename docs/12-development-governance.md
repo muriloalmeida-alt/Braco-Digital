@@ -94,3 +94,12 @@ Histórias com impacto de interface exigem:
 Google Material Design 3 é o Design System canônico.
 
 A documentação de Product Design fica em `docs/design/`.
+
+## Gate de dados reais de cliente final (PD3)
+
+Nenhum dado real de cliente final entra em produção antes de validação
+jurídica da política de retenção/exclusão — gate obrigatório **antes do
+início da Sprint 03**. Ver `docs/13-data-privacy-and-retention.md` (Status:
+Pending Legal Validation) e
+`docs/technical/16-product-decisions-required.md` (PD3). Não bloqueia
+Sprint 01 ou Sprint 02.

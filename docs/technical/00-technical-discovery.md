@@ -13,6 +13,17 @@ Este documento é o índice e resumo executivo dos 17 documentos técnicos em
 `docs/technical/`. Não implementa código — é o produto da etapa de
 Technical Discovery solicitada.
 
+## Atualização v1.1 — Product Decisions resolvidas
+
+Murilo (PO) decidiu PD1–PD5 (`16-product-decisions-required.md`):
+**PD1 RESOLVED, PD2 RESOLVED, PD3 PENDING LEGAL VALIDATION (gate antes da
+Sprint 03, não bloqueia Sprint 01), PD4 RESOLVED, PD5 RESOLVED.** O escopo
+de US06 foi confirmado. Como resultado, **as 8 histórias da Sprint 01 estão
+agora Product Ready + Design Ready + Tech Ready** — ver
+`14-sprint-01-tech-readiness.md` (v2) e `docs/11-decision-log.md`. O
+conteúdo original desta Discovery (v1) permanece abaixo como histórico;
+apenas as seções 10 e 12 foram atualizadas para refletir o novo status.
+
 ## 1. Executive Summary
 
 BRAÇO é tecnicamente viável com uma arquitetura deliberadamente simples para
@@ -103,15 +114,21 @@ pelo Design via algoritmo oficial do Material, Container Queries para os
 padrões adaptativos (Compact/Medium/Expanded), acessibilidade verificada
 automaticamente no CI (axe-core), nunca status comunicado só por cor.
 
-## 10. Sprint 01 Readiness
+## 10. Sprint 01 Readiness (atualizado — v1.1)
 
-Ver `14-sprint-01-tech-readiness.md`. **US01, US02, US03, US04, US05, US53,
-US54: Tech Ready. US06: Tech Ready with caveats** (limite de escopo da
-história — "iniciar" vs. "preencher" a preparação — precisa de confirmação
-rápida do PM, não é bloqueio técnico). **Nenhuma história está Not Tech
-Ready.** O que precisa existir antes da primeira linha de código de produto
-está listado em `14-sprint-01-tech-readiness.md` §11 (schema mínimo, auth/
-tenant/RBAC, tema M3 base, dados seed).
+Ver `14-sprint-01-tech-readiness.md` (v2). Após a resolução de PD1–PD5 e a
+confirmação do escopo de US06 por Murilo (PO): **as 8 histórias (US01,
+US02, US03, US04, US05, US06, US53, US54) estão Product Ready + Design
+Ready + Tech Ready.** O caveat anterior de US06 foi removido após
+confirmação explícita do PO. O que precisa existir antes da primeira linha
+de código de produto está listado em `14-sprint-01-tech-readiness.md` §13
+(schema mínimo com os 5 `EmployeeType` + `availability`, auth/tenant/RBAC,
+tema M3 base incluindo o padrão Catalog Availability, dados seed cobrindo
+onboarding manual — PD1).
+
+*(Histórico v1, antes da resolução: 7 de 8 histórias Tech Ready, US06 Tech
+Ready with caveats por um ponto de escopo pendente de confirmação com o
+PM.)*
 
 ## 11. Risks
 
@@ -120,17 +137,20 @@ LLM agindo fora dos limites configurados (R2), janela de 24h do WhatsApp
 quebrando follow-up (R3) — todos com mitigação arquitetural desenhada,
 nenhum bloqueia a Sprint 01.
 
-## 12. Product Decisions Required
+## 12. Product Decisions Required (atualizado — v1.1: todas decididas)
 
-Ver `16-product-decisions-required.md` — resumo:
+Ver `16-product-decisions-required.md` — resumo pós-decisão de Murilo (PO):
 
-| # | Decisão | Bloqueia Sprint 01? | Bloqueia lançamento real? |
+| # | Decisão | Status | Bloqueia Sprint 01? |
 |---|---|---|---|
-| PD1 | Não existe fluxo de criação de conta/empresa no backlog | Não (seed) | **Sim** |
-| PD2 | Janela de 24h do WhatsApp limita follow-up/lembrete proativo | Não (WhatsApp só entra na Sprint 03) | Sim, para E06 |
-| PD3 | Retenção/exclusão de dados de cliente final (LGPD) | Não | Sim, antes de dados reais de cliente |
-| PD4 | Google Tasks sem campo customizado — confirmar que gestor nunca precisa abrir o Google Tasks diretamente | Não | Baixo risco, só confirmação |
-| PD5 | Catálogo da Sprint 01: só Atendimento ou 5 tipos com bloqueio | **Sim, antes de codar US01** | — |
+| PD1 | Registro e Onboarding de Conta | **RESOLVED** — onboarding manual nas Sprints 01–06; self-service vira PRD 03/E11 (Sprint 07) | Não |
+| PD2 | WhatsApp: Follow-up e Templates | **RESOLVED** — 5 templates pré-aprovados, Design Ready fim da Sprint 02, submissão antes da Sprint 03 | Não |
+| PD3 | Retenção, Exclusão e LGPD | **PENDING LEGAL VALIDATION** — direção de produto definida em `docs/13-data-privacy-and-retention.md`, valor final é gate antes da Sprint 03 | Não |
+| PD4 | Google Tasks | **RESOLVED** — gestão de tarefas sempre dentro do BRAÇO | Não |
+| PD5 | Catálogo de Funcionários | **RESOLVED** — 5 no catálogo, só Atendimento Disponível, demais Em breve (Catalog Availability) | Não (já aplicada) |
+
+*(Histórico v1: PD5 bloqueava o início de US01 antes de decidida; PD1
+bloqueava lançamento real; ambas resolvidas acima.)*
 
 ## 13. Technical Decisions
 
@@ -206,19 +226,23 @@ Web Components como base do frontend M3 (TD7); auditoria de domínio via
 limites configurados (R2), janela de 24h do WhatsApp quebrando follow-up
 proativo (R3) — todos com mitigação arquitetural definida nesta Discovery.
 
-**Decisões que precisam voltar para Produto/Design:** as cinco listadas na
-seção 12 (PD1–PD5), com destaque para PD5 (bloqueia o início de US01) e PD1
-(não bloqueia a Sprint 01, mas bloqueia qualquer lançamento real).
+**Decisões que precisam voltar para Produto/Design (atualizado):** todas as
+cinco (PD1–PD5) já foram decididas por Murilo (PO) — ver seção 12. Único
+item ainda aberto: **PD3 aguarda validação jurídica** do período de
+retenção por categoria (gate antes da Sprint 03, não bloqueia Sprint 01).
 
-**A Sprint 01 está tecnicamente pronta?** Sim — 7 de 8 histórias Tech
-Ready, 1 (US06) Tech Ready with caveats por um ponto de escopo a confirmar
-com o PM, não por limitação técnica.
+**A Sprint 01 está tecnicamente pronta? (atualizado)** Sim — **as 8
+histórias estão Product Ready + Design Ready + Tech Ready** após a
+resolução de PD1–PD5 e a confirmação do escopo de US06 pelo PO. Nenhuma
+está mais "Tech Ready with caveats".
 
-**O que precisa ser resolvido antes da primeira linha de código:**
-1. PD5 (catálogo da Sprint 01 — decisão rápida);
-2. Fundação técnica: schema multi-tenant mínimo, auth/RBAC, testes de
-   isolamento de tenant, tema M3 base;
-3. Confirmação do caveat de escopo de US06 com o PM.
+**O que precisa ser resolvido antes da primeira linha de código
+(atualizado):**
+1. Fundação técnica: schema multi-tenant mínimo (incluindo os 5
+   `EmployeeType` com `availability`), auth/RBAC, testes de isolamento de
+   tenant, tema M3 base (incluindo o padrão Catalog Availability);
+2. Seed de dados cobrindo o onboarding manual (PD1: Company + Owner
+   pré-provisionados).
 
 Nenhum outro item bloqueia o início do desenvolvimento da Sprint 01.
 

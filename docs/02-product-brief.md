@@ -35,6 +35,10 @@ Conversa pelo WhatsApp.
 
 > O gestor configura no BRAÇO. O funcionário trabalha. As integrações fazem o restante.
 
+Confirmado (PD4): a gestão de tarefas (Google Tasks) acontece inteiramente
+dentro do BRAÇO — o gestor nunca precisa abrir o Google Tasks diretamente
+para ter contexto de cliente/atendimento.
+
 ## Design do produto
 
 O produto utiliza Material Design 3 como sistema-base.

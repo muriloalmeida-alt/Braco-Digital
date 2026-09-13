@@ -7,18 +7,36 @@
 ## Contexto
 Esta história detalha a capacidade **iniciar preparação**.
 
+## Escopo confirmado
+
+> Funcionário contratado → CTA "Preparar funcionário" → Entrar na
+> preparação → Visualizar visão geral → Visualizar estrutura de seções →
+> Visualizar estado inicial/incompleto → Entender próximo passo
+
+US06 **não inclui** o preenchimento das seções. O preenchimento pertence a
+US07–US15 (Sprint 02). Fora do escopo desta história: editar dados da
+empresa; cadastrar produtos/serviços; definir responsabilidades, regras,
+limites ou autonomia; informar responsáveis; configurar comunicação ou
+recursos; revisão final do Manual de Trabalho.
+
 ## História de usuário
-Como **gestor**, quero **iniciar preparação**, para **preparar o funcionário para trabalhar corretamente**.
+Como **gestor**, quero **iniciar a preparação do funcionário e ver a
+estrutura do que preciso preencher**, para **entender o próximo passo sem
+precisar preencher tudo de uma vez**.
 
 ## Critérios de aceitação
-- [ ] A capacidade 'Iniciar preparação' pode ser executada no fluxo previsto.
-- [ ] O resultado fica persistido e visível quando aplicável.
-- [ ] Impedimentos são apresentados de forma compreensível e acionável.
-- [ ] Regras, limites e permissões são respeitados.
+- [ ] O gestor consegue iniciar a preparação a partir do funcionário contratado.
+- [ ] A tela inicial da preparação apresenta todas as seções previstas (`docs/design/flows/02-preparation.md`).
+- [ ] Cada seção apresenta estado inicial/incompleto.
+- [ ] O produto informa claramente qual é o próximo passo.
+- [ ] O gestor consegue navegar para a primeira etapa de preenchimento.
+- [ ] Nenhuma informação de US07–US15 precisa ser preenchida para concluir US06.
+- [ ] O funcionário permanece em estado Preparando.
 
 ## Regras de negócio
 - A preparação alimenta o Manual de Trabalho.
 - Informações incompletas devem permanecer identificáveis.
+- Iniciar a preparação não exige preencher nenhuma seção (ver "Escopo confirmado" acima).
 
 ## Dependências
 - PRD aplicável.

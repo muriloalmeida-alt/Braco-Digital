@@ -147,7 +147,28 @@ Tabela **append-only**, é a espinha dorsal de auditoria e observabilidade
 attendance_id (opcional), action, decision_type (auto|rule_checked|
 escalated), tool_calls (JSONB), result, latency_ms, llm_cost_usd, error,
 created_at`. Nunca é atualizada ou apagada por fluxo de negócio — só por
-política de retenção LGPD (ver `10-security-lgpd.md`).
+política de retenção LGPD (ver `10-security-lgpd.md` e
+`docs/13-data-privacy-and-retention.md`, PD3 — Pending Legal Validation).
+
+### Suporte a retenção e exclusão (PD3)
+
+Entidades que carregam dado pessoal do cliente final (`Customer`,
+`Message`, `Appointment`, `Task`, `FollowUp`, `WorkEvent`) preveem, desde o
+schema inicial:
+- `retention_policy_id` (ou categoria equivalente) referenciando a política
+  configurável aplicável — nunca um período fixo hardcoded no schema;
+- suporte a `deleted_at` (soft delete) como mecanismo disponível, com
+  decisão de quando aplicar hard delete definitivo feita por política, não
+  por código;
+- exclusão em cascata por `company_id` (encerramento de empresa cliente),
+  reaproveitando o mesmo mecanismo de isolamento por tenant
+  (`04-multi-tenancy.md`);
+- um registro de execução de retenção/exclusão (o quê, quando, por qual
+  motivo — expiração, solicitação do titular, encerramento de empresa) para
+  auditoria, análogo em espírito ao `WorkEvent`.
+
+O período final de cada `retention_policy` depende de validação jurídica —
+ver `docs/13-data-privacy-and-retention.md`. Não bloqueia Sprint 01/02.
 
 ### Metric (Métrica)
 Não é uma entidade mutável independente. Métricas de negócio (US69–US76) são

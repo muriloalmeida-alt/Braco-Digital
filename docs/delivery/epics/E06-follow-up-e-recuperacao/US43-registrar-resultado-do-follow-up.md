@@ -19,6 +19,7 @@ Como **funcionário digital**, quero **registrar resultado do follow-up**, para 
 ## Regras de negócio
 - Follow-ups devem respeitar limites de contato.
 - Toda tentativa relevante deve ser registrada.
+- O registro deve distinguir estados de envio de template — enviando, enviado, entregue, falha, **rejeitado pela Meta** (PD2) — ver `docs/design/flows/06-follow-up.md`.
 
 ## Dependências
 - PRD aplicável.

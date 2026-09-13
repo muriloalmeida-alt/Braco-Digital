@@ -39,7 +39,24 @@ Provar que uma pequena empresa consegue contratar, preparar e colocar um funcion
 - contabilidade;
 - construtor genérico de automações;
 - plataforma genérica de IA;
-- projetos sob medida como núcleo.
+- projetos sob medida como núcleo;
+- criação de conta/empresa self-service (ver "Onboarding" abaixo).
+
+## Onboarding (Sprints 01–06)
+
+O MVP opera em **piloto com onboarding manual**: empresa e primeiro usuário
+Owner são provisionados administrativamente pela equipe BRAÇO. Registro e
+onboarding self-service ficam para **PRD 03 — Registro e Onboarding**
+(placeholder em `docs/10-product-roadmap.md`, Sprint 07), obrigatórios
+antes de lançamento público/self-service.
+
+## Catálogo de funcionários no MVP
+
+O catálogo exibe os 5 funcionários do portfólio
+(`docs/04-employee-catalog.md`). Apenas **Braço Atendimento** está
+**Disponível** para contratação; os demais aparecem como **Em breve**
+(conceito de Catalog Availability, não Employee Status — ver
+`docs/design/09-product-patterns.md`).
 
 ## Sucesso
 O gestor coloca o primeiro funcionário em operação e percebe valor mensurável.

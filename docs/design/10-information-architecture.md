@@ -23,7 +23,7 @@ BRAÇO
 ├── Trabalho
 │   ├── Conversas
 │   ├── Agenda
-│   ├── Tarefas
+│   ├── Tarefas          (recurso integrado — gestão sempre dentro do BRAÇO, PD4)
 │   └── Alertas
 │
 ├── Resultados

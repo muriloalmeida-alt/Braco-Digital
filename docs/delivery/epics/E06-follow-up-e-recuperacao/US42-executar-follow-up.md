@@ -19,6 +19,7 @@ Como **funcionário digital**, quero **executar follow-up**, para **garantir con
 ## Regras de negócio
 - Follow-ups devem respeitar limites de contato.
 - Toda tentativa relevante deve ser registrada.
+- Execução fora da janela de 24h do WhatsApp usa o template pré-aprovado aplicável (PD2); sem template aplicável aprovado, a execução não ocorre por texto livre — ver `docs/design/flows/06-follow-up.md`.
 
 ## Dependências
 - PRD aplicável.

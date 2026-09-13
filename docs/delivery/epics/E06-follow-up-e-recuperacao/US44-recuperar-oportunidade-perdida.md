@@ -19,6 +19,7 @@ Como **funcionário digital**, quero **recuperar oportunidade perdida**, para **
 ## Regras de negócio
 - Follow-ups devem respeitar limites de contato.
 - Toda tentativa relevante deve ser registrada.
+- Recuperação fora da janela de 24h do WhatsApp usa o template "Recuperação de oportunidade" pré-aprovado (PD2) — ver `docs/design/flows/06-follow-up.md`.
 
 ## Dependências
 - PRD aplicável.

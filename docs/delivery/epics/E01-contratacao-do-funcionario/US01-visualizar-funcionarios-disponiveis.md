@@ -11,14 +11,17 @@ Esta história detalha a capacidade **visualizar funcionários disponíveis**.
 Como **gestor**, quero **visualizar funcionários disponíveis**, para **iniciar a contratação e entender o próximo passo**.
 
 ## Critérios de aceitação
-- [ ] A capacidade 'Visualizar funcionários disponíveis' pode ser executada no fluxo previsto.
-- [ ] O resultado fica persistido e visível quando aplicável.
+- [ ] O catálogo exibe os 5 funcionários do portfólio (`docs/04-employee-catalog.md`): Atendimento, Vendas, Orçamentos, Pós-venda, Financeiro.
+- [ ] Braço Atendimento é exibido com disponibilidade **Disponível**.
+- [ ] Os outros 4 funcionários são exibidos com disponibilidade **Em breve** (Catalog Availability — não é Employee Status).
+- [ ] Cards "Em breve" mantêm conteúdo legível (missão, resultado esperado, responsabilidades) e acesso ao detalhe, sem CTA de contratação.
 - [ ] Impedimentos são apresentados de forma compreensível e acionável.
 - [ ] Regras, limites e permissões são respeitados.
 
 ## Regras de negócio
 - A contratação deve usar linguagem de equipe e função, não de tecnologia.
 - O próximo passo deve ser sempre claro.
+- Disponibilidade no catálogo (Disponível/Em breve) é um conceito separado de Employee Status.
 
 ## Dependências
 - PRD aplicável.

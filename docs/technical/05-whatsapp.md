@@ -35,8 +35,35 @@ Todo envio passa pelo `MessagingAdapter`, que:
    mensagem do cliente) ou se precisa de **template pré-aprovado**;
 2. enfileira com retry exponencial em caso de falha de rede/rate limit do
    provedor;
-3. grava o status retornado (enviando → enviado → entregue/falha) via
-   callbacks de status do provedor.
+3. grava o status retornado (enviando → enviado → entregue/falha/
+   **rejeitado**) via callbacks de status do provedor.
+
+### 3.1 Templates de follow-up/lembrete (PD2 — RESOLVED)
+
+Decisão de produto (`16-product-decisions-required.md`, PD2): mensagens
+proativas fora da janela de 24h nunca são texto livre gerado pelo LLM —
+sempre um template pré-aprovado pela Meta/BSP. MVP com 5 intenções de
+template, cada uma mapeada a uma `template_key` estável no
+`MessagingAdapter`:
+
+| Intenção | `template_key` | Épico/US |
+|---|---|---|
+| Follow-up de interesse | `follow_up_interest` | US40, US41 |
+| Agendamento incompleto | `follow_up_incomplete_booking` | US40, US41 |
+| Lembrete de agendamento | `appointment_reminder` | E05 |
+| Reagendamento | `appointment_reschedule` | US36 |
+| Recuperação de oportunidade | `opportunity_recovery` | US44 |
+
+O `MessagingAdapter` decide: se a `Attendance` está dentro da janela de 24h
+→ mensagem livre; se fora da janela → resolve a `template_key` aplicável à
+intenção e envia com as variáveis controladas; se não há template
+aprovado para a intenção → **não envia texto livre como fallback** (a ação
+fica pendente/gera `Alert`, nunca contorna a política da Meta). Conteúdo e
+variáveis de cada template são Design Ready até o fim da Sprint 02
+(`docs/design/flows/06-follow-up.md`); submissão à Meta/BSP deve ocorrer
+antes do início da Sprint 03, dado o lead time de aprovação (dias).
+Templates rejeitados pela Meta geram estado `rejected` distinto de falha
+técnica comum, visível como Atenção necessária.
 
 ## 4. Identificação do cliente e contexto
 
@@ -99,6 +126,8 @@ mesmo WhatsApp; o que muda é quem está autorizado a responder.
 ## 11. Limitações que impactam o PRD → Product Decisions Required
 
 Ver `16-product-decisions-required.md`, itens:
-- **Janela de 24h e mensagens de template** (follow-up/lembretes proativos).
+- **Janela de 24h e mensagens de template** (follow-up/lembretes proativos)
+  — **PD2: RESOLVED**, ver seção 3.1 acima.
 - **Tempo de aprovação de número e templates** pela Meta/BSP (impacta o
-  "tempo até ativação" — métrica de `docs/09-metrics.md`).
+  "tempo até ativação" — métrica de `docs/09-metrics.md`); submissão dos 5
+  templates do MVP deve iniciar antes do início da Sprint 03.

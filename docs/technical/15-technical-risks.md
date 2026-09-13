@@ -25,8 +25,11 @@ entrega.
 
 ### R3 — Janela de 24h do WhatsApp quebrando follow-up/lembrete proativo
 **Impacto:** alto — afeta diretamente PRD 01 (follow-up, recuperação,
-lembretes) e métricas-chave (`docs/09-metrics.md`). **Detalhe e decisão:**
-`16-product-decisions-required.md` #3.
+lembretes) e métricas-chave (`docs/09-metrics.md`). **Status: PD2
+RESOLVED** — mitigado por 5 templates pré-aprovados (Design Ready até fim
+da Sprint 02, submissão à Meta/BSP antes do início da Sprint 03). Risco
+residual: atraso ou rejeição na aprovação dos templates pela Meta pode
+atrasar o início efetivo de E06 — acompanhar prazo de submissão.
 
 ## Altos
 
@@ -48,7 +51,11 @@ eventual troca; complementar com primitivos próprios só onde necessário.
 
 ### R7 — Lacuna de onboarding/criação de empresa no backlog
 **Impacto:** alto para chegar a produção real (não bloqueia Sprint 01 com
-dados seed). **Detalhe e decisão:** `16-product-decisions-required.md` #1.
+dados seed). **Status: PD1 RESOLVED** — onboarding manual/provisionado
+pela equipe BRAÇO nas Sprints 01–06 (decisão explícita, não mais uma
+lacuna); self-service formalizado como PRD 03/E11, Sprint 07. Risco
+residual: E11 precisa ser planejado a tempo de não atrasar um lançamento
+público além da Sprint 06.
 
 ### R8 — Dependência de disponibilidade de terceiros (Meta/WhatsApp, Google, Anthropic)
 **Impacto:** alto — qualquer um fora do ar degrada a função central do
@@ -67,14 +74,19 @@ sem lock pessimista nativo).
 
 ### R10 — Templates de User Stories genéricos mascarando ambiguidade de escopo
 **Impacto:** médio — risco de retrabalho se Engenharia interpretar escopo
-diferente do pretendido pelo PM (exemplo concreto: US06, ver
-`14-sprint-01-tech-readiness.md` §7). **Mitigação:** todo caveat de
-interpretação é documentado e deve ser confirmado antes da implementação,
-nunca assumido silenciosamente — política já em vigor nesta Discovery.
+diferente do pretendido pelo PM. **Status:** exemplo concreto (US06)
+**confirmado por Murilo/PO** com critérios de aceitação reescritos — ver
+`14-sprint-01-tech-readiness.md` §7. Mitigação permanece em vigor para
+histórias futuras: todo caveat de interpretação é documentado e confirmado
+antes da implementação, nunca assumido silenciosamente.
 
 ### R11 — Retenção de dados de cliente final sem política definida
-**Impacto:** médio-alto no médio prazo (LGPD). **Detalhe e decisão:**
-`16-product-decisions-required.md` #4.
+**Impacto:** médio-alto no médio prazo (LGPD). **Status: PD3 — direção de
+produto definida, valor final PENDING LEGAL VALIDATION** (gate antes do
+início da Sprint 03). Ver `docs/13-data-privacy-and-retention.md` e
+`16-product-decisions-required.md` (PD3). Risco residual: validação
+jurídica não concluída a tempo da Sprint 03 atrasaria o início de dados
+reais de cliente final.
 
 ### R12 — Escalonamento de custo de mensageria (BSP) com crescimento de empresas
 **Impacto:** médio, financeiro. **Mitigação:** observabilidade de custo por
@@ -94,12 +106,14 @@ público amplo, não bloqueante para Sprint 01–04.
 
 ## Resumo por criticidade
 
-| Risco | Severidade | Bloqueia Sprint 01? |
-|---|---|---|
-| R1 | Crítica | Não (mas deve ser o primeiro teste do projeto) |
-| R2 | Crítica | Não (Sprint 01 não usa Runtime ainda) |
-| R3 | Crítica | Não (WhatsApp começa na Sprint 03) |
-| R7 | Alta | Não, com seed de dados (ver `14-sprint-01-tech-readiness.md`) |
-| R4, R5, R6, R8 | Alta | Não |
-| R9, R10, R11, R12 | Média | Não |
-| R13, R14 | Baixa | Não |
+| Risco | Severidade | Status | Bloqueia Sprint 01? |
+|---|---|---|---|
+| R1 | Crítica | Mitigação desenhada, a implementar | Não (mas deve ser o primeiro teste do projeto) |
+| R2 | Crítica | Mitigação arquitetural definida | Não (Sprint 01 não usa Runtime ainda) |
+| R3 | Crítica | **PD2 RESOLVED** | Não (WhatsApp começa na Sprint 03) |
+| R7 | Alta | **PD1 RESOLVED** | Não |
+| R4, R5, R6, R8 | Alta | Mitigação definida | Não |
+| R9, R10 | Média | R10 confirmado (US06) | Não |
+| R11 | Média | **PD3 pending legal validation** | Não (gate é antes da Sprint 03) |
+| R12 | Média | Mitigação definida | Não |
+| R13, R14 | Baixa | Mitigação definida | Não |

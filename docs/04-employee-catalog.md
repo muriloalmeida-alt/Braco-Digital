@@ -1,5 +1,24 @@
 # BRAÇO — Catálogo de Funcionários
 
+## Disponibilidade no catálogo (Catalog Availability)
+
+O catálogo exibido ao gestor mostra os 5 funcionários abaixo. Disponibilidade
+é um conceito **separado de Employee Status**
+(`docs/design/09-product-patterns.md`) — indica se o funcionário pode ser
+contratado hoje, não o estado de um funcionário já contratado.
+
+| Funcionário | Disponibilidade |
+|---|---|
+| Braço Atendimento | **Disponível** |
+| Braço Vendas | Em breve |
+| Braço Orçamentos | Em breve |
+| Braço Pós-venda | Em breve |
+| Braço Financeiro | Em breve |
+
+Apenas Braço Atendimento pode ser contratado nesta fase. Os demais têm
+detalhe visível (missão, responsabilidades, resultado esperado) mas sem CTA
+de contratação. Nenhuma lista de espera/"Avise-me" é oferecida nesta fase.
+
 ## Braço Atendimento
 **Função:** Recepcionista Digital
 

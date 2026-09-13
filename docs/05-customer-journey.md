@@ -36,3 +36,14 @@ Estados:
 - Pausado
 - Precisa de atenção
 - Desativado
+
+## Onboarding de conta (piloto)
+
+Esta jornada pressupõe **empresa e usuário Owner já existentes**. Nas
+Sprints 01–06, o BRAÇO opera em **piloto com onboarding manual**: a equipe
+BRAÇO provisiona a empresa e o primeiro usuário Owner administrativamente —
+não há criação de conta self-service nesta fase.
+
+O fluxo self-service de registro/onboarding será uma jornada própria,
+formalizada como **PRD 03 — Registro e Onboarding** (placeholder em
+`docs/10-product-roadmap.md`), obrigatória antes de um lançamento público.
