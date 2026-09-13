@@ -1,0 +1,186 @@
+/* Gerado por scripts/generate-theme.mjs — não editar à mão.
+ * Seeds: primary #3156A3, secondary #586578, tertiary #006B5E
+ * (docs/design/03-theme-strategy.md, 04-color-system.md).
+ * Para alterar cores, edite as seeds acima e rode: npm run theme:generate
+ */
+:root {
+  --md-sys-color-primary: #375ca9;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #d9e2ff;
+  --md-sys-color-on-primary-container: #001945;
+  --md-sys-color-secondary: #525f72;
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #d6e3fa;
+  --md-sys-color-on-secondary-container: #0f1c2c;
+  --md-sys-color-tertiary: #006b5e;
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: #9ff2e1;
+  --md-sys-color-on-tertiary-container: #00201b;
+  --md-sys-color-error: #b4271f;
+  --md-sys-color-on-error: #ffffff;
+  --md-sys-color-error-container: #ffdad5;
+  --md-sys-color-on-error-container: #410001;
+  --md-sys-color-surface: #fbf8fd;
+  --md-sys-color-on-surface: #1b1b1f;
+  --md-sys-color-surface-variant: #e1e2ec;
+  --md-sys-color-on-surface-variant: #44464f;
+  --md-sys-color-outline: #757780;
+  --md-sys-color-outline-variant: #c5c6d0;
+  --md-sys-color-surface-dim: #dbd9dd;
+  --md-sys-color-surface-bright: #fbf8fd;
+  --md-sys-color-surface-container-lowest: #ffffff;
+  --md-sys-color-surface-container-low: #f5f3f7;
+  --md-sys-color-surface-container: #efedf1;
+  --md-sys-color-surface-container-high: #e9e7ec;
+  --md-sys-color-surface-container-highest: #e3e2e6;
+  --md-sys-color-inverse-surface: #303034;
+  --md-sys-color-inverse-on-surface: #f2f0f4;
+  --md-sys-color-inverse-primary: #b0c6ff;
+
+  /* Extensões de domínio BRAÇO — docs/design/04-color-system.md §4 */
+  --md-ext-color-success: var(--md-sys-color-tertiary);
+  --md-ext-color-on-success: var(--md-sys-color-on-tertiary);
+  --md-ext-color-success-container: var(--md-sys-color-tertiary-container);
+  --md-ext-color-on-success-container: var(--md-sys-color-on-tertiary-container);
+  --md-ext-color-attention: #8c5000;
+  --md-ext-color-on-attention: #ffffff;
+  --md-ext-color-attention-container: #ffdcbf;
+  --md-ext-color-on-attention-container: #2d1600;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+  --md-sys-color-primary: #b0c6ff;
+  --md-sys-color-on-primary: #002c6f;
+  --md-sys-color-primary-container: #1a438f;
+  --md-sys-color-on-primary-container: #d9e2ff;
+  --md-sys-color-secondary: #bac7dd;
+  --md-sys-color-on-secondary: #243142;
+  --md-sys-color-secondary-container: #3b485a;
+  --md-sys-color-on-secondary-container: #d6e3fa;
+  --md-sys-color-tertiary: #83d5c5;
+  --md-sys-color-on-tertiary: #003730;
+  --md-sys-color-tertiary-container: #005046;
+  --md-sys-color-on-tertiary-container: #9ff2e1;
+  --md-sys-color-error: #ffb4aa;
+  --md-sys-color-on-error: #690003;
+  --md-sys-color-error-container: #910809;
+  --md-sys-color-on-error-container: #ffdad5;
+  --md-sys-color-surface: #121316;
+  --md-sys-color-on-surface: #e3e2e6;
+  --md-sys-color-surface-variant: #44464f;
+  --md-sys-color-on-surface-variant: #c5c6d0;
+  --md-sys-color-outline: #8f9099;
+  --md-sys-color-outline-variant: #44464f;
+  --md-sys-color-surface-dim: #121316;
+  --md-sys-color-surface-bright: #39393c;
+  --md-sys-color-surface-container-lowest: #0d0e11;
+  --md-sys-color-surface-container-low: #1b1b1f;
+  --md-sys-color-surface-container: #1f1f23;
+  --md-sys-color-surface-container-high: #292a2d;
+  --md-sys-color-surface-container-highest: #343438;
+  --md-sys-color-inverse-surface: #e3e2e6;
+  --md-sys-color-inverse-on-surface: #303034;
+  --md-sys-color-inverse-primary: #375ca9;
+
+  /* Extensões de domínio BRAÇO — docs/design/04-color-system.md §4 */
+  --md-ext-color-success: var(--md-sys-color-tertiary);
+  --md-ext-color-on-success: var(--md-sys-color-on-tertiary);
+  --md-ext-color-success-container: var(--md-sys-color-tertiary-container);
+  --md-ext-color-on-success-container: var(--md-sys-color-on-tertiary-container);
+  --md-ext-color-attention: #ffb873;
+  --md-ext-color-on-attention: #4a2800;
+  --md-ext-color-attention-container: #6a3b00;
+  --md-ext-color-on-attention-container: #ffdcbf;
+  }
+}
+
+:root[data-theme='dark'] {
+  --md-sys-color-primary: #b0c6ff;
+  --md-sys-color-on-primary: #002c6f;
+  --md-sys-color-primary-container: #1a438f;
+  --md-sys-color-on-primary-container: #d9e2ff;
+  --md-sys-color-secondary: #bac7dd;
+  --md-sys-color-on-secondary: #243142;
+  --md-sys-color-secondary-container: #3b485a;
+  --md-sys-color-on-secondary-container: #d6e3fa;
+  --md-sys-color-tertiary: #83d5c5;
+  --md-sys-color-on-tertiary: #003730;
+  --md-sys-color-tertiary-container: #005046;
+  --md-sys-color-on-tertiary-container: #9ff2e1;
+  --md-sys-color-error: #ffb4aa;
+  --md-sys-color-on-error: #690003;
+  --md-sys-color-error-container: #910809;
+  --md-sys-color-on-error-container: #ffdad5;
+  --md-sys-color-surface: #121316;
+  --md-sys-color-on-surface: #e3e2e6;
+  --md-sys-color-surface-variant: #44464f;
+  --md-sys-color-on-surface-variant: #c5c6d0;
+  --md-sys-color-outline: #8f9099;
+  --md-sys-color-outline-variant: #44464f;
+  --md-sys-color-surface-dim: #121316;
+  --md-sys-color-surface-bright: #39393c;
+  --md-sys-color-surface-container-lowest: #0d0e11;
+  --md-sys-color-surface-container-low: #1b1b1f;
+  --md-sys-color-surface-container: #1f1f23;
+  --md-sys-color-surface-container-high: #292a2d;
+  --md-sys-color-surface-container-highest: #343438;
+  --md-sys-color-inverse-surface: #e3e2e6;
+  --md-sys-color-inverse-on-surface: #303034;
+  --md-sys-color-inverse-primary: #375ca9;
+
+  /* Extensões de domínio BRAÇO — docs/design/04-color-system.md §4 */
+  --md-ext-color-success: var(--md-sys-color-tertiary);
+  --md-ext-color-on-success: var(--md-sys-color-on-tertiary);
+  --md-ext-color-success-container: var(--md-sys-color-tertiary-container);
+  --md-ext-color-on-success-container: var(--md-sys-color-on-tertiary-container);
+  --md-ext-color-attention: #ffb873;
+  --md-ext-color-on-attention: #4a2800;
+  --md-ext-color-attention-container: #6a3b00;
+  --md-ext-color-on-attention-container: #ffdcbf;
+}
+
+:root[data-theme='light'] {
+  --md-sys-color-primary: #375ca9;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #d9e2ff;
+  --md-sys-color-on-primary-container: #001945;
+  --md-sys-color-secondary: #525f72;
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #d6e3fa;
+  --md-sys-color-on-secondary-container: #0f1c2c;
+  --md-sys-color-tertiary: #006b5e;
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: #9ff2e1;
+  --md-sys-color-on-tertiary-container: #00201b;
+  --md-sys-color-error: #b4271f;
+  --md-sys-color-on-error: #ffffff;
+  --md-sys-color-error-container: #ffdad5;
+  --md-sys-color-on-error-container: #410001;
+  --md-sys-color-surface: #fbf8fd;
+  --md-sys-color-on-surface: #1b1b1f;
+  --md-sys-color-surface-variant: #e1e2ec;
+  --md-sys-color-on-surface-variant: #44464f;
+  --md-sys-color-outline: #757780;
+  --md-sys-color-outline-variant: #c5c6d0;
+  --md-sys-color-surface-dim: #dbd9dd;
+  --md-sys-color-surface-bright: #fbf8fd;
+  --md-sys-color-surface-container-lowest: #ffffff;
+  --md-sys-color-surface-container-low: #f5f3f7;
+  --md-sys-color-surface-container: #efedf1;
+  --md-sys-color-surface-container-high: #e9e7ec;
+  --md-sys-color-surface-container-highest: #e3e2e6;
+  --md-sys-color-inverse-surface: #303034;
+  --md-sys-color-inverse-on-surface: #f2f0f4;
+  --md-sys-color-inverse-primary: #b0c6ff;
+
+  /* Extensões de domínio BRAÇO — docs/design/04-color-system.md §4 */
+  --md-ext-color-success: var(--md-sys-color-tertiary);
+  --md-ext-color-on-success: var(--md-sys-color-on-tertiary);
+  --md-ext-color-success-container: var(--md-sys-color-tertiary-container);
+  --md-ext-color-on-success-container: var(--md-sys-color-on-tertiary-container);
+  --md-ext-color-attention: #8c5000;
+  --md-ext-color-on-attention: #ffffff;
+  --md-ext-color-attention-container: #ffdcbf;
+  --md-ext-color-on-attention-container: #2d1600;
+}

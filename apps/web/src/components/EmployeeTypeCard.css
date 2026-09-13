@@ -1,0 +1,99 @@
+.braco-employee-type-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--braco-space-3);
+  height: 100%;
+}
+
+.braco-employee-type-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--braco-space-3);
+}
+
+.braco-employee-type-card__header > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.braco-employee-type-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.braco-employee-type-card__name {
+  margin: 0;
+  font-size: var(--md-sys-typescale-title-medium-size);
+  font-weight: var(--md-sys-typescale-title-medium-weight);
+  line-height: var(--md-sys-typescale-title-medium-line-height);
+}
+
+.braco-employee-type-card__role {
+  margin: 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-body-medium-size);
+}
+
+.braco-employee-type-card__mission {
+  margin: 0;
+  font-size: var(--md-sys-typescale-body-medium-size);
+}
+
+.braco-employee-type-card__result {
+  background: var(--md-sys-color-surface-container);
+  border-radius: var(--md-sys-shape-corner-small);
+  padding: var(--braco-space-2) var(--braco-space-3);
+}
+
+.braco-employee-type-card__result-label {
+  display: block;
+  font-size: var(--md-sys-typescale-label-medium-size);
+  font-weight: 700;
+  color: var(--md-sys-color-on-surface-variant);
+  margin-bottom: 2px;
+}
+
+.braco-employee-type-card__result p {
+  margin: 0;
+  font-size: var(--md-sys-typescale-body-medium-size);
+}
+
+.braco-employee-type-card__responsibilities {
+  margin: 0;
+  padding-left: 1.1em;
+  font-size: var(--md-sys-typescale-body-medium-size);
+  color: var(--md-sys-color-on-surface-variant);
+  flex: 1;
+}
+
+.braco-employee-type-card__responsibilities li {
+  margin-bottom: 2px;
+}
+
+.braco-employee-type-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--braco-space-2);
+  margin-top: auto;
+}
+
+@media (max-width: 480px) {
+  .braco-employee-type-card__actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+  .braco-employee-type-card__actions a,
+  .braco-employee-type-card__actions button {
+    width: 100%;
+  }
+}

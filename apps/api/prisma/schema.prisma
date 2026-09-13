@@ -1,0 +1,175 @@
+// BRAÇO — App Service schema (Sprint 01 slice)
+// Ver docs/technical/03-data-model.md para o modelo conceitual completo.
+// Este schema implementa só o subconjunto necessário para US01-US06, US53, US54.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+/// Papel do usuário dentro de uma empresa (RBAC) — docs/technical/04-multi-tenancy.md §3
+enum Role {
+  OWNER
+  ADMIN
+  OPERATOR
+  VIEWER
+}
+
+/// Catalog Availability — separado de EmployeeStatus.
+/// docs/design/09-product-patterns.md §1.1, docs/design/18-catalog-availability-ui-spec.md
+enum CatalogAvailability {
+  AVAILABLE
+  COMING_SOON
+}
+
+/// Employee Status — docs/design/09-product-patterns.md §2, docs/design/12-status-and-states.md
+enum EmployeeStatus {
+  CONTRATADO
+  PREPARANDO
+  PRONTO
+  TRABALHANDO
+  PAUSADO
+  PRECISA_DE_ATENCAO
+  DESATIVADO
+}
+
+// ---------------------------------------------------------------------------
+// Tenant root
+// ---------------------------------------------------------------------------
+
+model Company {
+  id        String   @id @default(uuid())
+  name      String
+  document  String?
+  vertical  String?
+  timezone  String   @default("America/Sao_Paulo")
+  status    String   @default("active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  memberships      CompanyMembership[]
+  digitalEmployees DigitalEmployee[]
+  idempotencyKeys  IdempotencyKey[]
+
+  @@map("companies")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  name         String
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  memberships CompanyMembership[]
+
+  @@map("users")
+}
+
+/// Liga User a Company com um papel — um User pode pertencer a mais de uma
+/// empresa (docs/technical/03-data-model.md, seção "User / CompanyMembership").
+model CompanyMembership {
+  id        String   @id @default(uuid())
+  companyId String   @map("company_id")
+  userId    String   @map("user_id")
+  role      Role
+  createdAt DateTime @default(now()) @map("created_at")
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, userId])
+  @@index([userId])
+  @@map("company_memberships")
+}
+
+// ---------------------------------------------------------------------------
+// Catálogo (global, não pertence a nenhuma empresa)
+// ---------------------------------------------------------------------------
+
+/// Catálogo de produto — docs/04-employee-catalog.md. Global, seed-only no
+/// MVP (não editável por gestor).
+model EmployeeType {
+  id               String              @id @default(uuid())
+  key              String              @unique
+  name             String
+  role             String
+  mission          String
+  expectedResult   String              @map("expected_result")
+  responsibilities String[]
+  availability     CatalogAvailability @default(COMING_SOON)
+  sortOrder        Int                 @default(0) @map("sort_order")
+
+  digitalEmployees DigitalEmployee[]
+
+  @@map("employee_types")
+}
+
+// ---------------------------------------------------------------------------
+// Funcionário Digital (tenant-scoped)
+// ---------------------------------------------------------------------------
+
+model DigitalEmployee {
+  id             String         @id @default(uuid())
+  companyId      String         @map("company_id")
+  employeeTypeId String         @map("employee_type_id")
+  name           String?
+  status         EmployeeStatus @default(CONTRATADO)
+  hiredAt        DateTime       @default(now()) @map("hired_at")
+  activatedAt    DateTime?      @map("activated_at")
+
+  company      Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employeeType EmployeeType @relation(fields: [employeeTypeId], references: [id])
+  workManual   WorkManual?
+
+  @@index([companyId])
+  @@map("digital_employees")
+}
+
+/// Manual de Trabalho — nesta fase (US06) só a estrutura de seções e seu
+/// estado inicial/incompleto. Preenchimento de conteúdo é US07-US15
+/// (Sprint 02) e não é modelado aqui ainda.
+model WorkManual {
+  id                String   @id @default(uuid())
+  companyId         String   @map("company_id")
+  digitalEmployeeId String   @unique @map("digital_employee_id")
+  status            String   @default("not_started")
+  sections          Json
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  digitalEmployee DigitalEmployee @relation(fields: [digitalEmployeeId], references: [id], onDelete: Cascade)
+
+  // company_id é denormalizado aqui (não é FK Prisma para Company porque a
+  // relação de negócio é via DigitalEmployee) propositalmente: sustenta a
+  // política de RLS sem exigir JOIN — docs/technical/03-data-model.md §4
+  // ("toda tabela de tenant tem company_id NOT NULL").
+  @@index([companyId])
+  @@map("work_manuals")
+}
+
+// ---------------------------------------------------------------------------
+// Idempotência (US03 — evitar contratação duplicada)
+// ---------------------------------------------------------------------------
+
+model IdempotencyKey {
+  id           String   @id @default(uuid())
+  companyId    String   @map("company_id")
+  key          String
+  requestHash  String   @map("request_hash")
+  responseBody Json     @map("response_body")
+  statusCode   Int      @map("status_code")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, key])
+  @@map("idempotency_keys")
+}

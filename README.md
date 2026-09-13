@@ -80,3 +80,14 @@ Documentação de Design:
 Gate para histórias com interface:
 
 > **Product Ready + Design Ready + Tech Ready**
+
+## Desenvolvimento (Sprint 01)
+
+Implementação em código das histórias US01–US06, US53 e US54, conforme
+`docs/technical/14-sprint-01-tech-readiness.md`.
+
+- `apps/api` — backend (NestJS + Prisma + PostgreSQL).
+- `apps/web` — frontend (React + Vite + tema M3 gerado das seeds de cor).
+
+Instruções completas de setup, seed e testes:
+`docs/technical/18-running-the-app.md`.

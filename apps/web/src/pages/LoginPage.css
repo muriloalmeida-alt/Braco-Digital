@@ -1,0 +1,63 @@
+.braco-login-page {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--braco-space-5);
+  background: var(--md-sys-color-surface-container-lowest);
+}
+
+.braco-login-page__card {
+  width: 100%;
+  max-width: 360px;
+}
+
+.braco-login-page__title {
+  margin: 0;
+  color: var(--md-sys-color-primary);
+  font-size: var(--md-sys-typescale-headline-medium-size);
+}
+
+.braco-login-page__subtitle {
+  margin: 4px 0 var(--braco-space-4);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.braco-login-page__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--braco-space-3);
+}
+
+.braco-login-page__form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: var(--md-sys-typescale-label-large-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.braco-login-page__form input {
+  font: inherit;
+  padding: 10px 12px;
+  border-radius: var(--md-sys-shape-corner-small);
+  border: 1px solid var(--md-sys-color-outline);
+  background: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+}
+
+.braco-login-page__form input:focus-visible {
+  border-color: var(--md-sys-color-primary);
+}
+
+.braco-login-page__error {
+  color: var(--md-sys-color-error);
+  font-size: var(--md-sys-typescale-body-medium-size);
+  margin: 0;
+}
+
+.braco-login-page__hint {
+  margin-top: var(--braco-space-4);
+  font-size: var(--md-sys-typescale-label-medium-size);
+  color: var(--md-sys-color-on-surface-variant);
+}

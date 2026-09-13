@@ -1,0 +1,58 @@
+.braco-app-shell__topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--braco-space-5);
+  padding: var(--braco-space-3) var(--braco-space-5);
+  background: var(--md-sys-color-surface-container);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  flex-wrap: wrap;
+}
+
+.braco-app-shell__logo {
+  font-size: var(--md-sys-typescale-title-large-size);
+  font-weight: 700;
+  color: var(--md-sys-color-primary);
+  letter-spacing: 0.04em;
+}
+
+.braco-app-shell__nav {
+  display: flex;
+  gap: var(--braco-space-4);
+  flex: 1;
+}
+
+.braco-app-shell__nav a {
+  text-decoration: none;
+  color: var(--md-sys-color-on-surface-variant);
+  font-weight: 500;
+  padding: var(--braco-space-2) 0;
+  border-bottom: 2px solid transparent;
+}
+
+.braco-app-shell__nav a.is-active {
+  color: var(--md-sys-color-primary);
+  border-bottom-color: var(--md-sys-color-primary);
+}
+
+.braco-app-shell__user {
+  display: flex;
+  align-items: center;
+  gap: var(--braco-space-2);
+  font-size: var(--md-sys-typescale-body-medium-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.braco-app-shell__content {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: var(--braco-space-5);
+}
+
+@media (max-width: 600px) {
+  .braco-app-shell__topbar {
+    padding: var(--braco-space-3);
+  }
+  .braco-app-shell__content {
+    padding: var(--braco-space-3);
+  }
+}
