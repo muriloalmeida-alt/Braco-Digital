@@ -19,7 +19,11 @@
 }
 
 .braco-login-page__brand-logo {
-  height: 96px;
+  /* Login é "o momento mais institucional do app" (ver comentário em
+   * LoginPage.tsx) — logo com mais destaque que o padrão de navegação,
+   * dentro do permitido por docs/design/21-logo-usage.md §9 (manter
+   * reconhecível, preservar proporção). */
+  height: 160px;
   width: auto;
 }
 
@@ -43,7 +47,7 @@
 }
 
 .braco-login-page__compact-logo {
-  height: 56px;
+  height: 88px;
   width: auto;
 }
 
