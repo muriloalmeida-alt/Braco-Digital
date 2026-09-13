@@ -14,8 +14,15 @@ Um único serviço apontando para a raiz do monorepo não funciona: o
 Railpack não consegue decidir sozinho qual dos dois buildar, e o erro
 típico é a etapa `railpack prepare` falhar sem detalhe útil no log.
 
-Cada diretório já tem seu próprio `railway.json` (build `RAILPACK` + start
-command explícito), para não depender de detecção automática.
+Cada diretório já tem seu próprio `railway.json` com `buildCommand`
+(`npm run build`) e `startCommand` **explícitos** — em monorepo com
+workspaces npm (`apps/api` e `apps/web` não têm `package-lock.json`
+próprio, só o da raiz), deixar o Railpack detectar o build sozinho pode
+resultar em deploy "bem-sucedido" que na verdade nunca rodou `nest
+build`/`vite build`, e a API crasha na subida com
+`Error: Cannot find module '/app/dist/main.js'` (o `dist/` nunca foi
+gerado). Sempre que mexer nesses `railway.json`, mantenha os dois campos
+(`build.buildCommand` e `deploy.startCommand`) explícitos.
 
 ## 1. Criar o projeto e o banco
 
@@ -115,6 +122,7 @@ nunca como parte automática do deploy.
 | Sintoma | Causa provável |
 |---|---|
 | `railpack prepare` falha sem detalhe | Root Directory não configurado (serviço apontando pra raiz do monorepo) |
+| `Error: Cannot find module '/app/dist/main.js'` na subida | Build não gerou `dist/` (comum em monorepo sem `buildCommand` explícito no `railway.json`) — confirme `build.buildCommand: "npm run build"` no `railway.json` do serviço e olhe a aba **Build Logs** (não a de runtime) pra ver se `nest build`/`vite build` de fato rodou |
 | Erro de CORS no console do navegador | `CORS_ORIGIN` na API não bate **exatamente** com a URL do web (protocolo `https://` incluso, sem barra final) |
 | Frontend chama `localhost:3001` em produção | `VITE_API_BASE_URL` não foi definida antes do build, ou mudou sem novo deploy (é lida em build-time) |
 | API não sobe / erro de conexão com banco | `DATABASE_URL` não está referenciando o plugin Postgres corretamente |
