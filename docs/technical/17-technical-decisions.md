@@ -496,3 +496,64 @@ REAL`; não reaproveita `confirmConnection`.
 **Impacto futuro:** qualquer integração real futura (BSP/Google) precisa
 gravar `connectionMode: REAL` explicitamente para contar em produção —
 isso já está documentado no código como o contrato esperado.
+
+---
+
+## TD20 — Bootstrap da role pública fora das migrações do Prisma; escrita do Lead sem `RETURNING`
+
+**Contexto:** implementação de TD15 (role `braco_public`, Sprint 02
+Track A). Dois problemas concretos surgiram só na implementação, não
+previstos na análise de tech readiness:
+
+1. `CREATE ROLE`/`GRANT <role> TO <role>` exigem o atributo `CREATEROLE`
+   (ou superusuário). A role usada para rodar `prisma migrate deploy`
+   (`braco` em dev; o usuário de app do Postgres gerenciado em
+   staging/produção) não tem esse atributo — e não deveria precisar ter,
+   por menor privilégio. Confirmado no ambiente de dev: `prisma migrate
+   dev` falhou com `permission denied to create role`.
+2. `tx.lead.create()` do Prisma sempre gera `INSERT ... RETURNING`, e o
+   Postgres exige privilégio equivalente a `SELECT` sobre as colunas
+   retornadas para aceitar `RETURNING` — mesmo dentro do próprio INSERT.
+   Conceder esse `SELECT` a `braco_public` (mesmo com uma policy de RLS
+   sem `USING` para SELECT, que corretamente bloqueia um `SELECT`
+   avulso) ainda quebra a garantia pretendida: a primeira tentativa,
+   com `SELECT` concedido, mudou o erro de "permission denied" para
+   "new row violates row-level security policy" no próprio `RETURNING`
+   — ou seja, ou se abre uma política de leitura (larga demais) ou o
+   `RETURNING` simplesmente não funciona.
+
+**Decisão:**
+1. `CREATE ROLE braco_public` + `GRANT braco_public TO <role de app>`
+   viram um script separado, **fora** de `prisma/migrations/`
+   (`prisma/bootstrap/public-role.sql`), documentado para rodar uma
+   única vez por ambiente, à mão, por um superusuário/admin do Postgres,
+   **antes** do primeiro `prisma migrate deploy` que referencia a role.
+   A migração normal (`sprint02_track_b_public_leads`) só concede
+   privilégios sobre objetos que `braco` já possui — isso o dono de uma
+   tabela sempre pode fazer, sem `CREATEROLE`.
+2. `LeadsService.create` **não** usa `tx.lead.create()`. Gera `id`
+   (`crypto.randomUUID()`) e `createdAt` (`new Date()`) na aplicação
+   antes do INSERT, e grava a linha via `tx.$executeRaw` com um `INSERT`
+   simples parametrizado, sem `RETURNING`. `braco_public` mantém
+   exatamente os dois privilégios pretendidos por TD15 — `SELECT` em
+   `employee_types`, `INSERT` em `leads` — nada além disso, comprovado
+   pelo teste e2e negativo (`test/public-growth.e2e-spec.ts`, describe
+   "Isolamento — role pública do banco").
+**Justificativa:** manter o princípio de menor privilégio real (não só
+"privilégio mínimo exceto quando o ORM pede mais") — abrir `SELECT`
+para acomodar `RETURNING` reintroduziria exatamente o vetor que TD15
+existe para fechar.
+**Trade-offs:** `LeadsService` não pode usar a API idiomática do Prisma
+Client para este único INSERT; a resposta ao cliente depende de valores
+gerados na aplicação em vez de lidos de volta do banco (aceitável aqui:
+`id`/`createdAt` não têm nenhuma lógica gerada só no servidor de banco).
+Qualquer novo endpoint público de escrita futuro deve repetir o mesmo
+padrão (gerar `id`/timestamps na aplicação, `INSERT` sem `RETURNING`)
+enquanto a role pública não tiver `SELECT` em sua própria tabela de
+escrita.
+**Reversibilidade:** alta — se um dia for aceitável dar `SELECT` restrito
+a `braco_public` (ex.: via uma view ou policy mais elaborada), a troca
+para `tx.lead.create()` é local a `LeadsService`.
+**Impacto futuro:** documentar isso explicitamente evita que uma
+refatoração futura "simplifique" para `tx.lead.create()` sem perceber
+que isso reabriria a superfície de leitura pública.

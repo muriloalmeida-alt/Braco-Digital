@@ -1,0 +1,320 @@
+/* BRAÇO — Growth (Landing + Monte sua equipe). Mais emocional que o app
+ * gerencial, mas subordinado a M3/Brand UI Foundation
+ * (docs/design/26-growth-landing-experience.md §2). */
+
+.braco-growth-section {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: var(--braco-space-6) var(--braco-space-5);
+}
+
+@media (max-width: 767px) {
+  .braco-growth-section {
+    padding: var(--braco-space-5) var(--braco-space-4);
+  }
+}
+
+.braco-growth-hero {
+  text-align: left;
+  display: grid;
+  gap: var(--braco-space-4);
+}
+
+.braco-growth-hero__eyebrow {
+  color: var(--md-sys-color-primary);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: var(--md-sys-typescale-label-large-size);
+}
+
+.braco-growth-hero__headline {
+  margin: 0;
+  font-family: var(--md-ref-typeface);
+  font-weight: 800;
+  font-size: clamp(1.75rem, 4vw + 1rem, 3rem);
+  line-height: 1.15;
+  color: var(--md-sys-color-on-surface);
+  max-width: 18ch;
+}
+
+.braco-growth-hero__support {
+  font-size: var(--md-sys-typescale-body-large-size);
+  color: var(--md-sys-color-on-surface-variant);
+  max-width: 52ch;
+}
+
+.braco-growth-hero__ctas {
+  display: flex;
+  gap: var(--braco-space-3);
+  flex-wrap: wrap;
+}
+
+@media (min-width: 1024px) {
+  .braco-growth-hero {
+    grid-template-columns: 1.1fr 0.9fr;
+    align-items: center;
+    text-align: left;
+  }
+}
+
+.braco-growth-heading {
+  margin: 0 0 var(--braco-space-2);
+  font-size: var(--md-sys-typescale-headline-medium-size);
+  font-weight: var(--md-sys-typescale-headline-medium-weight);
+  line-height: var(--md-sys-typescale-headline-medium-line-height);
+  text-align: center;
+}
+
+.braco-growth-support {
+  text-align: center;
+  color: var(--md-sys-color-on-surface-variant);
+  max-width: 60ch;
+  margin: 0 auto var(--braco-space-5);
+}
+
+.braco-growth-steps {
+  display: grid;
+  gap: var(--braco-space-4);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .braco-growth-steps {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.braco-growth-step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--braco-space-2);
+  text-align: center;
+  padding: var(--braco-space-4);
+}
+
+.braco-growth-step__number {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--braco-weight-numeric);
+  margin: 0 auto;
+}
+
+.braco-growth-portfolio {
+  display: grid;
+  gap: var(--braco-space-4);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .braco-growth-portfolio {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .braco-growth-portfolio {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.braco-growth-portfolio-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--braco-space-2);
+}
+
+.braco-growth-portfolio-card h3 {
+  margin: 0;
+}
+
+.braco-growth-portfolio-card p {
+  margin: 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-body-medium-size);
+}
+
+.braco-growth-diagnostic-teaser {
+  background: var(--braco-color-surface-secondary);
+  color: var(--braco-color-on-surface-secondary);
+  border-radius: var(--md-sys-shape-corner-large);
+  padding: var(--braco-space-6);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--braco-space-3);
+  align-items: center;
+}
+
+.braco-growth-faq {
+  display: flex;
+  flex-direction: column;
+  gap: var(--braco-space-4);
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.braco-growth-faq-item h3 {
+  margin: 0 0 4px;
+  font-size: var(--md-sys-typescale-title-medium-size);
+}
+
+.braco-growth-faq-item p {
+  margin: 0;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.braco-growth-cta-final {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--braco-space-4);
+  align-items: center;
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  border-radius: var(--md-sys-shape-corner-large);
+  padding: var(--braco-space-6);
+}
+
+.braco-growth-cta-final h2 {
+  margin: 0;
+  max-width: 24ch;
+}
+
+/* --- Diagnóstico / Wizard --------------------------------------------- */
+
+.braco-diagnostic {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--braco-space-6) var(--braco-space-5);
+}
+
+@media (max-width: 767px) {
+  .braco-diagnostic {
+    padding: var(--braco-space-5) var(--braco-space-4);
+  }
+}
+
+.braco-diagnostic__progress-label {
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-label-large-size);
+  margin: 0 0 var(--braco-space-2);
+}
+
+.braco-diagnostic__progress-bar {
+  height: 4px;
+  background: var(--md-sys-color-surface-container);
+  border-radius: var(--md-sys-shape-corner-full);
+  overflow: hidden;
+  margin-bottom: var(--braco-space-5);
+}
+
+.braco-diagnostic__progress-fill {
+  height: 100%;
+  background: var(--md-sys-color-primary);
+  transition: width 0.3s ease;
+}
+
+.braco-diagnostic__title {
+  margin: 0 0 var(--braco-space-4);
+  font-size: var(--md-sys-typescale-headline-medium-size);
+  font-weight: var(--md-sys-typescale-headline-medium-weight);
+  line-height: var(--md-sys-typescale-headline-medium-line-height);
+}
+
+.braco-diagnostic__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: var(--braco-space-4);
+}
+
+.braco-diagnostic__field label {
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.braco-diagnostic__field select,
+.braco-diagnostic__field input[type='text'] {
+  font: inherit;
+  padding: 12px;
+  border-radius: var(--md-sys-shape-corner-small);
+  border: 1px solid var(--md-sys-color-outline);
+  background: var(--md-sys-color-surface-container-lowest);
+  color: var(--md-sys-color-on-surface);
+}
+
+.braco-diagnostic__options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--braco-space-2);
+}
+
+.braco-diagnostic__option {
+  display: flex;
+  align-items: center;
+  gap: var(--braco-space-3);
+  padding: var(--braco-space-3);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-small);
+  cursor: pointer;
+  font-size: var(--md-sys-typescale-body-large-size);
+}
+
+.braco-diagnostic__option:has(input:checked) {
+  border-color: var(--md-sys-color-primary);
+  background: var(--md-sys-color-primary-container);
+}
+
+.braco-diagnostic__field-error {
+  color: var(--md-sys-color-error);
+  font-size: var(--md-sys-typescale-label-medium-size);
+  margin: 0;
+}
+
+.braco-diagnostic__actions {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--braco-space-3);
+  margin-top: var(--braco-space-5);
+}
+
+.braco-diagnostic__result-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--braco-space-2);
+  margin-bottom: var(--braco-space-4);
+}
+
+.braco-diagnostic__result-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--braco-space-2);
+  flex-wrap: wrap;
+}
+
+.braco-diagnostic__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-ext-color-success-container);
+  color: var(--md-ext-color-on-success-container);
+  font-size: var(--md-sys-typescale-label-medium-size);
+  font-weight: var(--md-sys-typescale-label-medium-weight);
+}
+
+.braco-diagnostic__begin-note {
+  text-align: center;
+  color: var(--md-sys-color-on-surface-variant);
+  margin: var(--braco-space-4) 0;
+}

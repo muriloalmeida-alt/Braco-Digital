@@ -444,3 +444,57 @@ model IdempotencyKey {
   @@unique([companyId, key])
   @@map("idempotency_keys")
 }
+
+// ---------------------------------------------------------------------------
+// Track B — Growth / Monte sua equipe (público, sem tenant)
+// docs/technical/20-sprint-02-tech-readiness.md §5, §16, TD15.
+// ---------------------------------------------------------------------------
+
+/// Faixas de tamanho de equipe informadas no diagnóstico público.
+/// docs/prd/04-aquisicao-e-diagnostico-de-equipe.md §8.
+enum TeamSizeRange {
+  SO_EU
+  DE_2_A_5
+  DE_6_A_20
+  DE_21_A_50
+  MAIS_DE_50
+}
+
+/// Faixas de volume aproximado informadas no diagnóstico público.
+/// docs/prd/04-aquisicao-e-diagnostico-de-equipe.md §11.
+enum DiagnosticVolumeRange {
+  ATE_10
+  DE_11_A_30
+  DE_31_A_100
+  MAIS_DE_100
+  NAO_SEI_DIZER
+}
+
+/// US83 — Lead capturado no fim do diagnóstico público "Monte sua equipe".
+/// Não tem `company_id`: não pertence a nenhum tenant (não cria Company,
+/// User nem contratação — PRD 04 §19). Isolamento de acesso é feito por
+/// role de banco dedicada (TD15), não por RLS por empresa.
+model Lead {
+  id            String                @id @default(uuid())
+  name          String
+  companyName   String                @map("company_name")
+  whatsapp      String
+  email         String?
+  segment       String
+  teamSize      TeamSizeRange         @map("team_size")
+  needs         String[]
+  priority      String
+  volume        DiagnosticVolumeRange
+  ranking       Json
+  ruleVersion   String                @map("rule_version")
+  // Enquanto o Launch Gate de privacidade (PD6) não estiver validado
+  // juridicamente, todo lead capturado fora de produção real é marcado
+  // sintético — nunca um mock disfarçado de captação real (ver
+  // PublicLeadCaptureGuard e docs/technical/17-technical-decisions.md
+  // TD19).
+  isSynthetic   Boolean               @default(true) @map("is_synthetic")
+  source        String
+  createdAt     DateTime              @default(now()) @map("created_at")
+
+  @@map("leads")
+}
