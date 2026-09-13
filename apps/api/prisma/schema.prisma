@@ -161,6 +161,11 @@ model Company {
   products         ProductService[]
   integrations     Integration[]
 
+  zernioConnection         ZernioConnection?
+  zernioOnboardingAttempts ZernioOnboardingAttempt[]
+  zernioWebhookEvents      ZernioWebhookEvent[]
+  zernioMessages           ZernioMessage[]
+
   @@map("companies")
 }
 
@@ -171,8 +176,9 @@ model User {
   name         String
   createdAt    DateTime @default(now()) @map("created_at")
 
-  memberships    CompanyMembership[]
-  responsibleFor EmployeeResponsible[]
+  memberships              CompanyMembership[]
+  responsibleFor           EmployeeResponsible[]
+  zernioOnboardingAttempts ZernioOnboardingAttempt[]
 
   @@map("users")
 }
@@ -399,25 +405,25 @@ model EmployeeCommunicationStyle {
 /// sempre derivada em runtime das responsabilidades habilitadas, nunca
 /// uma coluna própria (evita dessincronia).
 model Integration {
-  id                   String            @id @default(uuid())
-  companyId            String            @map("company_id")
+  id                   String                    @id @default(uuid())
+  companyId            String                    @map("company_id")
   type                 IntegrationType
-  status               IntegrationStatus @default(NOT_CONFIGURED)
-  externalAccountRef   String?           @map("external_account_ref")
+  status               IntegrationStatus         @default(NOT_CONFIGURED)
+  externalAccountRef   String?                   @map("external_account_ref")
   // Placeholder até KMS/secrets manager existir no ambiente
   // (docs/technical/20-sprint-02-tech-readiness.md §24.2) — nunca
   // credencial real em texto plano; nesta sprint não há OAuth real
   // conectado, então o campo fica vazio em uso normal.
-  credentialsEncrypted String?           @map("credentials_encrypted")
+  credentialsEncrypted String?                   @map("credentials_encrypted")
   // Product Review 01: nunca inferir "verificado" a partir de status
   // sozinho — SIMULATED é o único valor que o código de hoje sabe
   // produzir (não há OAuth real implementado ainda); REAL fica
   // reservado para quando o callback real existir. A autoridade de
   // completude (PreparationReadinessService) exige REAL em produção.
   connectionMode       IntegrationConnectionMode @default(SIMULATED) @map("connection_mode")
-  connectedAt          DateTime?         @map("connected_at")
-  lastSyncAt           DateTime?         @map("last_sync_at")
-  updatedAt            DateTime          @updatedAt @map("updated_at")
+  connectedAt          DateTime?                 @map("connected_at")
+  lastSyncAt           DateTime?                 @map("last_sync_at")
+  updatedAt            DateTime                  @updatedAt @map("updated_at")
 
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
@@ -443,6 +449,170 @@ model IdempotencyKey {
 
   @@unique([companyId, key])
   @@map("idempotency_keys")
+}
+
+// ---------------------------------------------------------------------------
+// Integração real de WhatsApp via Zernio (issue #30, US14)
+// docs/technical/21-zernio-whatsapp-integration.md
+//
+// `Integration` (acima, tipo WHATSAPP) continua sendo o que
+// `ResourcesService`/`PreparationReadinessService` leem (status/
+// connectionMode/externalAccountRef/connectedAt) — TD19 e o guard de
+// produção não mudam nem sabem que "Zernio" existe. As tabelas abaixo
+// guardam o detalhe específico do provedor; `ZernioConnectionService`
+// mantém a linha genérica em `integrations` em sincronia com elas.
+// ---------------------------------------------------------------------------
+
+/// Estado detalhado da conexão — mais granular que `IntegrationStatus`
+/// (compartilhado entre WHATSAPP/GOOGLE_CALENDAR/GOOGLE_TASKS) porque só
+/// o Zernio hoje tem um provedor real por trás para reportar isso.
+enum ZernioConnectionStatus {
+  NOT_CONNECTED
+  CONNECTING
+  CONNECTED
+  DEGRADED
+  DISCONNECTED
+  FAILED
+}
+
+/// Uma por empresa — "usar um profileId Zernio por empresa/tenant"
+/// (decisão de arquitetura da issue #30). `accountId`/`profileId` únicos
+/// globalmente: impede que o mesmo profile/número Zernio seja associado a
+/// duas empresas por engano (IDOR entre tenants).
+model ZernioConnection {
+  id        String @id @default(uuid())
+  companyId String @unique @map("company_id")
+
+  profileId String? @unique @map("profile_id")
+  accountId String? @unique @map("account_id")
+
+  phoneNumber String? @map("phone_number")
+  displayName String? @map("display_name")
+
+  status                 ZernioConnectionStatus @default(NOT_CONNECTED)
+  // Espelho textual do campo cru retornado pelo Zernio (`phone.status`,
+  // ex.: "CONNECTED") — `status` acima é o que este código decide a
+  // partir dele; `providerStatus` é o dado bruto, para auditoria/debug
+  // sem precisar reinterpretar a decisão.
+  providerStatus         String?                @map("provider_status")
+  qualityRating          String?                @map("quality_rating")
+  nameStatus             String?                @map("name_status")
+  wabaVerificationStatus String?                @map("waba_verification_status")
+
+  lastHealthCheckAt DateTime? @map("last_health_check_at")
+  lastWebhookAt     DateTime? @map("last_webhook_at")
+  connectedAt       DateTime? @map("connected_at")
+  disconnectedAt    DateTime? @map("disconnected_at")
+  failureReason     String?   @map("failure_reason")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("zernio_connections")
+}
+
+/// Correlação interna de uso único do onboarding (Embedded Signup),
+/// criada ANTES de redirecionar o usuário ao Zernio e consumida no
+/// callback. "Não confiar somente no state remoto" (issue #30): o `id`
+/// aqui — não o `state` que o Zernio devolve — é a fonte de verdade que o
+/// callback valida (pertence ao tenant certo, não expirou, não foi usada).
+model ZernioOnboardingAttempt {
+  id                String    @id @default(uuid())
+  companyId         String    @map("company_id")
+  initiatedByUserId String    @map("initiated_by_user_id")
+  profileId         String    @map("profile_id")
+  expiresAt         DateTime  @map("expires_at")
+  consumedAt        DateTime? @map("consumed_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  company         Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  initiatedByUser User    @relation(fields: [initiatedByUserId], references: [id])
+
+  @@index([companyId])
+  @@map("zernio_onboarding_attempts")
+}
+
+/// Deduplicação persistente de webhooks (Zernio entrega "at least once").
+/// `eventId` == `X-Zernio-Event-Id` / `payload.id` — único: uma segunda
+/// entrega do mesmo evento colide na inserção, nunca reprocessa efeito.
+model ZernioWebhookEvent {
+  id              String    @id @default(uuid())
+  eventId         String    @unique @map("event_id")
+  eventType       String    @map("event_type")
+  // Resolvido a partir de accountId/profileId do payload — nulo só quando
+  // a resolução de tenant falha (evento órfão, ver zernio-webhook.service.ts).
+  companyId       String?   @map("company_id")
+  payload         Json
+  receivedAt      DateTime  @default(now()) @map("received_at")
+  processedAt     DateTime? @map("processed_at")
+  processingError String?   @map("processing_error")
+
+  company Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+
+  @@index([companyId])
+  @@map("zernio_webhook_events")
+}
+
+enum ZernioMessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum ZernioMessageStatus {
+  RECEIVED
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
+/// Registro mínimo do ciclo de vida de uma mensagem — o bastante para o
+/// loop enviar→status pedido pela issue #30. Não é o domínio de
+/// Conversation/Message/WorkEvent do Runtime (docs/technical/03-data-
+/// model.md) — esse domínio não existe neste código ainda e está fora do
+/// escopo desta integração (nenhuma lógica de IA/Policy Engine aqui).
+model ZernioMessage {
+  id                String                 @id @default(uuid())
+  companyId         String                 @map("company_id")
+  direction         ZernioMessageDirection
+  conversationId    String                 @map("conversation_id")
+  platformMessageId String                 @unique @map("platform_message_id")
+  text              String?
+  status            ZernioMessageStatus
+  // Preferir businessScopedUserId; phoneNumber é fallback (issue #30) —
+  // nunca a chave estável de identidade do contato, só o remetente cru.
+  senderIdentity    String?                @map("sender_identity")
+  standby           Boolean                @default(false)
+  idempotencyKey    String?                @map("idempotency_key")
+  failureReason     String?                @map("failure_reason")
+  sentAt            DateTime?              @map("sent_at")
+  deliveredAt       DateTime?              @map("delivered_at")
+  readAt            DateTime?              @map("read_at")
+  createdAt         DateTime               @default(now()) @map("created_at")
+  updatedAt         DateTime               @updatedAt @map("updated_at")
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, conversationId])
+  @@map("zernio_messages")
+}
+
+/// Marcador de plataforma (não por tenant — assim como `EmployeeType`, sem
+/// RLS de propósito): a assinatura de webhook do Zernio é uma por conta
+/// Zernio inteira, não por empresa cliente do BRAÇO. Linha única
+/// (`id = "default"`) usada por `ensureWebhookRegistered()` para nunca
+/// criar uma segunda assinatura a cada deploy — reaproveita ou atualiza a
+/// existente quando a URL/eventos mudam.
+model ZernioWebhookRegistration {
+  id           String   @id @default("default")
+  url          String
+  eventsHash   String   @map("events_hash")
+  registeredAt DateTime @default(now()) @map("registered_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("zernio_webhook_registrations")
 }
 
 // ---------------------------------------------------------------------------
@@ -475,26 +645,26 @@ enum DiagnosticVolumeRange {
 /// User nem contratação — PRD 04 §19). Isolamento de acesso é feito por
 /// role de banco dedicada (TD15), não por RLS por empresa.
 model Lead {
-  id            String                @id @default(uuid())
-  name          String
-  companyName   String                @map("company_name")
-  whatsapp      String
-  email         String?
-  segment       String
-  teamSize      TeamSizeRange         @map("team_size")
-  needs         String[]
-  priority      String
-  volume        DiagnosticVolumeRange
-  ranking       Json
-  ruleVersion   String                @map("rule_version")
+  id          String                @id @default(uuid())
+  name        String
+  companyName String                @map("company_name")
+  whatsapp    String
+  email       String?
+  segment     String
+  teamSize    TeamSizeRange         @map("team_size")
+  needs       String[]
+  priority    String
+  volume      DiagnosticVolumeRange
+  ranking     Json
+  ruleVersion String                @map("rule_version")
   // Enquanto o Launch Gate de privacidade (PD6) não estiver validado
   // juridicamente, todo lead capturado fora de produção real é marcado
   // sintético — nunca um mock disfarçado de captação real (ver
   // PublicLeadCaptureGuard e docs/technical/17-technical-decisions.md
   // TD19).
-  isSynthetic   Boolean               @default(true) @map("is_synthetic")
-  source        String
-  createdAt     DateTime              @default(now()) @map("created_at")
+  isSynthetic Boolean               @default(true) @map("is_synthetic")
+  source      String
+  createdAt   DateTime              @default(now()) @map("created_at")
 
   @@map("leads")
 }

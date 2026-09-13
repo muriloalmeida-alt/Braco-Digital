@@ -632,3 +632,79 @@ pública/`RETURNING`) foi renumerada para TD20; esta entrada, que tinha
 nascido como a segunda TD20 desta branch, virou **TD21** — nenhuma das
 três teve seu conteúdo alterado, só o número desta e da de bootstrap de
 role.
+
+---
+
+## TD22 — WhatsApp real via Zernio: módulo dedicado que só escreve na mesma `Integration` que TD19 já protege
+
+**Contexto:** issue #30. O PO forneceu o contrato de API do Zernio
+diretamente (rede deste ambiente não alcança `docs.zernio.com`) pedindo
+a conexão real de WhatsApp por empresa via Meta Cloud API (nunca
+WhatsApp Web/scraping). `05-whatsapp.md`/`01-architecture.md` descrevem
+um `Integration Hub`/`MessagingAdapter`/`Runtime Service` que não
+existe em código — a base real é o monólito NestJS simples já
+implementado, com `Integration`/`ResourcesService`/
+`PreparationReadinessService` do Track A (TD19) como única autoridade
+de completude hoje.
+**Opções:** (a) construir o `Integration Hub`/Runtime completo primeiro,
+como pré-requisito; (b) encaixar o Zernio dentro de
+`ResourcesService`/`confirmConnection`, reaproveitando o fluxo
+simulado existente; (c) um módulo novo e isolado
+(`integrations/zernio/`) com suas próprias tabelas, que só sincroniza a
+mesma linha `Integration` (`type: WHATSAPP`) que TD19 já lê, sempre com
+`connectionMode: REAL`.
+**Decisão:** (c).
+**Justificativa:** (a) inverteria a ordem pedida pela issue (entregar a
+conexão real agora) para construir infraestrutura especulativa sem
+necessidade comprovada — mesmo raciocínio de TD2/TD9 (não adiantar
+infra que o volume atual não exige). (b) misturaria o caminho
+`SIMULATED` (que TD19 explicitamente proíbe de contar como pronto em
+produção) com o caminho `REAL` na mesma classe, arriscando o guard de
+produção de TD19 por acidente de refatoração futura. (c) é exatamente o
+"caminho novo (endpoint/callback próprio) que grava `connectionMode:
+REAL`" que a seção "Reversibilidade" de TD19 já previa como o contrato
+esperado — nenhuma mudança em `ResourcesService`/
+`PreparationReadinessService` foi necessária.
+**Mecanismo:** ver `docs/technical/21-zernio-whatsapp-integration.md`
+para o detalhamento completo (modelo de dados, RLS, fluxos de
+onboarding/callback/status/webhook/envio, variáveis de ambiente,
+limitações conhecidas). Resumo dos pontos com maior superfície de
+decisão:
+- Confirmação real do provedor é obrigatória antes de `CONNECTED` — o
+  callback do OAuth sozinho nunca marca a conexão como pronta, só uma
+  consulta a `GET /whatsapp/number-info` faz isso (mesmo espírito do
+  guard de TD19: a verdade vem de uma revalidação, não de um evento
+  isolado).
+- Duas extensões do padrão de RLS "lookup antes de conhecer o tenant"
+  já usado em `company_memberships_self_lookup`: resolver `companyId`
+  a partir de `accountId` (webhook) ou de `correlationId` (callback)
+  via variáveis de sessão dedicadas, mais um `OR company_id IS NULL`
+  explícito para o evento de webhook órfão (accountId desconhecido) —
+  sem esse `OR`, o `WITH CHECK` implícito do Postgres rejeitaria a
+  gravação de uma linha com `company_id NULL`.
+- Idempotência reaproveita o modelo genérico `IdempotencyKey` (mesmo
+  contrato já usado em US03/`digital-employees.service.ts`) em vez de
+  um mecanismo paralelo só para Zernio.
+- Processamento do webhook é síncrono, dentro da própria requisição
+  HTTP — não há fila/Redis neste código; o contrato de dedup por
+  `eventId` já é o que uma fila exigiria, então mover para assíncrono
+  no futuro é uma troca local.
+- Métricas são contadores in-process (`ZernioMetrics`), não um backend
+  real de observabilidade (`11-observability.md` continua descrevendo
+  a visão futura) — nomeados já na convenção que um `prom-client` real
+  usaria.
+**Trade-offs:** mais um módulo/conjunto de tabelas paralelo ao invés de
+reaproveitar `Integration Hub` (que não existe) ou `ResourcesService`
+(que existe, mas é o caminho simulado); aceito porque a alternativa era
+construir infraestrutura especulativa ou arriscar o guard de produção
+de TD19.
+**Reversibilidade:** alta para o módulo em si (isolado, sem
+dependências de outros domínios além de `Integration`/
+`IdempotencyKey`); média para o webhook síncrono (migrar para fila é
+local ao `ZernioWebhookService`, mas exige infraestrutura nova).
+**Impacto futuro:** qualquer consumidor futuro de `ZernioMessage`
+(resposta automática via Runtime/IA) precisa respeitar
+`standby === true` (Meta Business Agent no controle da conversa) antes
+de responder — a regra já está documentada e teste-coberta
+(`shouldAutoRespond()`), mas nenhum consumidor existe ainda; isso é
+trabalho futuro, fora desta issue.

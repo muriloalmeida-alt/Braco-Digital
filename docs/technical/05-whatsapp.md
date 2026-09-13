@@ -3,6 +3,14 @@
 Canal transversal de todos os Braços que falam com clientes (PRD 01/02,
 `docs/design/flows/04-whatsapp-attendance.md`).
 
+> **Nota de implementação (issue #30):** este documento descreve a
+> visão de arquitetura (`Integration Hub`/`MessagingAdapter`/`Runtime
+> Service`), que ainda não existe em código. A conexão real de
+> WhatsApp implementada hoje usa o Zernio como BSP (Meta Cloud API) e
+> está documentada em
+> `docs/technical/21-zernio-whatsapp-integration.md` — sem fila/Runtime
+> (processamento síncrono) e sem resposta automática ainda.
+
 ## 1. API oficial vs. BSP
 
 | Opção | Prós | Contras |

@@ -86,4 +86,47 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       return fn(tx);
     });
   }
+
+  /**
+   * Quarto modo de acesso: resolução de tenant a partir de um `accountId`
+   * do Zernio (issue #30). Um webhook chega sem `company_id` nenhum — só
+   * um identificador externo — e mapear "qual empresa é dona deste
+   * accountId" É a consulta que precisa acontecer antes de qualquer
+   * `withTenant`. Mesmo padrão de `withUser` (login: resolve a partir de
+   * `app.current_user_id`), com sua própria policy aditiva em
+   * `zernio_connections` (migration `zernio_whatsapp_integration`) — nunca
+   * um bypass geral de RLS, só libera a linha cujo `account_id` bate
+   * exatamente com o valor setado nesta transação.
+   */
+  async withZernioAccountLookup<T>(
+    accountId: string,
+    fn: (tx: Prisma.TransactionClient) => Promise<T>,
+  ): Promise<T> {
+    return this.$transaction(async (tx) => {
+      await tx.$executeRawUnsafe(
+        `SELECT set_config('app.current_zernio_lookup_account_id', $1, true)`,
+        accountId,
+      );
+      return fn(tx);
+    });
+  }
+
+  /**
+   * Mesma ideia de `withZernioAccountLookup`, para o callback público do
+   * onboarding: localiza a `ZernioOnboardingAttempt` pelo seu próprio
+   * `id` (o `correlationId` de uso único) antes de saber a que empresa
+   * ela pertence.
+   */
+  async withZernioAttemptLookup<T>(
+    attemptId: string,
+    fn: (tx: Prisma.TransactionClient) => Promise<T>,
+  ): Promise<T> {
+    return this.$transaction(async (tx) => {
+      await tx.$executeRawUnsafe(
+        `SELECT set_config('app.current_zernio_lookup_attempt_id', $1, true)`,
+        attemptId,
+      );
+      return fn(tx);
+    });
+  }
 }
