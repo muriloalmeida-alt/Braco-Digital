@@ -1,6 +1,7 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { PrismaClient } from '@prisma/client';
+import { ThrottlerStorage, ThrottlerStorageService } from '@nestjs/throttler';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 
@@ -86,16 +87,30 @@ describe('Track B — Growth público (e2e)', () => {
       answers: { needs: ['responder_duvidas'], priority: 'responder_duvidas' },
     };
 
+    // Product Review 01: o default fail-closed é DISABLED (nenhum lead é
+    // aceito). Estes testes cobrem o funcionamento normal do endpoint —
+    // rodam sob SYNTHETIC, explicitamente, exatamente como um ambiente
+    // de dev/staging real precisaria configurar.
+    const previousMode = process.env.PUBLIC_LEAD_CAPTURE_MODE;
+    beforeAll(() => {
+      process.env.PUBLIC_LEAD_CAPTURE_MODE = 'SYNTHETIC';
+    });
+    afterAll(() => {
+      if (previousMode === undefined) delete process.env.PUBLIC_LEAD_CAPTURE_MODE;
+      else process.env.PUBLIC_LEAD_CAPTURE_MODE = previousMode;
+    });
+
     it('persiste o lead, recalculando o ranking no servidor (nunca confia no ranking do cliente)', async () => {
       const res = await request(app.getHttpServer()).post('/public/leads').send(validPayload).expect(201);
       expect(res.body.id).toBeDefined();
       expect(res.body.ranking[0].typeKey).toBe('atendimento');
+      expect(res.body.isSynthetic).toBe(true);
 
       const persisted = await prisma.lead.findUnique({ where: { id: res.body.id } });
       expect(persisted?.whatsapp).toBe('+5511999998888'); // normalizado para E.164
       expect(persisted?.companyName).toBe(validPayload.companyName);
-      // PD6: enquanto PUBLIC_LEAD_CAPTURE_REAL não estiver "true", todo
-      // lead capturado fora do gate jurídico é sintético.
+      // PD6: SYNTHETIC nunca persiste como captação real, mesmo que o
+      // texto de todos os campos pareça um lead de verdade.
       expect(persisted?.isSynthetic).toBe(true);
 
       await prisma.lead.update({ where: { id: res.body.id }, data: { source: 'e2e-test' } });
@@ -136,6 +151,125 @@ describe('Track B — Growth público (e2e)', () => {
       await prisma.lead.updateMany({
         where: { whatsapp: '+5511900000000' },
         data: { source: 'e2e-test' },
+      });
+    });
+  });
+
+  /**
+   * Product Review 01 — três modos de captação (DISABLED/SYNTHETIC/REAL)
+   * substituindo o booleano `PUBLIC_LEAD_CAPTURE_REAL`, que a revisão
+   * apontou como não fail-closed (mesmo "false" ainda persistia PII
+   * real, só marcando `isSynthetic=true`).
+   */
+  describe('Product Review 01 — capture modes (DISABLED/SYNTHETIC/REAL)', () => {
+    // As 3 chamadas a POST /public/leads deste describe (uma por modo)
+    // não podem herdar o rate limit já consumido pelo describe anterior
+    // (que inclui um teste que deliberadamente estoura o limite de
+    // 5/min) — reseta o storage do throttler para começar com janela
+    // limpa, sem depender de ordem/contagem entre describes.
+    beforeAll(() => {
+      (app.get(ThrottlerStorage) as ThrottlerStorageService).storage.clear();
+    });
+
+    const validPayload = {
+      name: 'Visitante Capture Mode',
+      companyName: 'Empresa Capture Mode',
+      whatsapp: '11977776666',
+      segment: 'saude',
+      teamSize: 'DE_2_A_5',
+      volume: 'DE_11_A_30',
+      answers: { needs: ['responder_duvidas'], priority: 'responder_duvidas' },
+    };
+
+    async function withMode<T>(mode: string | undefined, fn: () => Promise<T>): Promise<T> {
+      const previous = process.env.PUBLIC_LEAD_CAPTURE_MODE;
+      if (mode === undefined) delete process.env.PUBLIC_LEAD_CAPTURE_MODE;
+      else process.env.PUBLIC_LEAD_CAPTURE_MODE = mode;
+      try {
+        return await fn();
+      } finally {
+        if (previous === undefined) delete process.env.PUBLIC_LEAD_CAPTURE_MODE;
+        else process.env.PUBLIC_LEAD_CAPTURE_MODE = previous;
+      }
+    }
+
+    it('DISABLED é o default fail-closed (variável ausente)', async () => {
+      await withMode(undefined, async () => {
+        const res = await request(app.getHttpServer()).get('/public/leads/capture-mode').expect(200);
+        expect(res.body.mode).toBe('DISABLED');
+      });
+    });
+
+    describe('modo DISABLED', () => {
+      it('diagnóstico e recomendação continuam funcionando', async () => {
+        await withMode('DISABLED', async () => {
+          await request(app.getHttpServer()).get('/public/employee-types').expect(200);
+          await request(app.getHttpServer())
+            .post('/public/diagnostics/recommendation')
+            .send({ needs: ['responder_duvidas'], priority: 'responder_duvidas' })
+            .expect(200);
+        });
+      });
+
+      it('endpoint de lead rejeita a submissão e nenhuma PII é persistida', async () => {
+        const leadsBefore = await prisma.lead.count();
+        await withMode('DISABLED', async () => {
+          await request(app.getHttpServer()).post('/public/leads').send(validPayload).expect(403);
+        });
+        expect(await prisma.lead.count()).toBe(leadsBefore);
+        const byWhatsapp = await prisma.lead.findFirst({ where: { whatsapp: '+5511977776666' } });
+        expect(byWhatsapp).toBeNull();
+      });
+    });
+
+    describe('modo SYNTHETIC', () => {
+      it('formulário funciona e o registro é marcado de teste/sintético', async () => {
+        await withMode('SYNTHETIC', async () => {
+          const modeRes = await request(app.getHttpServer()).get('/public/leads/capture-mode').expect(200);
+          expect(modeRes.body.mode).toBe('SYNTHETIC');
+
+          const res = await request(app.getHttpServer()).post('/public/leads').send(validPayload).expect(201);
+          expect(res.body.isSynthetic).toBe(true);
+
+          const persisted = await prisma.lead.findUnique({ where: { id: res.body.id } });
+          expect(persisted?.isSynthetic).toBe(true);
+
+          await prisma.lead.update({ where: { id: res.body.id }, data: { source: 'e2e-test' } });
+        });
+      });
+    });
+
+    describe('modo REAL', () => {
+      it('não ativa com valores parecidos mas não reconhecidos — continua fail-closed', async () => {
+        for (const almostReal of ['REALX', 'true', 'REAL-MODE', '1']) {
+          await withMode(almostReal, async () => {
+            const res = await request(app.getHttpServer()).get('/public/leads/capture-mode').expect(200);
+            expect(res.body.mode).not.toBe('REAL');
+          });
+        }
+      });
+
+      it('quando explicitamente REAL, o formulário funciona e o registro NÃO é sintético', async () => {
+        await withMode('REAL', async () => {
+          const modeRes = await request(app.getHttpServer()).get('/public/leads/capture-mode').expect(200);
+          expect(modeRes.body.mode).toBe('REAL');
+
+          const res = await request(app.getHttpServer())
+            .post('/public/leads')
+            .send({ ...validPayload, whatsapp: '11955554444' })
+            .expect(201);
+          expect(res.body.isSynthetic).toBe(false);
+
+          const persisted = await prisma.lead.findUnique({ where: { id: res.body.id } });
+          expect(persisted?.isSynthetic).toBe(false);
+
+          // Mesmo em REAL, a estrutura de campos capturados continua a
+          // mesma (nome/empresa/WhatsApp/e-mail opcional) — evidência
+          // jurídica adicional (aviso/aceite/timestamp) é decisão de
+          // Produto/Jurídico ainda pendente (PD6), não implementada
+          // nesta sprint.
+          await prisma.lead.update({ where: { id: res.body.id }, data: { source: 'e2e-test' } });
+        });
       });
     });
   });

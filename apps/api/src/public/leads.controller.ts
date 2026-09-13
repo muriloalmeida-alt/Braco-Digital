@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, UseGuards } from '@nestjs/common';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { CreateLeadDto } from './dto/create-lead.dto';
 import { LeadsService } from './leads.service';
@@ -11,6 +11,16 @@ import { LeadsService } from './leads.service';
 @Controller('public/leads')
 export class LeadsController {
   constructor(private readonly leadsService: LeadsService) {}
+
+  /**
+   * Product Review 01: a UI (Disabled/Synthetic/Real) nunca infere o
+   * modo sozinha — pergunta ao backend, mesmo princípio de autoridade
+   * de backend usado em `canSimulateConnection` (Track A/TD19).
+   */
+  @Get('capture-mode')
+  getCaptureMode() {
+    return this.leadsService.getCaptureMode();
+  }
 
   @Post()
   @HttpCode(201)

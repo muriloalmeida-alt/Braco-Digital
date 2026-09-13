@@ -3,7 +3,15 @@ import { useSearchParams } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import { ApiError } from '../../api/client';
 import { trackGrowthEvent } from '../../api/growth-analytics';
-import { publicApi, type DiagnosticAnswers, type NeedKey, type RankedBraco, type TeamSize, type VolumeRange } from '../../api/public';
+import {
+  publicApi,
+  type DiagnosticAnswers,
+  type LeadCaptureMode,
+  type NeedKey,
+  type RankedBraco,
+  type TeamSize,
+  type VolumeRange,
+} from '../../api/public';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { CatalogAvailabilityLabel } from '../../components/CatalogAvailabilityLabel';
@@ -36,9 +44,30 @@ export function DiagnosticPage() {
   const [ruleVersion, setRuleVersion] = useState<string | null>(null);
   const [recommendationError, setRecommendationError] = useState<string | null>(null);
   const [leadName, setLeadName] = useState('');
+  const [leadWasSynthetic, setLeadWasSynthetic] = useState(false);
+  // Product Review 01 — a UI nunca infere o modo de captação sozinha,
+  // sempre pergunta ao backend (mesmo princípio de `canSimulateConnection`
+  // do Track A). Default local é DISABLED (fail-closed) até a resposta
+  // chegar ou se a checagem falhar.
+  const [captureMode, setCaptureMode] = useState<LeadCaptureMode>('DISABLED');
   const headingRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => saveDiagnosticAnswers(answers), [answers]);
+
+  useEffect(() => {
+    let cancelled = false;
+    publicApi
+      .getLeadCaptureMode()
+      .then((res) => {
+        if (!cancelled) setCaptureMode(res.mode);
+      })
+      .catch(() => {
+        // Fail-closed: se a checagem falhar, permanece DISABLED.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     document.title = 'Monte sua equipe — BRAÇO';
@@ -152,6 +181,7 @@ export function DiagnosticPage() {
           </h1>
           <ResultView
             ranking={recommendation}
+            captureMode={captureMode}
             onContinue={() => goToStep('contato')}
           />
         </div>
@@ -164,6 +194,14 @@ export function DiagnosticPage() {
       goToStep('4');
       return null;
     }
+    if (captureMode === 'DISABLED') {
+      // Guarda defensiva (Product Review 01): mesmo com acesso direto a
+      // ?step=contato, o formulário de lead nunca pode renderizar quando
+      // a captação está desabilitada — a decisão de exibir já foi tomada
+      // em ResultView, mas essa etapa não confia nisso, confia no modo.
+      goToStep('resultado');
+      return null;
+    }
     return (
       <PublicShell>
         <div className="braco-diagnostic">
@@ -173,8 +211,10 @@ export function DiagnosticPage() {
           <LeadForm
             answers={answers}
             ranking={recommendation}
-            onSuccess={(name) => {
+            captureMode={captureMode}
+            onSuccess={(name, isSynthetic) => {
               setLeadName(name);
+              setLeadWasSynthetic(isSynthetic);
               clearDiagnosticAnswers();
               goToStep('sucesso');
             }}
@@ -191,10 +231,14 @@ export function DiagnosticPage() {
         <Card>
           <CheckCircle2 size={28} aria-hidden="true" style={{ color: 'var(--md-ext-color-success)' }} />
           <h1 ref={headingRef} tabIndex={-1} className="braco-diagnostic__title">
-            Diagnóstico recebido
+            {leadWasSynthetic ? 'Diagnóstico de teste registrado.' : 'Diagnóstico recebido'}
           </h1>
           <p>Obrigado, {leadName || 'você'}.</p>
-          <p>Sua equipe recomendada foi registrada. A equipe BRAÇO pode entrar em contato pelos dados informados.</p>
+          {leadWasSynthetic ? (
+            <p>Este é um registro de ambiente de teste — nenhum contato comercial real será feito a partir dele.</p>
+          ) : (
+            <p>Sua equipe recomendada foi registrada. A equipe BRAÇO pode entrar em contato pelos dados informados.</p>
+          )}
           <div className="braco-diagnostic__actions" style={{ justifyContent: 'flex-start' }}>
             <Button onClick={() => (window.location.href = '/')}>Voltar para o site</Button>
           </div>
@@ -432,9 +476,21 @@ function Step4({
   );
 }
 
-function ResultView({ ranking, onContinue }: { ranking: RankedBraco[]; onContinue: () => void }) {
+function ResultView({
+  ranking,
+  captureMode,
+  onContinue,
+}: {
+  ranking: RankedBraco[];
+  captureMode: LeadCaptureMode;
+  onContinue: () => void;
+}) {
   const hasAvailable = ranking.some((r) => r.availability === 'AVAILABLE');
   const firstIsAvailable = ranking[0]?.availability === 'AVAILABLE';
+  // Product Review 01: em produção sem captação liberada (PD6 fechado),
+  // o resultado do diagnóstico continua funcionando, mas o CTA nunca leva
+  // a um formulário de captação, nem promete contato posterior.
+  const captureDisabled = captureMode === 'DISABLED';
 
   return (
     <div>
@@ -466,8 +522,14 @@ function ResultView({ ranking, onContinue }: { ranking: RankedBraco[]; onContinu
       )}
       {!hasAvailable && <p>Esses Braços ainda não estão disponíveis para contratação.</p>}
 
+      {captureDisabled && <p>Captação de contato não está disponível neste ambiente.</p>}
+
       <div className="braco-diagnostic__actions" style={{ justifyContent: 'flex-end' }}>
-        <Button onClick={onContinue}>{hasAvailable ? 'Quero montar minha equipe' : 'Receber meu diagnóstico'}</Button>
+        {captureDisabled ? (
+          <Button onClick={() => (window.location.href = '/')}>Voltar para o site</Button>
+        ) : (
+          <Button onClick={onContinue}>{hasAvailable ? 'Quero montar minha equipe' : 'Receber meu diagnóstico'}</Button>
+        )}
       </div>
     </div>
   );
@@ -476,11 +538,13 @@ function ResultView({ ranking, onContinue }: { ranking: RankedBraco[]; onContinu
 function LeadForm({
   answers,
   ranking,
+  captureMode,
   onSuccess,
 }: {
   answers: DiagnosticAnswers;
   ranking: RankedBraco[];
-  onSuccess: (name: string) => void;
+  captureMode: LeadCaptureMode;
+  onSuccess: (name: string, isSynthetic: boolean) => void;
 }) {
   const [name, setName] = useState('');
   const [companyName, setCompanyName] = useState('');
@@ -511,7 +575,7 @@ function LeadForm({
         answers: { needs: answers.needs, priority: answers.priority as NeedKey },
       });
       trackGrowthEvent('lead_submit_success', { leadId: res.id });
-      onSuccess(name);
+      onSuccess(name, res.isSynthetic);
     } catch (err) {
       trackGrowthEvent('lead_submit_error', { reason: err instanceof ApiError ? `http_${err.status}` : 'network' });
       setError('Não foi possível enviar seus dados. Seu diagnóstico continua nesta tela.');
@@ -522,6 +586,11 @@ function LeadForm({
 
   return (
     <form onSubmit={handleSubmit}>
+      {captureMode === 'SYNTHETIC' && (
+        <p className="braco-diagnostic__test-banner" role="note">
+          Ambiente de teste — use apenas dados fictícios.
+        </p>
+      )}
       <div className="braco-diagnostic__field">
         <label htmlFor="lead-name">Nome *</label>
         <input id="lead-name" type="text" value={name} onChange={(e) => setName(e.target.value)} />
@@ -538,8 +607,20 @@ function LeadForm({
         <label htmlFor="lead-email">E-mail</label>
         <input id="lead-email" type="text" value={email} onChange={(e) => setEmail(e.target.value)} />
       </div>
+      {/*
+       * Product Review 01: esta frase (usada hoje tanto em SYNTHETIC
+       * quanto em REAL) NÃO é aviso jurídico aprovado e NÃO deve ser
+       * tratada como solução final de PD6. Em SYNTHETIC ela é reforçada
+       * pelo banner de ambiente de teste acima e pela linguagem
+       * operacional abaixo. Em REAL — que só é ativado após liberação
+       * formal de PD6 — o aviso/copy/link legal definitivos são de
+       * Produto/Design após Jurídico; nada aqui deve ser publicado como
+       * essa decisão.
+       */}
       <p style={{ fontSize: 'var(--md-sys-typescale-body-medium-size)', color: 'var(--md-sys-color-on-surface-variant)' }}>
-        Usamos seus dados só para conversar sobre a equipe recomendada. Nenhum contrato é firmado neste formulário.
+        {captureMode === 'SYNTHETIC'
+          ? 'Ambiente de teste: os dados enviados aqui não geram contato comercial real e são usados apenas para validar o funcionamento do diagnóstico.'
+          : 'Usamos seus dados só para conversar sobre a equipe recomendada. Nenhum contrato é firmado neste formulário.'}
       </p>
       {error && <p className="braco-diagnostic__field-error">{error}</p>}
       <div className="braco-diagnostic__actions" style={{ justifyContent: 'flex-end' }}>

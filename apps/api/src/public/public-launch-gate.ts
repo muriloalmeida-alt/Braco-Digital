@@ -3,17 +3,34 @@
  * docs/technical/16-product-decisions-required.md, docs/technical/20-
  * sprint-02-tech-readiness.md §24.3: "desenvolvimento não é bloqueado;
  * publicação com captação real de lead é bloqueada até validação
- * jurídico/compliance". Enquanto isso, dev/staging usam dados sintéticos.
+ * jurídico/compliance".
  *
- * Controle técnico (decisão de Engenharia, registrada em TD19,
- * `docs/technical/17-technical-decisions.md`): a variável de ambiente
- * `PUBLIC_LEAD_CAPTURE_REAL` precisa valer exatamente `"true"` para que
- * um lead seja gravado como captação real. Ausente/qualquer outro valor
- * → captação permanece sintética, mesmo em produção, mesmo que alguém
- * esqueça de configurar algo. Fail-closed de propósito: o padrão nunca
- * captura dado real por omissão — alguém precisa decidir ativamente
- * "true" depois que o jurídico validar o aviso de privacidade.
+ * Product + Product Design Review 01 apontou uma falha de design: a
+ * versão anterior deste arquivo usava um único booleano
+ * (`PUBLIC_LEAD_CAPTURE_REAL`) e, quando "false", ainda ACEITAVA e
+ * PERSISTIA nome/empresa/WhatsApp/e-mail reais — só marcava
+ * `isSynthetic=true`. Isso não é fail-closed: dado pessoal real não
+ * vira sintético por causa de uma flag. A revisão corrigida usa três
+ * modos explícitos, e o modo `DISABLED` **recusa a submissão inteira**
+ * antes de tocar em qualquer campo — nenhuma PII chega perto do banco.
  */
-export function isRealPublicCaptureEnabled(): boolean {
-  return process.env.PUBLIC_LEAD_CAPTURE_REAL === 'true';
+export type PublicLeadCaptureMode = 'DISABLED' | 'SYNTHETIC' | 'REAL';
+
+const RAW_TO_MODE: Record<string, PublicLeadCaptureMode> = {
+  REAL: 'REAL',
+  SYNTHETIC: 'SYNTHETIC',
+  TEST: 'SYNTHETIC', // sinônimo aceito — "ambiente de teste" é a linguagem voltada ao usuário
+  DISABLED: 'DISABLED',
+};
+
+/**
+ * `PUBLIC_LEAD_CAPTURE_MODE` controla o modo. Fail-closed por
+ * construção: **qualquer** valor ausente, vazio, mal digitado ou não
+ * reconhecido cai em `DISABLED` — o modo mais restritivo — nunca em
+ * `SYNTHETIC` ou `REAL` por omissão/acidente. Só um valor
+ * explicitamente reconhecido ativa um modo menos restritivo.
+ */
+export function getPublicLeadCaptureMode(): PublicLeadCaptureMode {
+  const raw = (process.env.PUBLIC_LEAD_CAPTURE_MODE ?? '').trim().toUpperCase();
+  return RAW_TO_MODE[raw] ?? 'DISABLED';
 }

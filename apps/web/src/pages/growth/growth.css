@@ -318,3 +318,16 @@
   color: var(--md-sys-color-on-surface-variant);
   margin: var(--braco-space-4) 0;
 }
+
+/* Product Review 01 — aviso de ambiente de teste (modo SYNTHETIC). Não é
+ * um erro nem um problema, então segue a mesma família neutra usada em
+ * "Em breve" (secondaryContainer), nunca a semântica de erro/warning. */
+.braco-diagnostic__test-banner {
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  border-radius: var(--md-sys-shape-corner-medium);
+  padding: var(--braco-space-3);
+  font-size: var(--md-sys-typescale-label-medium-size);
+  font-weight: var(--md-sys-typescale-label-medium-weight);
+  margin: 0 0 var(--braco-space-4);
+}

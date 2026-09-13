@@ -1,9 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateLeadDto } from './dto/create-lead.dto';
 import { DiagnosticsService } from './diagnostics.service';
-import { isRealPublicCaptureEnabled } from './public-launch-gate';
+import { getPublicLeadCaptureMode, type PublicLeadCaptureMode } from './public-launch-gate';
 import { normalizeWhatsapp } from './whatsapp-normalize';
 
 /**
@@ -28,7 +28,23 @@ export class LeadsService {
     private readonly diagnosticsService: DiagnosticsService,
   ) {}
 
+  /** `GET /public/leads/capture-mode` — a UI decide o que renderizar a partir daqui, nunca sozinha. */
+  getCaptureMode(): { mode: PublicLeadCaptureMode } {
+    return { mode: getPublicLeadCaptureMode() };
+  }
+
   async create(dto: CreateLeadDto, source: string) {
+    const mode = getPublicLeadCaptureMode();
+    // Product Review 01: DISABLED recusa a submissão INTEIRA antes de
+    // qualquer outra coisa — nenhuma PII (nome/empresa/WhatsApp/e-mail)
+    // chega perto de normalização, do motor de recomendação ou do
+    // banco. A versão anterior só marcava `isSynthetic=true` com a flag
+    // desligada, o que ainda persistia dado real; isso não é
+    // fail-closed. Aqui, "desligado" significa "nada é gravado", ponto.
+    if (mode === 'DISABLED') {
+      throw new ForbiddenException('Captação de lead não está disponível neste ambiente.');
+    }
+
     const whatsapp = normalizeWhatsapp(dto.whatsapp);
     if (!whatsapp) {
       throw new BadRequestException('Número de WhatsApp inválido.');
@@ -41,7 +57,10 @@ export class LeadsService {
 
     const id = randomUUID();
     const createdAt = new Date();
-    const isSynthetic = !isRealPublicCaptureEnabled();
+    // SYNTHETIC (e qualquer valor que não seja explicitamente REAL, por
+    // construção de getPublicLeadCaptureMode) grava isSynthetic=true.
+    // Só REAL grava captação real — nunca por omissão/acidente.
+    const isSynthetic = mode !== 'REAL';
 
     await this.prisma.withPublicAccess((tx) =>
       tx.$executeRaw`
@@ -54,6 +73,6 @@ export class LeadsService {
       `,
     );
 
-    return { id, createdAt, ranking, ruleVersion };
+    return { id, createdAt, ranking, ruleVersion, isSynthetic };
   }
 }

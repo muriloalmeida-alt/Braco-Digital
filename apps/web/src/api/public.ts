@@ -45,6 +45,15 @@ export interface CreateLeadInput {
   sessionId?: string;
 }
 
+/**
+ * Product Review 01 — três modos de captação de lead (substituindo o
+ * booleano anterior, que não era fail-closed). A UI nunca infere o modo
+ * sozinha: sempre pergunta a `GET /public/leads/capture-mode`, mesmo
+ * princípio de autoridade de backend usado em `canSimulateConnection`
+ * (Track A).
+ */
+export type LeadCaptureMode = 'DISABLED' | 'SYNTHETIC' | 'REAL';
+
 export const publicApi = {
   listEmployeeTypes: () => request<EmployeeType[]>('/public/employee-types'),
 
@@ -54,8 +63,10 @@ export const publicApi = {
       body: JSON.stringify({ needs, priority }),
     }),
 
+  getLeadCaptureMode: () => request<{ mode: LeadCaptureMode }>('/public/leads/capture-mode'),
+
   createLead: (input: CreateLeadInput) =>
-    request<{ id: string; ranking: RankedBraco[]; ruleVersion: string }>('/public/leads', {
+    request<{ id: string; ranking: RankedBraco[]; ruleVersion: string; isSynthetic: boolean }>('/public/leads', {
       method: 'POST',
       body: JSON.stringify(input),
     }),
