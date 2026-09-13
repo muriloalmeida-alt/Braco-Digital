@@ -91,6 +91,11 @@ export function RecursosStep({
           {item.status === 'CONNECTED' && (
             <>
               <p>{item.externalAccountRef}</p>
+              {item.connectionMode === 'SIMULATED' && !item.canSimulateConnection && (
+                <p className="braco-prep__field-error">
+                  Conexão simulada — não conta como verificada neste ambiente.
+                </p>
+              )}
               <div className="braco-prep__list-item-actions">
                 <button type="button" onClick={() => disconnect(item.type)}>
                   Desconectar
@@ -100,11 +105,14 @@ export function RecursosStep({
           )}
 
           {(item.status === 'NOT_CONFIGURED' || item.status === 'DISCONNECTED' || item.status === 'CONNECTING') &&
-            connecting !== item.type && (
+            connecting !== item.type &&
+            (item.canSimulateConnection ? (
               <Button onClick={() => startConnect(item.type)}>Conectar {LABELS[item.type]}</Button>
-            )}
+            ) : (
+              <p>Integração real ainda não disponível neste ambiente.</p>
+            ))}
 
-          {connecting === item.type && (
+          {connecting === item.type && item.canSimulateConnection && (
             <div className="braco-prep__field">
               <label htmlFor={`ref-${item.type}`}>
                 Identificação da conta (simulação — sem credencial de BSP/Google neste ambiente)

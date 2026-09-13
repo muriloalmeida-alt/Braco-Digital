@@ -157,12 +157,22 @@ export type IntegrationStatus =
   | 'DISCONNECTED'
   | 'NOT_NECESSARY';
 
+export type IntegrationConnectionMode = 'SIMULATED' | 'REAL';
+
 export interface ResourceItem {
   type: IntegrationType;
   required: boolean;
   status: IntegrationStatus;
   externalAccountRef: string | null;
   connectedAt: string | null;
+  connectionMode: IntegrationConnectionMode | null;
+  /**
+   * Autoridade do backend (Product Review 01): quando `false`
+   * (produção), a UI de simulação não deve aparecer — não é uma
+   * decisão do frontend, é o que `ResourcesService.get` calcula a
+   * partir do ambiente.
+   */
+  canSimulateConnection: boolean;
 }
 
 export const preparationApi = {

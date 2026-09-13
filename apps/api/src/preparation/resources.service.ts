@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { IntegrationStatus, IntegrationType } from '@prisma/client';
+import { isProductionEnvironment } from '../config/environment';
 import { PrismaService } from '../prisma/prisma.service';
 import { getResponsibilityCatalog } from './catalogs/responsibility-catalog';
 import { PreparationReadinessService } from './preparation-readiness.service';
@@ -20,6 +21,16 @@ import { PreparationReadinessService } from './preparation-readiness.service';
  * "autorização externa" é simulada via `confirmConnection` para permitir
  * testar o restante do fluxo (obrigatoriedade, bloqueio de Revisão,
  * etc.). Nenhuma história é declarada Done com base nesta simulação.
+ *
+ * Product Review 01 — guard de produção: a simulação acima NUNCA pode
+ * satisfazer Recursos/PRONTO em produção (TD19,
+ * docs/technical/17-technical-decisions.md). `startConnection`/
+ * `confirmConnection` recusam com 403 quando `isProductionEnvironment()`
+ * — bloqueio no backend, não só escondido na UI, então uma chamada
+ * direta de API não contorna o guard. Quando um fluxo real de OAuth
+ * existir, ele entra como um caminho NOVO (endpoint/callback próprio)
+ * que grava `connectionMode: REAL` — não reaproveita este caminho
+ * simulado.
  */
 @Injectable()
 export class ResourcesService {
@@ -52,6 +63,10 @@ export class ResourcesService {
       const required = await this.requiredness(tx, digitalEmployeeId, employee.employeeType.key);
       const integrations = await tx.integration.findMany({ where: { companyId } });
       const byType = new Map(integrations.map((i) => [i.type, i]));
+      // Backend é a autoridade de qual UI faz sentido mostrar (mesmo
+      // princípio de PreparationReadinessService) — o frontend nunca
+      // decide sozinho se a simulação deve aparecer.
+      const canSimulateConnection = !isProductionEnvironment();
 
       return (Object.keys(required) as IntegrationType[]).map((type) => {
         const isRequired = required[type];
@@ -62,12 +77,15 @@ export class ResourcesService {
           status: !isRequired ? 'NOT_NECESSARY' : row?.status ?? IntegrationStatus.NOT_CONFIGURED,
           externalAccountRef: row?.externalAccountRef ?? null,
           connectedAt: row?.connectedAt ?? null,
+          connectionMode: row?.connectionMode ?? null,
+          canSimulateConnection,
         };
       });
     });
   }
 
   async startConnection(companyId: string, digitalEmployeeId: string, type: IntegrationType) {
+    this.assertSimulationAllowed();
     return this.prisma.withTenant(companyId, async (tx) => {
       await this.assertEmployeeExists(tx, digitalEmployeeId);
       await tx.integration.upsert({
@@ -80,6 +98,7 @@ export class ResourcesService {
   }
 
   async confirmConnection(companyId: string, digitalEmployeeId: string, type: IntegrationType, externalAccountRef: string) {
+    this.assertSimulationAllowed();
     return this.prisma.withTenant(companyId, async (tx) => {
       await this.assertEmployeeExists(tx, digitalEmployeeId);
       await tx.integration.upsert({
@@ -88,13 +107,35 @@ export class ResourcesService {
           companyId,
           type,
           status: IntegrationStatus.CONNECTED,
+          connectionMode: 'SIMULATED',
           externalAccountRef,
           connectedAt: new Date(),
         },
-        update: { status: IntegrationStatus.CONNECTED, externalAccountRef, connectedAt: new Date() },
+        update: {
+          status: IntegrationStatus.CONNECTED,
+          connectionMode: 'SIMULATED',
+          externalAccountRef,
+          connectedAt: new Date(),
+        },
       });
       return this.readiness.recomputeStatus(tx, companyId, digitalEmployeeId);
     });
+  }
+
+  /**
+   * Product Review 01: nem `startConnection` nem `confirmConnection`
+   * (o único caminho de conexão que este código sabe fazer hoje, sem
+   * credenciais reais de BSP/Google) podem rodar em produção — uma
+   * chamada direta de API recebe 403, não um 200 silenciosamente
+   * inofensivo. Isso é verificado ANTES de abrir a transação, então
+   * nunca cria/atualiza linha nenhuma.
+   */
+  private assertSimulationAllowed() {
+    if (isProductionEnvironment()) {
+      throw new ForbiddenException(
+        'Conexão simulada não está disponível neste ambiente. É necessária uma integração real verificada pelo provedor.',
+      );
+    }
   }
 
   async disconnect(companyId: string, digitalEmployeeId: string, type: IntegrationType) {

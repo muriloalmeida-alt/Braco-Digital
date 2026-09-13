@@ -269,6 +269,101 @@ describe('Preparation — Manual de Trabalho (e2e)', () => {
       .expect(201);
   });
 
+  /**
+   * Product Review 01 — guard de produção contra "simulação vira PRONTO"
+   * (TD19). `employeeId` chega aqui com WHATSAPP e GOOGLE_CALENDAR
+   * CONNECTED/SIMULATED (dos testes acima) — o cenário exato que não
+   * pode satisfazer Recursos/PRONTO em produção.
+   */
+  describe('Product Review 01 — guard de produção para conexão simulada (TD19)', () => {
+    async function asProduction<T>(fn: () => Promise<T>): Promise<T> {
+      const previous = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'production';
+      try {
+        return await fn();
+      } finally {
+        process.env.NODE_ENV = previous;
+      }
+    }
+
+    it('ambiente de teste — simulação continua permitida (canSimulateConnection=true)', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/digital-employees/${employeeId}/resources`)
+        .set('Authorization', `Bearer ${tokenA}`)
+        .expect(200);
+      for (const item of res.body) expect(item.canSimulateConnection).toBe(true);
+    });
+
+    it('produção — conexão simulada não satisfaz Recursos nem Concluir preparação', async () => {
+      await asProduction(async () => {
+        const overview = await request(app.getHttpServer())
+          .get(`/digital-employees/${employeeId}/work-manual/overview`)
+          .set('Authorization', `Bearer ${tokenA}`)
+          .expect(200);
+        expect(overview.body.steps.recursos_trabalho).not.toBe('complete');
+        expect(overview.body.completedCount).toBeLessThan(8);
+        expect(overview.body.review).toBe('bloqueada');
+        expect(overview.body.pendingSteps).toContain('recursos_trabalho');
+
+        const complete = await request(app.getHttpServer())
+          .post(`/digital-employees/${employeeId}/work-manual/complete`)
+          .set('Authorization', `Bearer ${tokenA}`)
+          .expect(409);
+        expect(complete.body.pendingSteps).toContain('recursos_trabalho');
+      });
+    });
+
+    it('produção — GET /resources reflete canSimulateConnection=false e marca a conexão existente como simulada', async () => {
+      await asProduction(async () => {
+        const res = await request(app.getHttpServer())
+          .get(`/digital-employees/${employeeId}/resources`)
+          .set('Authorization', `Bearer ${tokenA}`)
+          .expect(200);
+        for (const item of res.body) expect(item.canSimulateConnection).toBe(false);
+        const whatsapp = res.body.find((i: { type: string }) => i.type === 'WHATSAPP');
+        expect(whatsapp.status).toBe('CONNECTED');
+        expect(whatsapp.connectionMode).toBe('SIMULATED');
+      });
+    });
+
+    it('produção — tentativa direta de API (connect/confirm) recebe 403 e não contorna o guard', async () => {
+      await asProduction(async () => {
+        await request(app.getHttpServer())
+          .post(`/digital-employees/${employeeId}/resources/GOOGLE_TASKS/connect`)
+          .set('Authorization', `Bearer ${tokenA}`)
+          .expect(403);
+        await request(app.getHttpServer())
+          .post(`/digital-employees/${employeeId}/resources/GOOGLE_TASKS/confirm`)
+          .set('Authorization', `Bearer ${tokenA}`)
+          .send({ externalAccountRef: 'tentativa-direta' })
+          .expect(403);
+      });
+
+      // Nenhuma linha foi criada pela tentativa — o 403 acontece antes de
+      // abrir a transação, não depois de gravar e barrar na leitura.
+      const tasksIntegration = await prisma.integration.findFirst({
+        where: { companyId: companyA.id, type: 'GOOGLE_TASKS' },
+      });
+      expect(tasksIntegration).toBeNull();
+    });
+
+    it('desconectar em produção continua permitido (não é a simulação que precisa ser bloqueada, é a confirmação)', async () => {
+      await asProduction(async () => {
+        await request(app.getHttpServer())
+          .post(`/digital-employees/${employeeId}/resources/WHATSAPP/disconnect`)
+          .set('Authorization', `Bearer ${tokenA}`)
+          .expect(201);
+      });
+
+      // Reconecta fora do modo produção para não vazar estado.
+      await request(app.getHttpServer())
+        .post(`/digital-employees/${employeeId}/resources/WHATSAPP/confirm`)
+        .set('Authorization', `Bearer ${tokenA}`)
+        .send({ externalAccountRef: '+5511999990000' })
+        .expect(201);
+    });
+  });
+
   it('PD7/TD14 — backend rejeita autonomia acima do teto e 🟡 sem condição', async () => {
     const aboveCeiling = await request(app.getHttpServer())
       .patch(`/digital-employees/${employeeId}/autonomy`)

@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { AutonomyLevel, EmployeeStatus, Prisma } from '@prisma/client';
+import { isProductionEnvironment } from '../config/environment';
 import { AUTONOMY_RANK, getAutonomyDefault } from './catalogs/autonomy-catalog';
 import { getResponsibilityCatalog } from './catalogs/responsibility-catalog';
 
@@ -217,18 +218,37 @@ export class PreparationReadinessService {
     return 'in_progress';
   }
 
+  /**
+   * Product Review 01 / TD19: em produção, uma integração só satisfaz
+   * Recursos (e portanto só contribui para PRONTO) quando `status ===
+   * CONNECTED` **e** `connectionMode === 'REAL'`. Fora de produção
+   * (dev/test/staging), `status === CONNECTED` basta — é isso que
+   * permite testar o restante do fluxo (obrigatoriedade, bloqueio de
+   * Revisão) sem credenciais reais de BSP/Google. Esta checagem roda
+   * toda vez que a etapa é recomputada (leitura e escrita), então nem
+   * um dado legado nem uma chamada direta de API que tenha escapado do
+   * guard em `ResourcesService` conseguiriam produzir PRONTO em
+   * produção com uma conexão simulada.
+   */
   private computeRecursosStatus(
     catalog: { key: string; requiresCalendar: boolean; requiresTasks: boolean }[],
     enabledKeys: Set<string>,
-    integrations: { type: string; status: string }[],
+    integrations: { type: string; status: string; connectionMode: string }[],
   ): StepStatus {
     const needsCalendar = catalog.some((c) => c.requiresCalendar && enabledKeys.has(c.key));
     const needsTasks = catalog.some((c) => c.requiresTasks && enabledKeys.has(c.key));
+    const requireRealConnection = isProductionEnvironment();
 
-    const byType = new Map(integrations.map((i) => [i.type, i.status]));
-    const whatsappOk = byType.get('WHATSAPP') === 'CONNECTED';
-    const calendarOk = !needsCalendar || byType.get('GOOGLE_CALENDAR') === 'CONNECTED';
-    const tasksOk = !needsTasks || byType.get('GOOGLE_TASKS') === 'CONNECTED';
+    const byType = new Map(integrations.map((i) => [i.type, i]));
+    const isVerified = (type: string) => {
+      const row = byType.get(type);
+      if (row?.status !== 'CONNECTED') return false;
+      return !requireRealConnection || row.connectionMode === 'REAL';
+    };
+
+    const whatsappOk = isVerified('WHATSAPP');
+    const calendarOk = !needsCalendar || isVerified('GOOGLE_CALENDAR');
+    const tasksOk = !needsTasks || isVerified('GOOGLE_TASKS');
 
     if (whatsappOk && calendarOk && tasksOk) return 'complete';
     if (integrations.length === 0) return 'not_started';

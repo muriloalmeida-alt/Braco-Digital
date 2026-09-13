@@ -120,6 +120,15 @@ enum IntegrationStatus {
   DISCONNECTED
 }
 
+/// Product Review 01 — origem da conexão de um recurso. Guarda contra o
+/// caso "simulação vira PRONTO em produção" (docs/technical/17-technical-
+/// decisions.md TD19): SIMULATED nunca satisfaz Recursos/PRONTO quando o
+/// ambiente é produção, independente do valor de `status`.
+enum IntegrationConnectionMode {
+  SIMULATED
+  REAL
+}
+
 // ---------------------------------------------------------------------------
 // Tenant root
 // ---------------------------------------------------------------------------
@@ -400,6 +409,12 @@ model Integration {
   // credencial real em texto plano; nesta sprint não há OAuth real
   // conectado, então o campo fica vazio em uso normal.
   credentialsEncrypted String?           @map("credentials_encrypted")
+  // Product Review 01: nunca inferir "verificado" a partir de status
+  // sozinho — SIMULATED é o único valor que o código de hoje sabe
+  // produzir (não há OAuth real implementado ainda); REAL fica
+  // reservado para quando o callback real existir. A autoridade de
+  // completude (PreparationReadinessService) exige REAL em produção.
+  connectionMode       IntegrationConnectionMode @default(SIMULATED) @map("connection_mode")
   connectedAt          DateTime?         @map("connected_at")
   lastSyncAt           DateTime?         @map("last_sync_at")
   updatedAt            DateTime          @updatedAt @map("updated_at")

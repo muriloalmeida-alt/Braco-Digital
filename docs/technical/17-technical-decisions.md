@@ -440,3 +440,59 @@ reescrever o restante da SPA autenticada.
 **Impacto futuro:** se SEO orgânico virar métrica relevante de Growth,
 a evolução natural é pré-renderizar essa rota específica, não migrar o
 produto inteiro para SSR.
+
+---
+
+## TD19 — Guard de produção contra conexão simulada satisfazendo PRONTO
+
+**Contexto:** Product + Product Design Review 01. US14 usa uma
+confirmação simulada de conexão (`ResourcesService.confirmConnection`)
+porque não há credenciais reais de BSP de WhatsApp/OAuth Google neste
+ambiente (§24.2 do tech readiness). Sem nenhuma barreira adicional, essa
+simulação já é suficiente hoje para `Recursos` ficar completo e o
+funcionário chegar a `PRONTO` — aceitável em dev/teste, mas inaceitável
+em produção: um funcionário não pode ficar `PRONTO` para atender
+clientes reais com um WhatsApp que nunca foi de fato conectado.
+**Opções:** (a) confiar só na UI para esconder a simulação em produção;
+(b) uma flag de ambiente isolada só para "permitir simulação de
+recursos"; (c) um campo de origem da conexão (`connectionMode`:
+`SIMULATED`/`REAL`) no próprio `Integration`, combinado com detecção de
+ambiente (`NODE_ENV`) consultada tanto no guard de escrita quanto na
+autoridade de completude.
+**Decisão:** (c).
+**Justificativa:** (a) sozinha não resiste a uma chamada direta de API
+(o próprio critério de aceite do Review exige isso). Uma flag dedicada
+(b) resolveria o guard de escrita, mas não fecharia o caso de uma linha
+`CONNECTED`/`SIMULATED` pré-existente (ex.: dado de seed/staging migrado
+por engano) continuar contando como válida em produção — só recomputar
+a completude a partir do dado persistido, não só bloquear a escrita,
+cobre os dois ângulos. Mesmo princípio de "autoridade de backend" já
+usado em `PreparationReadinessService` (TD13) e no teto de autonomia
+(TD14): a verdade vem do dado relacional revalidado a cada leitura, não
+de uma flag de UI.
+**Mecanismo:**
+- `Integration.connectionMode` (`SIMULATED` por padrão; `REAL`
+  reservado para quando um callback de OAuth real existir).
+- `ResourcesService.startConnection`/`confirmConnection` recusam com
+  403 quando `isProductionEnvironment()` (`NODE_ENV === 'production'`)
+  — verificado antes de abrir qualquer transação, então uma tentativa
+  direta de API não grava nada.
+- `PreparationReadinessService.computeRecursosStatus` exige
+  `connectionMode === 'REAL'` quando em produção, além de `status ===
+  CONNECTED` — roda em toda leitura/escrita, então cobre também dado
+  legado.
+- `GET /resources` expõe `canSimulateConnection` (calculado no backend)
+  para a UI decidir o que mostrar — o frontend nunca infere sozinho se
+  está em produção.
+- `disconnect` continua permitido em qualquer ambiente (não é o alvo do
+  guard, e uma conexão real futura também precisará ser desconectável
+  em produção).
+**Trade-offs:** mais um campo no modelo (`connectionMode`) que só ganha
+significado quando o fluxo real de OAuth existir; até lá, toda linha
+criada por este código é `SIMULATED` por construção.
+**Reversibilidade:** alta — quando o fluxo real existir, ele é um
+caminho novo (endpoint/callback próprio) que grava `connectionMode:
+REAL`; não reaproveita `confirmConnection`.
+**Impacto futuro:** qualquer integração real futura (BSP/Google) precisa
+gravar `connectionMode: REAL` explicitamente para contar em produção —
+isso já está documentado no código como o contrato esperado.
