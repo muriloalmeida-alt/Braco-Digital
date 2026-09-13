@@ -17,5 +17,15 @@ Garantir que somente funcionários suficientemente preparados entrem em operaç�
 - US22 — Retomar funcionário
 - US23 — Desativar funcionário
 
+## Relação com Sprint 02
+
+US17 pertence a este épico, mas é entregue na Sprint 02 como ponte entre
+Preparação e Ativação.
+
+No fim da Sprint 02:
+- Manual revisado → funcionário `Pronto`;
+- nenhum funcionário é ativado;
+- checklist e ativação começam na Sprint 03.
+
 ## Critério de conclusão
 Histórias necessárias ao escopo implementadas, validadas e documentadas conforme Definition of Done.

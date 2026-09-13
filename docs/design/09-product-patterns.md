@@ -4,89 +4,45 @@ Padrões de domínio são construídos sobre componentes M3.
 
 ## 1. Employee Card
 
-Objetivo:
-representar um funcionário digital em Minha Equipe.
+Objetivo: representar um funcionário digital em Minha Equipe.
 
 Conteúdo mínimo:
 - identidade;
 - função;
 - status;
 - resumo de atividade ou próximo passo;
-- atenção quando houver;
+- atenção;
 - ação principal.
 
 Base M3:
 - Card;
 - List-like content;
 - Icon/Avatar;
-- Badge/label quando aplicável;
+- Badge/label;
 - Button/Menu.
 
-> **Nota:** este é o Employee Card de **Minha Equipe** (funcionário já
-> contratado, usa Employee Status). O card do **catálogo** (funcionário
-> ainda não contratado) usa Catalog Availability — ver seção 1.1.
-
-## 1.1 Catalog Availability (catálogo de contratação)
-
-Conceito **separado de Employee Status**. Aplica-se apenas a funcionários
-no catálogo de contratação (ainda não contratados), nunca a um funcionário
-já em Minha Equipe.
+## 1.1 Catalog Availability
 
 Estados:
 - **Disponível**
 - **Em breve**
 
-Especificação visual completa:
-
+Especificação:
 - `docs/design/18-catalog-availability-ui-spec.md`
 
-### Employee Card — Disponível
-Conteúdo mínimo:
-- identidade;
-- função;
-- missão;
-- resultado esperado;
-- principais responsabilidades;
-- disponibilidade;
-- ação secundária `Ver detalhes`;
-- CTA de contratação: **Contratar funcionário**.
+### Disponível
+- `Ver detalhes`
+- `Contratar funcionário`
 
-### Employee Card — Em breve
-Não é um card tradicionalmente `disabled`. Não:
-- reduzir opacity de todo o card;
-- prejudicar leitura;
-- mostrar botão aparentemente quebrado;
-- usar semântica de erro/warning para a indisponibilidade futura.
-
-Deve possuir:
-- conteúdo legível (missão, responsabilidades, resultado esperado, como os
-  demais cards);
-- label M3/BRAÇO **Em breve**, informativo e não interativo;
-- ação `Ver detalhes`;
-- nenhum CTA de contratação.
-
-Na página de detalhe de um funcionário "Em breve", mostrar normalmente
-missão, responsabilidades e resultado esperado, com uma mensagem objetiva
-de indisponibilidade:
-
-> **Este funcionário ainda não está disponível para contratação.**
-
-Não implementar nesta fase lista de espera ou cadastro de interesse
-("Avise-me") — exigiria histórias próprias.
-
-### Regra de interação
-
-O card do catálogo não deve depender de toda a superfície ser clicável
-quando houver ações explícitas, evitando interação aninhada.
-
-- `Ver detalhes` navega para o detalhe;
-- `Contratar funcionário` inicia a contratação;
-- `Em breve` possui apenas `Ver detalhes`.
+### Em breve
+- conteúdo legível;
+- label `Em breve`;
+- `Ver detalhes`;
+- sem CTA de contratação;
+- sem card disabled.
 
 ## 2. Employee Status
 
-Status (funcionário **já contratado**, exibido em Minha Equipe — não
-confundir com Catalog Availability acima):
 - Contratado
 - Preparando
 - Pronto
@@ -101,57 +57,68 @@ Sempre exibir texto.
 
 Experiência para ensinar ao funcionário como trabalhar.
 
-Estrutura:
+### Estrutura
+
+8 etapas + Revisão:
 - Empresa
 - Produtos/Serviços
 - Responsabilidades
-- Regras
+- Regras e limites
 - Autonomia
-- Equipe
+- Pessoas e responsáveis
 - Comunicação
 - Recursos
+- Revisão
 
-Padrão:
-- seções;
-- progress;
+### Padrão
+
+- overview;
+- progresso;
+- section status;
+- autosave;
 - validação;
-- revisão final.
+- CTA Continuar;
+- review final;
+- pendências acionáveis.
+
+### Regras
+
+- não é prompt builder;
+- contexto compartilhado é identificado;
+- limites de sistema são read-only;
+- autonomia é por responsabilidade;
+- recursos são condicionais às responsabilidades;
+- concluir preparação é explícito;
+- concluir preparação muda para `Pronto`, não `Trabalhando`.
+
+Referências:
+- `docs/design/22-work-manual-content-model.md`
+- `docs/design/23-preparation-experience-spec.md`
+- `docs/design/24-work-resources-ui-spec.md`
 
 ## 4. Activation Checklist
 
 Lista clara de pré-requisitos antes da ativação.
 
-Deve:
-- mostrar concluído/incompleto;
-- permitir acessar o item pendente;
-- impedir ativação insegura.
+A Activation Checklist é Sprint 03 e não deve ser confundida com a Revisão
+do Manual da Sprint 02.
 
 ## 5. Work Timeline
 
 Eventos relevantes do trabalho, não logs técnicos.
 
-Exemplos:
-- atendimento iniciado;
-- agendamento criado;
-- follow-up executado;
-- humano solicitado;
-- humano assumiu;
-- atendimento concluído.
-
 ## 6. Human Handoff
-
-Representa transferência entre funcionário digital e pessoa.
 
 Estados:
 - solicitado;
 - aguardando;
 - assumido;
 - resolvido;
-- devolvido ao funcionário.
+- devolvido.
 
 ## 7. Attention Item
 
-Todo item de atenção responde:
+Responder:
 - o que aconteceu?
 - por que importa?
 - o que fazer?
@@ -159,28 +126,30 @@ Todo item de atenção responde:
 
 ## 8. Result Card
 
-Representa impacto:
 - indicador;
 - contexto;
 - período;
-- variação quando útil;
-- ação de exploração.
+- variação;
+- exploração.
 
 ## 9. Integration Status
 
 Estados:
-- não configurada;
-- conectando;
-- conectada;
-- precisa de atenção;
-- desconectada.
+- Não configurado
+- Conectando
+- Conectado
+- Precisa de atenção
+- Desconectado
+- Não necessário
+
+Status sempre textual.
 
 ## 10. Conversation Surface
 
-Deve diferenciar visualmente:
+Diferenciar:
 - cliente;
 - funcionário digital;
 - humano;
-- eventos de sistema relevantes.
+- eventos relevantes.
 
-Não exibir detalhes técnicos de modelo/prompt.
+Não expor modelo/prompt.

@@ -1,7 +1,7 @@
 # PRD 02 — Plataforma Gerencial
 
 **Status:** Aprovado  
-**Versão:** 1.0
+**Versão:** 1.1 — refinamento Sprint 02
 
 ## 1. Visão
 Ambiente onde a empresa contrata, prepara, acompanha e evolui sua equipe digital.
@@ -19,7 +19,9 @@ Múltiplos usuários e grupos, com permissões baseadas na função de negócio.
 - mínimo jargão técnico;
 - foco em trabalho e resultado;
 - responsivo;
-- **simples no celular, completo no desktop**.
+- **simples no celular, completo no desktop**;
+- configuração em linguagem de negócio, nunca como prompt/agent builder;
+- progresso e próximo passo sempre visíveis.
 
 ## 5. Minha Equipe
 Área principal com nome, função, status, atenção, trabalho recente e ações.
@@ -28,15 +30,89 @@ Múltiplos usuários e grupos, com permissões baseadas na função de negócio.
 **Necessidade → Funcionário → Preparação → Ativação → Trabalho → Resultado**
 
 ## 7. Preparação
-Responder:
+
+A preparação deve responder:
 - Quem somos?
 - O que fazemos?
 - Como trabalhamos?
 - O que você pode fazer?
 - Quando deve chamar uma pessoa?
 
+A experiência possui:
+
+1. Empresa
+2. Produtos e serviços
+3. Responsabilidades
+4. Regras e limites
+5. Autonomia
+6. Pessoas e responsáveis
+7. Comunicação
+8. Recursos de trabalho
+9. Revisão
+
+As oito primeiras etapas contêm dados/configurações. A Revisão é o gate final.
+
+### Comportamento
+
+- alterações são salvas progressivamente;
+- cada etapa possui critérios objetivos de completude;
+- campos opcionais não impedem conclusão;
+- o gestor pode sair e voltar sem perder progresso;
+- uma etapa incompleta permanece identificável;
+- a Revisão lista pendências e oferece atalho para corrigi-las;
+- concluir os campos não ativa automaticamente o funcionário.
+
+### Conclusão da preparação
+
+Quando as oito etapas estão completas, o gestor pode revisar e escolher:
+
+> **Concluir preparação**
+
+Essa ação:
+- confirma que o Manual de Trabalho foi revisado;
+- muda o funcionário de `Preparando` para `Pronto`;
+- **não ativa o funcionário**;
+- prepara a transição para o checklist de ativação da Sprint 03.
+
+Se uma alteração posterior invalidar um requisito obrigatório antes da
+ativação, o funcionário volta a `Preparando`.
+
 ## 8. Manual de Trabalho
-Identidade, empresa, produtos, função, responsabilidades, regras, autonomia, limites, equipe, escalonamentos, recursos e comunicação.
+
+O Manual reúne:
+- identidade/função do funcionário;
+- empresa;
+- produtos e serviços;
+- responsabilidades;
+- regras;
+- autonomia;
+- limites;
+- equipe;
+- escalonamentos;
+- recursos;
+- comunicação.
+
+### Contexto compartilhado
+
+Dados da empresa e produtos/serviços pertencem ao contexto compartilhado
+da empresa e podem ser usados por mais de um Braço.
+
+A interface deve deixar claro quando uma alteração é compartilhada.
+
+### Contexto específico do funcionário
+
+São específicos por funcionário:
+- responsabilidades selecionadas;
+- autonomia;
+- regras adicionais quando específicas;
+- responsável primário;
+- estilo de comunicação;
+- recursos necessários à função.
+
+### Limites de sistema
+
+Limites de segurança definidos pelo produto são visíveis e não podem ser
+removidos pelo gestor.
 
 ## 9. Configurações da empresa
 Separar contexto compartilhado de configurações específicas de cada funcionário.
@@ -52,6 +128,9 @@ Explícita e condicionada a checklist.
 
 > Não trabalhar é melhor do que trabalhar errado.
 
+`Pronto` significa preparado para entrar no fluxo de ativação; não significa
+`Trabalhando`.
+
 ## 13. Acompanhamento
 **Resumo → Atenção → Ação → Detalhe**
 
@@ -63,10 +142,7 @@ Visibilidade operacional sem exigir uso direto de sistemas externos.
 
 **Confirmado (PD4):** toda a experiência de gestão de tarefas acontece
 dentro do BRAÇO. Google Tasks é um recurso operacional integrado, não uma
-superfície de gestão — o produto não garante que abrir o Google Tasks
-diretamente mostre cliente, atendimento, conversa ou funcionário
-relacionados. Princípio: o gestor configura e acompanha no BRAÇO; as
-integrações trabalham nos bastidores.
+superfície de gestão.
 
 ## 16. Resultados
 Medir valor, não vaidade.
@@ -95,12 +171,21 @@ ERP, CRM completo, contabilidade, RH, plataforma genérica de IA, construtor de 
 ## 24. Critérios de aceitação
 O gestor executa a jornada principal sem conhecimento técnico.
 
+Na preparação, o gestor deve entender:
+- o que já está pronto;
+- o que falta;
+- o que é compartilhado;
+- o que o funcionário pode fazer;
+- quando chama uma pessoa;
+- quais recursos estão conectados;
+- quando pode concluir a preparação.
+
 ## 25. Decisões pendentes
 Implementação técnica fica para engenharia. Mudança de comportamento retorna ao produto.
 
 Retenção e exclusão de dados: ver `docs/13-data-privacy-and-retention.md`
 (Status: Pending Legal Validation) — gate antes do início da Sprint 03,
-não bloqueia Sprint 01/02.
+não bloqueia Sprint 02.
 
 ## Conclusão
 O gestor deve sentir que administra uma equipe, não que configura software.

@@ -3,37 +3,85 @@
 ## 1. Status do funcionário
 
 ### Contratado
-Existe na equipe, mas preparação ainda não começou ou está no início.
+Existe na equipe antes do início efetivo da preparação quando aplicável.
 
 ### Preparando
-Manual de Trabalho/configurações estão sendo preenchidos.
+Manual/configurações ainda não foram concluídos e revisados.
+
+Durante Sprint 02, pode ser enriquecido:
+
+> **Preparando · 5 de 8 etapas**
 
 ### Pronto
-Pré-requisitos concluídos; pode ser ativado.
+As oito etapas foram concluídas e o gestor executou **Concluir preparação**.
+
+Significa: pronto para entrar no fluxo de ativação.
+
+Não significa Trabalhando.
 
 ### Trabalhando
 Ativo e autorizado a executar sua função.
 
 ### Pausado
-Continua contratado, mas não executa trabalho.
+Contratado, mas não trabalha.
 
 ### Precisa de atenção
-Existe condição que exige intervenção/configuração.
+Condição exige intervenção/configuração.
 
 ### Desativado
-Não participa mais da operação ativa.
+Não participa da operação ativa.
 
-## 2. Regras
+## 2. Preparando → Pronto
 
-Status deve sempre possuir:
+Não é automático ao salvar o último campo.
+
+```text
+8 etapas completas
+→ Revisão disponível
+→ Gestor revisa
+→ Concluir preparação
+→ Pronto
+```
+
+## 3. Pronto → Preparando
+
+Antes da ativação, se edição/desconexão tornar requisito obrigatório
+incompleto:
+
+> **Pronto → Preparando**
+
+A interface explica o que falta.
+
+## 4. Estados da etapa
+
+- Não iniciada
+- Em andamento
+- Completa
+
+## 5. Estado da Revisão
+
+- Bloqueada
+- Disponível
+- Concluída
+
+## 6. Estados de integração
+
+- Não configurado
+- Conectando
+- Conectado
+- Precisa de atenção
+- Desconectado
+- Não necessário
+
+## 7. Regras gerais
+
+Status possui:
 - texto;
 - semântica;
-- ação aplicável;
-- cor acessível como reforço, nunca como único indicador.
+- ação;
+- cor apenas como reforço.
 
-## 3. Estados de interface
-
-Toda tela deve considerar quando aplicável:
+## 8. Estados de interface
 
 - loading;
 - empty;
@@ -46,25 +94,6 @@ Toda tela deve considerar quando aplicável:
 - integration disconnected;
 - attention required.
 
-## 4. Empty states
+## 9. Estados assíncronos
 
-Devem:
-- explicar o estado;
-- dizer por que importa;
-- oferecer próximo passo quando existir.
-
-Exemplo Minha Equipe vazia:
-> Sua equipe digital ainda está vazia. Contrate seu primeiro funcionário para começar.
-
-CTA:
-**Conhecer funcionários**
-
-## 5. Estados irreversíveis/destrutivos
-
-Ações de impacto relevante devem usar confirmação proporcional ao risco.
-
-## 6. Estados assíncronos
-
-Integrações e mensagens podem possuir estado pendente.
-
-A interface nunca deve apresentar como concluída uma ação ainda não confirmada.
+Nunca apresentar como concluída ação ainda não confirmada.

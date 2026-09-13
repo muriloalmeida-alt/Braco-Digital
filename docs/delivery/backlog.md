@@ -2,8 +2,8 @@
 
 ## Resumo
 
-- 10 épicos
-- 76 histórias
+- 11 épicos ativos + E11 planejado
+- 83 histórias ativas
 - 6 sprints
 
 | Story | Título | Épico | Prioridade | Sprint |
@@ -85,13 +85,22 @@
 | US75 | Visualizar período | E10 — Resultados e Relatórios | P1 | Sprint 06 |
 | US76 | Comparar resultado | E10 — Resultados e Relatórios | P1 | Sprint 06 |
 
+| US77 | Visualizar Landing Page | E12 — Aquisição e Diagnóstico de Equipe | P1 | Sprint 02 |
+| US78 | Iniciar diagnóstico de equipe | E12 — Aquisição e Diagnóstico de Equipe | P1 | Sprint 02 |
+| US79 | Informar necessidades da empresa | E12 — Aquisição e Diagnóstico de Equipe | P1 | Sprint 02 |
+| US80 | Priorizar problemas da empresa | E12 — Aquisição e Diagnóstico de Equipe | P1 | Sprint 02 |
+| US81 | Gerar equipe recomendada | E12 — Aquisição e Diagnóstico de Equipe | P1 | Sprint 02 |
+| US82 | Visualizar disponibilidade dos Braços recomendados | E12 — Aquisição e Diagnóstico de Equipe | P1 | Sprint 02 |
+| US83 | Registrar lead interessado | E12 — Aquisição e Diagnóstico de Equipe | P1 | Sprint 02 |
+
+## Nota — E12 Growth na Sprint 02
+
+E12 é um track público de aquisição. Não cria conta, tenant ou usuário. O resultado do diagnóstico pode gerar um lead para onboarding comercial/manual. Não substitui E11/PRD 03.
+
 ## Nota — Onboarding de conta (PD1)
 
 As Sprints 01–06 acima operam em **piloto com onboarding manual**: empresa
 e primeiro usuário Owner são provisionados administrativamente pela equipe
-BRAÇO (nenhuma história deste backlog cobre criação de conta/empresa
-self-service). O fluxo self-service será formalizado como um futuro
+BRAÇO. O fluxo self-service será formalizado como um futuro
 **E11 — Registro e Onboarding** (PRD 03), com planejamento inicial na
-**Sprint 07** — fora do backlog atual de 10 épicos/76 histórias até ser
-priorizado. Ver `docs/10-product-roadmap.md` e
-`docs/technical/16-product-decisions-required.md` (PD1).
+**Sprint 07**.
