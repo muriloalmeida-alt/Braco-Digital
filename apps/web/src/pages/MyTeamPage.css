@@ -1,0 +1,70 @@
+.braco-my-team-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--braco-space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--braco-space-5);
+}
+
+.braco-my-team-page__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--braco-space-3);
+  max-width: 480px;
+}
+
+.braco-my-team-page__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--braco-space-4);
+}
+
+@media (min-width: 700px) {
+  .braco-my-team-page__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1040px) {
+  .braco-my-team-page__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.braco-my-team-page__card-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.braco-my-team-page__card {
+  transition: box-shadow 120ms ease;
+}
+
+.braco-my-team-page__card-link:hover .braco-my-team-page__card {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.braco-my-team-page__card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--braco-space-2);
+}
+
+.braco-my-team-page__card-header h3 {
+  margin: 0;
+  font-size: var(--md-sys-typescale-title-medium-size);
+}
+
+.braco-my-team-page__role {
+  margin: 4px 0 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-body-medium-size);
+}
+
+.braco-my-team-page__next-step {
+  margin: var(--braco-space-3) 0 0;
+  font-size: var(--md-sys-typescale-body-medium-size);
+}

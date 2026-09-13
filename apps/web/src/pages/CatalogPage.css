@@ -1,0 +1,41 @@
+.braco-catalog-page__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--braco-space-4);
+  margin-top: var(--braco-space-5);
+}
+
+/* Medium — docs/design/18-catalog-availability-ui-spec.md §11 */
+@container (min-width: 700px) {
+  .braco-catalog-page__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Fallback sem Container Queries + Expanded via viewport */
+@media (min-width: 700px) {
+  .braco-catalog-page__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1040px) {
+  .braco-catalog-page__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.braco-catalog-page__error {
+  margin-top: var(--braco-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--braco-space-2);
+  align-items: flex-start;
+}
+
+.braco-catalog-page__hire-error {
+  color: var(--md-sys-color-error);
+  background: var(--md-sys-color-error-container);
+  padding: var(--braco-space-3);
+  border-radius: var(--md-sys-shape-corner-small);
+}

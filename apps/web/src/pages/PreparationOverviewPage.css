@@ -1,0 +1,55 @@
+.braco-preparation-page {
+  max-width: 560px;
+}
+
+.braco-preparation-page__back {
+  color: var(--md-sys-color-on-surface-variant);
+  text-decoration: none;
+  font-size: var(--md-sys-typescale-body-medium-size);
+  display: inline-block;
+  margin-bottom: var(--braco-space-4);
+}
+
+.braco-preparation-page__next {
+  margin: var(--braco-space-4) 0;
+}
+
+.braco-preparation-page__sections {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-medium);
+  overflow: hidden;
+}
+
+.braco-preparation-page__section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--braco-space-3) var(--braco-space-4);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  background: var(--md-sys-color-surface-container-low);
+}
+
+.braco-preparation-page__section:last-child {
+  border-bottom: none;
+}
+
+.braco-preparation-page__section-status {
+  font-size: var(--md-sys-typescale-label-medium-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.braco-preparation-page__section-status--complete {
+  color: var(--md-ext-color-success);
+  font-weight: 700;
+}
+
+.braco-preparation-page__note {
+  margin-top: var(--braco-space-4);
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-body-medium-size);
+}

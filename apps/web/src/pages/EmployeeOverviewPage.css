@@ -1,0 +1,39 @@
+.braco-employee-overview {
+  max-width: 560px;
+}
+
+.braco-employee-overview__back {
+  color: var(--md-sys-color-on-surface-variant);
+  text-decoration: none;
+  font-size: var(--md-sys-typescale-body-medium-size);
+  display: inline-block;
+  margin-bottom: var(--braco-space-4);
+}
+
+.braco-employee-overview__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--braco-space-3);
+}
+
+.braco-employee-overview__hired-at {
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-body-medium-size);
+}
+
+.braco-employee-overview__next-step {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--braco-space-3);
+  background: var(--md-sys-color-surface-container);
+  border-radius: var(--md-sys-shape-corner-medium);
+  padding: var(--braco-space-4);
+  margin-top: var(--braco-space-4);
+}
+
+.braco-employee-overview__next-step span {
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface-variant);
+}
