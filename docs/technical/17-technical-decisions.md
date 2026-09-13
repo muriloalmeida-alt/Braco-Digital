@@ -496,3 +496,139 @@ REAL`; não reaproveita `confirmConnection`.
 **Impacto futuro:** qualquer integração real futura (BSP/Google) precisa
 gravar `connectionMode: REAL` explicitamente para contar em produção —
 isso já está documentado no código como o contrato esperado.
+
+---
+
+## TD20 — Bootstrap da role pública fora das migrações do Prisma; escrita do Lead sem `RETURNING`
+
+**Contexto:** implementação de TD15 (role `braco_public`, Sprint 02
+Track A). Dois problemas concretos surgiram só na implementação, não
+previstos na análise de tech readiness:
+
+1. `CREATE ROLE`/`GRANT <role> TO <role>` exigem o atributo `CREATEROLE`
+   (ou superusuário). A role usada para rodar `prisma migrate deploy`
+   (`braco` em dev; o usuário de app do Postgres gerenciado em
+   staging/produção) não tem esse atributo — e não deveria precisar ter,
+   por menor privilégio. Confirmado no ambiente de dev: `prisma migrate
+   dev` falhou com `permission denied to create role`.
+2. `tx.lead.create()` do Prisma sempre gera `INSERT ... RETURNING`, e o
+   Postgres exige privilégio equivalente a `SELECT` sobre as colunas
+   retornadas para aceitar `RETURNING` — mesmo dentro do próprio INSERT.
+   Conceder esse `SELECT` a `braco_public` (mesmo com uma policy de RLS
+   sem `USING` para SELECT, que corretamente bloqueia um `SELECT`
+   avulso) ainda quebra a garantia pretendida: a primeira tentativa,
+   com `SELECT` concedido, mudou o erro de "permission denied" para
+   "new row violates row-level security policy" no próprio `RETURNING`
+   — ou seja, ou se abre uma política de leitura (larga demais) ou o
+   `RETURNING` simplesmente não funciona.
+
+**Decisão:**
+1. `CREATE ROLE braco_public` + `GRANT braco_public TO <role de app>`
+   viram um script separado, **fora** de `prisma/migrations/`
+   (`prisma/bootstrap/public-role.sql`), documentado para rodar uma
+   única vez por ambiente, à mão, por um superusuário/admin do Postgres,
+   **antes** do primeiro `prisma migrate deploy` que referencia a role.
+   A migração normal (`sprint02_track_b_public_leads`) só concede
+   privilégios sobre objetos que `braco` já possui — isso o dono de uma
+   tabela sempre pode fazer, sem `CREATEROLE`.
+2. `LeadsService.create` **não** usa `tx.lead.create()`. Gera `id`
+   (`crypto.randomUUID()`) e `createdAt` (`new Date()`) na aplicação
+   antes do INSERT, e grava a linha via `tx.$executeRaw` com um `INSERT`
+   simples parametrizado, sem `RETURNING`. `braco_public` mantém
+   exatamente os dois privilégios pretendidos por TD15 — `SELECT` em
+   `employee_types`, `INSERT` em `leads` — nada além disso, comprovado
+   pelo teste e2e negativo (`test/public-growth.e2e-spec.ts`, describe
+   "Isolamento — role pública do banco").
+**Justificativa:** manter o princípio de menor privilégio real (não só
+"privilégio mínimo exceto quando o ORM pede mais") — abrir `SELECT`
+para acomodar `RETURNING` reintroduziria exatamente o vetor que TD15
+existe para fechar.
+**Trade-offs:** `LeadsService` não pode usar a API idiomática do Prisma
+Client para este único INSERT; a resposta ao cliente depende de valores
+gerados na aplicação em vez de lidos de volta do banco (aceitável aqui:
+`id`/`createdAt` não têm nenhuma lógica gerada só no servidor de banco).
+Qualquer novo endpoint público de escrita futuro deve repetir o mesmo
+padrão (gerar `id`/timestamps na aplicação, `INSERT` sem `RETURNING`)
+enquanto a role pública não tiver `SELECT` em sua própria tabela de
+escrita.
+**Reversibilidade:** alta — se um dia for aceitável dar `SELECT` restrito
+a `braco_public` (ex.: via uma view ou policy mais elaborada), a troca
+para `tx.lead.create()` é local a `LeadsService`.
+**Impacto futuro:** documentar isso explicitamente evita que uma
+refatoração futura "simplifique" para `tx.lead.create()` sem perceber
+que isso reabriria a superfície de leitura pública.
+
+## TD21 — Captação de lead: três modos explícitos (DISABLED/SYNTHETIC/REAL), não um booleano
+
+**Contexto:** Product + Product Design Review 01 apontou que
+`PUBLIC_LEAD_CAPTURE_REAL=false` (booleano) ainda aceitava e persistia
+PII real (nome, empresa, WhatsApp, e-mail), só marcando
+`isSynthetic=true` no registro gravado. Um booleano com esse
+comportamento não é fail-closed: dado pessoal real não vira sintético
+por causa de uma flag, e "desligado" continuava significando "grava do
+mesmo jeito, só rotula diferente".
+
+**Decisão:** substituir o booleano por `PUBLIC_LEAD_CAPTURE_MODE` com
+três valores (`getPublicLeadCaptureMode()`,
+`apps/api/src/public/public-launch-gate.ts`):
+- **DISABLED** (default fail-closed — valor ausente, vazio ou não
+  reconhecido resolve para este modo): `POST /public/leads` rejeita a
+  submissão inteira com 403 **antes** de qualquer normalização de
+  WhatsApp, chamada ao motor de recomendação ou gravação — nenhuma PII
+  é tocada, não só "não persistida ao final".
+- **SYNTHETIC** (aceita o sinônimo `TEST`): formulário habilitado,
+  grava `isSynthetic=true`.
+- **REAL** (só quando o valor é explicitamente `REAL`): grava
+  `isSynthetic=false`.
+
+`GET /public/leads/capture-mode` expõe o modo atual como autoridade de
+backend — o frontend nunca infere produção/captação sozinho, mesmo
+princípio de `canSimulateConnection` do Track A (TD19 da branch
+`feature/sprint-02-track-a-preparation`; ver nota de numeração abaixo).
+Em `DiagnosticPage.tsx`, o passo `resultado` troca o CTA de captura por
+um estado não capturante sob `DISABLED` (sem prometer contato
+posterior), e o passo `contato` tem uma guarda independente que nunca
+renderiza o formulário sob `DISABLED` — mesmo que o usuário force a
+URL/estado de navegação client-side, sem depender só da decisão já
+tomada em `resultado`.
+
+**Justificativa:** fail-closed real precisa impedir a PII de entrar no
+sistema, não só rotulá-la depois de já ter entrado. Três modos
+nomeados (em vez de um booleano com um "modo verdadeiro implícito" e
+um "modo falso que ainda captura") tornam o estado de produção
+inequívoco e auditável — o valor da variável de ambiente já diz o que
+vai acontecer, sem precisar ler o código para saber que `false` ainda
+grava.
+
+**Trade-offs:** mais um valor possível de configurar corretamente por
+ambiente (três em vez de dois), mitigado pelo fail-closed no parsing —
+qualquer valor não reconhecido cai em `DISABLED`, nunca em `SYNTHETIC`
+ou `REAL` por acidente de digitação.
+
+**Reversibilidade:** alta — é uma troca local ao parsing da variável de
+ambiente e às leituras de `getPublicLeadCaptureMode()`/
+`getLeadCaptureMode()`; nenhum dado gravado depende do mecanismo de
+leitura do modo, só do valor de `isSynthetic` já persistido por linha.
+
+**Impacto futuro:** a copy exibida em `SYNTHETIC`
+("Ambiente de teste — use apenas dados fictícios.") e em `REAL` (ainda
+a mesma frase provisória de antes desta revisão) **não** é aviso
+jurídico aprovado e **não** deve ser tratada como a solução final de
+PD6 — o aviso/copy/link legal definitivos para `REAL` ficam para
+Produto/Design depois do Jurídico, antes de `REAL` ser ativado em
+produção.
+
+**Nota de numeração:** esta entrada nasceu como TD20 na branch
+`feature/sprint-02-track-b-growth`, numerada antes do rebase sobre
+`main` pós-merge de Track A. `feature/sprint-02-track-a-preparation`
+tinha sua própria TD19 (guarda de produção contra conexão simulada,
+Product Review 01) — as duas branches divergiram antes de qualquer uma
+mergear em `main`, então numeraram de forma independente e colidiram
+com a TD19 já existente nesta branch (TD15/bootstrap de role pública).
+Resolução aditiva aplicada no rebase de Track B sobre a nova `main`
+(depois do merge de #20): a TD19 de Track A (guarda de produção) foi
+preservada como TD19; a TD19 original desta branch (bootstrap de role
+pública/`RETURNING`) foi renumerada para TD20; esta entrada, que tinha
+nascido como a segunda TD20 desta branch, virou **TD21** — nenhuma das
+três teve seu conteúdo alterado, só o número desta e da de bootstrap de
+role.

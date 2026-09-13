@@ -58,4 +58,32 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       return fn(tx);
     });
   }
+
+  /**
+   * Terceiro modo de acesso a dados: PÚBLICO (Track B, TD15,
+   * docs/technical/20-sprint-02-tech-readiness.md §16). Nem tenant, nem
+   * usuário autenticado — a rota que chama isto não tem `req.user` nem
+   * `company_id` nenhum.
+   *
+   * `SET LOCAL ROLE braco_public` troca o privilégio efetivo da conexão,
+   * só dentro desta transação, para exatamente os privilégios da role
+   * `braco_public` (GRANT SELECT em employee_types, GRANT INSERT em
+   * leads — nada além disso, `prisma/bootstrap/public-role.sql` +
+   * migration `sprint02_track_b_public_leads`). Isso não é "confiar que o
+   * código só vai fazer a query certa": é o próprio Postgres recusando
+   * qualquer outra tabela, mesmo que um bug de aplicação tentasse ler
+   * `companies` ou `digital_employees` a partir daqui.
+   *
+   * A role de aplicação (`braco`, dona das tabelas) precisa ser membro de
+   * `braco_public` para o `SET ROLE` funcionar — ver bootstrap. `SET
+   * LOCAL` é revertido automaticamente ao fim da transação.
+   */
+  async withPublicAccess<T>(
+    fn: (tx: Prisma.TransactionClient) => Promise<T>,
+  ): Promise<T> {
+    return this.$transaction(async (tx) => {
+      await tx.$executeRawUnsafe(`SET LOCAL ROLE braco_public`);
+      return fn(tx);
+    });
+  }
 }

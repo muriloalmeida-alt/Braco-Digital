@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /$
+Allow: /monte-sua-equipe$
+Disallow: /equipe
+Disallow: /login
+
+Sitemap: https://braco.digital/sitemap.xml

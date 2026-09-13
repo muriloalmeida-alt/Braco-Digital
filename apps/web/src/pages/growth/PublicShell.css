@@ -1,0 +1,46 @@
+.braco-public-shell {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--md-sys-color-surface);
+}
+
+.braco-public-shell__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--braco-space-4) var(--braco-space-5);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.braco-public-shell__brand {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.braco-public-shell__logo {
+  height: 28px;
+  width: auto;
+}
+
+.braco-public-shell__enter {
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  font-size: var(--md-sys-typescale-label-large-size);
+  color: var(--md-sys-color-primary);
+  text-decoration: none;
+  padding: var(--braco-space-2) var(--braco-space-3);
+  border-radius: var(--md-sys-shape-corner-small);
+}
+
+.braco-public-shell__enter:hover {
+  background: var(--md-sys-color-surface-container-lowest);
+}
+
+.braco-public-shell__footer {
+  margin-top: auto;
+  padding: var(--braco-space-5);
+  text-align: center;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-body-medium-size);
+}

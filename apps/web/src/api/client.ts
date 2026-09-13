@@ -31,6 +31,9 @@ export function loadStoredToken(): string | null {
   return authToken;
 }
 
+// Exportado: Track B (api/public.ts, api/growth-analytics.ts) reusa este
+// mesmo cliente HTTP para as rotas públicas — nunca duplica a lógica de
+// headers/erro num segundo fetch wrapper.
 export async function request<T>(
   path: string,
   options: RequestInit & { idempotencyKey?: string } = {},

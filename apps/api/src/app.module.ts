@@ -5,6 +5,7 @@ import { DigitalEmployeesModule } from './digital-employees/digital-employees.mo
 import { EmployeeTypesModule } from './employee-types/employee-types.module';
 import { PreparationModule } from './preparation/preparation.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { PublicModule } from './public/public.module';
 import { WorkManualModule } from './work-manual/work-manual.module';
 
 @Module({
@@ -16,6 +17,7 @@ import { WorkManualModule } from './work-manual/work-manual.module';
     DigitalEmployeesModule,
     WorkManualModule,
     PreparationModule,
+    PublicModule,
   ],
 })
 export class AppModule {}
