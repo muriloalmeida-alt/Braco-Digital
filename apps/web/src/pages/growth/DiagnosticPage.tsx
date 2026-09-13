@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import { ApiError } from '../../api/client';
 import { trackGrowthEvent } from '../../api/growth-analytics';
@@ -25,32 +25,59 @@ import {
   loadDiagnosticAnswers,
   saveDiagnosticAnswers,
 } from './diagnostic-state';
+import { resolveValidDiagnosticStep, type DiagnosticStep } from './diagnostic-navigation';
 import { PublicShell } from './PublicShell';
 import './growth.css';
 
-type Step = '1' | '2' | '3' | '4' | 'resultado' | 'contato' | 'sucesso';
+type Step = DiagnosticStep | 'sucesso';
 const TOTAL_STEPS = 4;
+/** Recuperação de `recommendation`/`ruleVersion` após hard reload em
+ * `resultado`/`contato` (issue #28) — o backend continua a única
+ * autoridade; nunca tratamos um valor recuperado do cliente como fonte
+ * de verdade nem inventamos um passo intermediário só para escondê-la. */
+type RecoveryStatus = 'idle' | 'loading' | 'error';
 
 /**
  * US78-83 — "Monte sua equipe". Passo atual refletido em `?step=` (back/
  * forward nativos do navegador); respostas acumuladas em sessionStorage.
  * docs/technical/20-sprint-02-tech-readiness.md §8.
+ *
+ * Issue #28: nenhuma navegação acontece durante a renderização. Passos
+ * inválidos/incompletos (incluindo `?step=` ausente/desconhecido) usam
+ * `<Navigate replace>` a partir de `resolveValidDiagnosticStep` (pura,
+ * `diagnostic-navigation.ts`); `recommendation`/`ruleVersion` — que só
+ * vivem em memória, não em sessionStorage — são recuperados via
+ * `useEffect` quando um hard reload os perde mas as respostas persistidas
+ * ainda são suficientes para regenerá-los pelo backend.
  */
 export function DiagnosticPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const step = (searchParams.get('step') as Step | null) ?? '1';
+  const rawStep = searchParams.get('step');
   const [answers, setAnswers] = useState<DiagnosticAnswers>(() => loadDiagnosticAnswers());
   const [recommendation, setRecommendation] = useState<RankedBraco[] | null>(null);
   const [ruleVersion, setRuleVersion] = useState<string | null>(null);
   const [recommendationError, setRecommendationError] = useState<string | null>(null);
+  const [recovery, setRecovery] = useState<RecoveryStatus>('idle');
   const [leadName, setLeadName] = useState('');
   const [leadWasSynthetic, setLeadWasSynthetic] = useState(false);
   // Product Review 01 — a UI nunca infere o modo de captação sozinha,
   // sempre pergunta ao backend (mesmo princípio de `canSimulateConnection`
-  // do Track A). Default local é DISABLED (fail-closed) até a resposta
-  // chegar ou se a checagem falhar.
-  const [captureMode, setCaptureMode] = useState<LeadCaptureMode>('DISABLED');
+  // do Track A). `null` = "ainda não sabemos" — issue #28: em hard reload
+  // direto em `?step=contato`, tratar "ainda não sabemos" como se já
+  // fosse DISABLED redirecionaria para `resultado` antes mesmo da
+  // checagem responder, e o resultado ficaria preso lá mesmo que o modo
+  // real seja SYNTHETIC/REAL (a URL já teria mudado). Fail-closed aqui
+  // significa nunca mostrar o formulário enquanto não soubermos — não
+  // decidir (redirecionar) por adivinhação. Falha na checagem resolve
+  // para 'DISABLED' de verdade (decisão final, não mais "não sei").
+  const [captureMode, setCaptureMode] = useState<LeadCaptureMode | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
+
+  // `rawStep === null` (URL sem ?step=) é o ponto de entrada normal e
+  // sempre resolve para '1' sem precisar de redirect (ver abaixo). Um
+  // `?step=` explícito mas inválido/incompleto é o caso que a issue #28
+  // cobre: resolvido aqui, sem navegar durante o render.
+  const resolvedStep: Step = rawStep === 'sucesso' ? 'sucesso' : resolveValidDiagnosticStep(rawStep, answers);
 
   useEffect(() => saveDiagnosticAnswers(answers), [answers]);
 
@@ -62,7 +89,9 @@ export function DiagnosticPage() {
         if (!cancelled) setCaptureMode(res.mode);
       })
       .catch(() => {
-        // Fail-closed: se a checagem falhar, permanece DISABLED.
+        // Fail-closed: se a checagem falhar, a decisão final (não mais
+        // "não sei") é DISABLED.
+        if (!cancelled) setCaptureMode('DISABLED');
       });
     return () => {
       cancelled = true;
@@ -72,14 +101,14 @@ export function DiagnosticPage() {
   useEffect(() => {
     document.title = 'Monte sua equipe — BRAÇO';
     headingRef.current?.focus();
-  }, [step]);
+  }, [resolvedStep, recovery]);
 
   useEffect(() => {
-    if (step === '1' && !sessionStorage.getItem('braco.growth.startFired')) {
+    if (resolvedStep === '1' && !sessionStorage.getItem('braco.growth.startFired')) {
       trackGrowthEvent('diagnostic_start');
       sessionStorage.setItem('braco.growth.startFired', '1');
     }
-  }, [step]);
+  }, [resolvedStep]);
 
   function goToStep(next: Step) {
     setSearchParams({ step: next });
@@ -89,6 +118,33 @@ export function DiagnosticPage() {
     trackGrowthEvent('diagnostic_step_complete', { step: current });
     goToStep(next);
   }
+
+  /**
+   * Issue #28 — chamada pelo fim normal do passo 4 (`finishDiagnostic`) e
+   * pela recuperação em hard reload de `resultado`/`contato`
+   * (`recommendation`/`ruleVersion` só vivem em memória). Nos dois casos o
+   * backend é a única autoridade — nunca aceitamos um ranking vindo do
+   * cliente, e um valor recuperado não é tratado diferente de um recém-
+   * calculado.
+   */
+  async function recoverRecommendation() {
+    setRecovery('loading');
+    try {
+      const result = await publicApi.getRecommendation(answers.needs, answers.priority as NeedKey);
+      setRecommendation(result.ranking);
+      setRuleVersion(result.ruleVersion);
+      setRecovery('idle');
+    } catch {
+      setRecovery('error');
+    }
+  }
+
+  useEffect(() => {
+    if ((resolvedStep === 'resultado' || resolvedStep === 'contato') && recommendation === null && recovery === 'idle') {
+      recoverRecommendation();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- recoverRecommendation lê `answers` atual via closure; recriar a cada render é intencional, não deve disparar o efeito de novo.
+  }, [resolvedStep, recommendation, recovery]);
 
   async function finishDiagnostic() {
     trackGrowthEvent('diagnostic_step_complete', { step: '4' });
@@ -108,7 +164,25 @@ export function DiagnosticPage() {
     }
   }
 
-  if (step === '1') {
+  // Issue #28 — nenhum redirect acontece durante o render a partir daqui:
+  // `resolvedStep` já foi calculado de forma síncrona e pura (topo do
+  // componente) a partir das respostas persistidas. Se a URL pede um
+  // passo diferente do que é válido agora, `<Navigate replace>` troca a
+  // URL sem empilhar histórico e sem nunca deixar `#root` vazio.
+  if (rawStep !== null && rawStep !== resolvedStep) {
+    return <Navigate to={{ pathname: '/monte-sua-equipe', search: `?step=${resolvedStep}` }} replace />;
+  }
+
+  // Segunda dimensão do guard de `contato` (Product Review 01): não é
+  // sobre completude de respostas, é sobre o modo de captação. Resolvida
+  // antes de tentar recuperar `recommendation` — evita uma chamada de
+  // rede para uma tela da qual estamos saindo, e nunca deixa o formulário
+  // "piscar" em DISABLED enquanto os dados são recuperados.
+  if (resolvedStep === 'contato' && captureMode === 'DISABLED') {
+    return <Navigate to={{ pathname: '/monte-sua-equipe', search: '?step=resultado' }} replace />;
+  }
+
+  if (resolvedStep === '1') {
     return (
       <DiagnosticShell step={1} headingRef={headingRef} title="Conte um pouco sobre sua empresa">
         <Step1
@@ -120,7 +194,7 @@ export function DiagnosticPage() {
     );
   }
 
-  if (step === '2') {
+  if (resolvedStep === '2') {
     return (
       <DiagnosticShell step={2} headingRef={headingRef} title="O que está ficando para depois?">
         <Step2
@@ -133,11 +207,7 @@ export function DiagnosticPage() {
     );
   }
 
-  if (step === '3') {
-    if (answers.needs.length === 0) {
-      goToStep('2');
-      return null;
-    }
+  if (resolvedStep === '3') {
     return (
       <DiagnosticShell step={3} headingRef={headingRef} title="Se você pudesse resolver uma dessas coisas primeiro, qual seria?">
         <Step3
@@ -150,11 +220,7 @@ export function DiagnosticPage() {
     );
   }
 
-  if (step === '4') {
-    if (!answers.priority) {
-      goToStep('3');
-      return null;
-    }
+  if (resolvedStep === '4') {
     return (
       <DiagnosticShell step={4} headingRef={headingRef} title="Quantos contatos ou demandas desse tipo chegam em um dia normal?">
         <Step4
@@ -168,11 +234,46 @@ export function DiagnosticPage() {
     );
   }
 
-  if (step === 'resultado') {
-    if (!recommendation) {
-      goToStep('4');
-      return null;
+  if (resolvedStep === 'resultado' || resolvedStep === 'contato') {
+    // `resolvedStep` já garante que as respostas estão completas o
+    // suficiente (`isDiagnosticComplete`) — falta (a) `recommendation`
+    // em memória (hard reload só preserva `answers`, via sessionStorage;
+    // `recoverRecommendation` a repõe chamando o backend de novo, nunca
+    // inventando um ranking no cliente) e, só para `contato`, (b) saber
+    // com certeza o `captureMode` antes de decidir entre mostrar o
+    // formulário ou redirecionar — ver comentário no estado acima.
+    const waitingForCaptureMode = resolvedStep === 'contato' && captureMode === null;
+
+    if (recovery === 'error') {
+      return (
+        <PublicShell>
+          <div className="braco-diagnostic">
+            <h1 ref={headingRef} tabIndex={-1} className="braco-diagnostic__title">
+              Não foi possível recuperar seu diagnóstico
+            </h1>
+            <p>Isso pode acontecer por uma falha de conexão. Suas respostas continuam salvas — você pode tentar de novo.</p>
+            <div className="braco-diagnostic__actions" style={{ justifyContent: 'flex-start' }}>
+              <Button onClick={recoverRecommendation}>Tentar novamente</Button>
+            </div>
+          </div>
+        </PublicShell>
+      );
     }
+    if (recommendation === null || recovery === 'loading' || waitingForCaptureMode) {
+      return (
+        <PublicShell>
+          <div className="braco-diagnostic">
+            <h1 ref={headingRef} tabIndex={-1} className="braco-diagnostic__title">
+              Carregando sua recomendação…
+            </h1>
+            <p>Só um instante enquanto recuperamos o resultado do seu diagnóstico.</p>
+          </div>
+        </PublicShell>
+      );
+    }
+  }
+
+  if (resolvedStep === 'resultado') {
     return (
       <PublicShell>
         <div className="braco-diagnostic">
@@ -180,7 +281,7 @@ export function DiagnosticPage() {
             Sua equipe recomendada
           </h1>
           <ResultView
-            ranking={recommendation}
+            ranking={recommendation as RankedBraco[]}
             captureMode={captureMode}
             onContinue={() => goToStep('contato')}
           />
@@ -189,19 +290,9 @@ export function DiagnosticPage() {
     );
   }
 
-  if (step === 'contato') {
-    if (!recommendation || !ruleVersion) {
-      goToStep('4');
-      return null;
-    }
-    if (captureMode === 'DISABLED') {
-      // Guarda defensiva (Product Review 01): mesmo com acesso direto a
-      // ?step=contato, o formulário de lead nunca pode renderizar quando
-      // a captação está desabilitada — a decisão de exibir já foi tomada
-      // em ResultView, mas essa etapa não confia nisso, confia no modo.
-      goToStep('resultado');
-      return null;
-    }
+  if (resolvedStep === 'contato') {
+    // captureMode === 'DISABLED' já foi tratado (redirect) antes deste
+    // bloco — chegar aqui garante SYNTHETIC ou REAL.
     return (
       <PublicShell>
         <div className="braco-diagnostic">
@@ -210,8 +301,8 @@ export function DiagnosticPage() {
           </h1>
           <LeadForm
             answers={answers}
-            ranking={recommendation}
-            captureMode={captureMode}
+            ranking={recommendation as RankedBraco[]}
+            captureMode={captureMode as LeadCaptureMode}
             onSuccess={(name, isSynthetic) => {
               setLeadName(name);
               setLeadWasSynthetic(isSynthetic);
@@ -482,15 +573,18 @@ function ResultView({
   onContinue,
 }: {
   ranking: RankedBraco[];
-  captureMode: LeadCaptureMode;
+  captureMode: LeadCaptureMode | null;
   onContinue: () => void;
 }) {
   const hasAvailable = ranking.some((r) => r.availability === 'AVAILABLE');
   const firstIsAvailable = ranking[0]?.availability === 'AVAILABLE';
   // Product Review 01: em produção sem captação liberada (PD6 fechado),
   // o resultado do diagnóstico continua funcionando, mas o CTA nunca leva
-  // a um formulário de captação, nem promete contato posterior.
-  const captureDisabled = captureMode === 'DISABLED';
+  // a um formulário de captação, nem promete contato posterior. `null`
+  // ("ainda não sabemos o modo", issue #28) recebe o mesmo tratamento de
+  // `DISABLED` aqui — nunca oferecer o CTA de captura antes de ter
+  // certeza; assim que o modo real chegar, o próximo render já reflete.
+  const captureDisabled = captureMode !== 'SYNTHETIC' && captureMode !== 'REAL';
 
   return (
     <div>
