@@ -95,12 +95,6 @@
   margin: 0;
 }
 
-.braco-login-page__hint {
-  margin-top: var(--braco-space-4);
-  font-size: var(--md-sys-typescale-label-medium-size);
-  color: var(--md-sys-color-on-surface-variant);
-}
-
 /* Expanded: mostra o painel institucional; esconde a logo compacta acima
  * do formulário (a marca já aparece no painel). */
 @media (min-width: 900px) {
