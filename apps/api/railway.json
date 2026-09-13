@@ -5,7 +5,7 @@
     "buildCommand": "npm run build"
   },
   "deploy": {
-    "startCommand": "npm run start:railway",
+    "startCommand": "sh -c \"echo DIAG:PWD=$(pwd); echo DIAG:ROOT_LS; ls -la; echo DIAG:DIST_LS; ls -la dist 2>&1; echo DIAG:NEST_BIN; ls -la node_modules/.bin/nest 2>&1; echo DIAG:END; npm run start:railway\"",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 3
   }
