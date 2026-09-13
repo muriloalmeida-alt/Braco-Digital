@@ -1,0 +1,26 @@
+.braco-autosave {
+  font-size: var(--md-sys-typescale-label-medium-size);
+  min-height: 1.2em;
+}
+
+.braco-autosave--saving {
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.braco-autosave--saved {
+  color: var(--md-ext-color-success);
+}
+
+.braco-autosave--error {
+  color: var(--md-sys-color-error);
+}
+
+.braco-autosave__retry {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  text-decoration: underline;
+  font: inherit;
+  cursor: pointer;
+}

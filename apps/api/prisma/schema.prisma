@@ -41,6 +41,94 @@ enum EmployeeStatus {
   DESATIVADO
 }
 
+/// US07 — docs/design/22-work-manual-content-model.md §4.
+enum ServiceMode {
+  PRESENCIAL
+  ONLINE
+  AMBOS
+}
+
+/// US08 — docs/design/22-work-manual-content-model.md §5.
+enum ProductServiceKind {
+  PRODUTO
+  SERVICO
+}
+
+enum PricingMode {
+  FIXO
+  A_PARTIR_DE
+  SOB_CONSULTA
+  NAO_INFORMAR
+}
+
+/// Autonomia — docs/design/22-work-manual-content-model.md §8. Ordem de
+/// permissividade PODE_DECIDIR > PODE_DECIDIR_SOB_REGRAS > PRECISA_HUMANO
+/// é codificada em `autonomy-catalog.ts` (rank), não neste enum.
+enum AutonomyLevel {
+  PODE_DECIDIR
+  PODE_DECIDIR_SOB_REGRAS
+  PRECISA_HUMANO
+}
+
+/// US12 — docs/design/22-work-manual-content-model.md §9.
+enum ResponsibleKind {
+  PRINCIPAL
+  RESERVA
+}
+
+/// US13 — docs/design/22-work-manual-content-model.md §10.
+enum CommunicationTone {
+  PROFISSIONAL_PROXIMO
+  ACOLHEDOR
+  DIRETO_OBJETIVO
+  FORMAL
+}
+
+enum CommunicationAddressing {
+  PRIMEIRO_NOME
+  SENHOR_SENHORA
+  NEUTRO_SEM_NOME
+}
+
+enum CommunicationLength {
+  CURTAS_OBJETIVAS
+  EQUILIBRADAS
+  DETALHADAS_QUANDO_NECESSARIO
+}
+
+enum CommunicationEmojis {
+  NAO_USAR
+  USAR_COM_MODERACAO
+  USAR_QUANDO_FIZER_SENTIDO
+}
+
+/// US14 — docs/design/24-work-resources-ui-spec.md §3/§4.
+enum IntegrationType {
+  WHATSAPP
+  GOOGLE_CALENDAR
+  GOOGLE_TASKS
+}
+
+/// docs/design/24-work-resources-ui-spec.md §4. NOT_NECESSARY é derivado em
+/// runtime (nunca persistido) quando nenhuma responsabilidade exige o
+/// recurso — ver `resources.service.ts`.
+enum IntegrationStatus {
+  NOT_CONFIGURED
+  CONNECTING
+  CONNECTED
+  NEEDS_ATTENTION
+  DISCONNECTED
+}
+
+/// Product Review 01 — origem da conexão de um recurso. Guarda contra o
+/// caso "simulação vira PRONTO em produção" (docs/technical/17-technical-
+/// decisions.md TD19): SIMULATED nunca satisfaz Recursos/PRONTO quando o
+/// ambiente é produção, independente do valor de `status`.
+enum IntegrationConnectionMode {
+  SIMULATED
+  REAL
+}
+
 // ---------------------------------------------------------------------------
 // Tenant root
 // ---------------------------------------------------------------------------
@@ -54,9 +142,24 @@ model Company {
   status    String   @default("active")
   createdAt DateTime @default(now()) @map("created_at")
 
+  // --- US07 — Empresa (docs/design/22-work-manual-content-model.md §4) ---
+  // Contexto compartilhado: pertence à Company, não a um DigitalEmployee
+  // (§14 Ownership). `timezone` acima já cobre "Fuso horário".
+  attendanceName   String?      @map("attendance_name")
+  about            String?
+  serviceMode      ServiceMode? @map("service_mode")
+  address          String?
+  businessHours    Json?        @map("business_hours")
+  website          String?
+  socialHandle     String?      @map("social_handle")
+  generalNotes     String?      @map("general_notes")
+  profileUpdatedAt DateTime?    @map("profile_updated_at")
+
   memberships      CompanyMembership[]
   digitalEmployees DigitalEmployee[]
   idempotencyKeys  IdempotencyKey[]
+  products         ProductService[]
+  integrations     Integration[]
 
   @@map("companies")
 }
@@ -68,7 +171,8 @@ model User {
   name         String
   createdAt    DateTime @default(now()) @map("created_at")
 
-  memberships CompanyMembership[]
+  memberships    CompanyMembership[]
+  responsibleFor EmployeeResponsible[]
 
   @@map("users")
 }
@@ -129,6 +233,12 @@ model DigitalEmployee {
   employeeType EmployeeType @relation(fields: [employeeTypeId], references: [id])
   workManual   WorkManual?
 
+  responsibilities   EmployeeResponsibility[]
+  rules              WorkManualRule[]
+  autonomyPolicies   EmployeeAutonomyPolicy[]
+  responsibles       EmployeeResponsible[]
+  communicationStyle EmployeeCommunicationStyle?
+
   @@index([companyId])
   @@map("digital_employees")
 }
@@ -145,6 +255,11 @@ model WorkManual {
   createdAt         DateTime @default(now()) @map("created_at")
   updatedAt         DateTime @updatedAt @map("updated_at")
 
+  // US10 — "Não tenho regras adicionais" é uma decisão explícita do
+  // gestor, distinta de "lista de regras vazia porque ele ainda não
+  // mexeu na etapa" (docs/design/22-work-manual-content-model.md §7).
+  rulesAcknowledgedNoAdditional Boolean @default(false) @map("rules_ack_no_additional")
+
   digitalEmployee DigitalEmployee @relation(fields: [digitalEmployeeId], references: [id], onDelete: Cascade)
 
   // company_id é denormalizado aqui (não é FK Prisma para Company porque a
@@ -153,6 +268,162 @@ model WorkManual {
   // ("toda tabela de tenant tem company_id NOT NULL").
   @@index([companyId])
   @@map("work_manuals")
+}
+
+// ---------------------------------------------------------------------------
+// Sprint 02 — Track A: conteúdo do Manual de Trabalho
+// docs/design/22-work-manual-content-model.md, docs/technical/17-
+// technical-decisions.md TD13.
+// ---------------------------------------------------------------------------
+
+/// US08 — Produtos e serviços. Compartilhado pela Company (§14 Ownership),
+/// não copiado por funcionário.
+model ProductService {
+  id                String             @id @default(uuid())
+  companyId         String             @map("company_id")
+  name              String
+  kind              ProductServiceKind
+  clientDescription String             @map("client_description")
+  pricingMode       PricingMode        @map("pricing_mode")
+  price             Decimal?           @db.Decimal(12, 2)
+  schedulable       Boolean            @default(false)
+  durationMinutes   Int?               @map("duration_minutes")
+  notes             String?
+  createdAt         DateTime           @default(now()) @map("created_at")
+  updatedAt         DateTime           @updatedAt @map("updated_at")
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@map("products_services")
+}
+
+/// US09 — Responsabilidades habilitadas por funcionário. O catálogo em si
+/// (quais chaves existem, quais são essenciais, dependências de recurso)
+/// é fixo em código (`responsibility-catalog.ts`) — aqui só persiste a
+/// seleção (`enabled`) por funcionário.
+model EmployeeResponsibility {
+  id                String   @id @default(uuid())
+  companyId         String   @map("company_id")
+  digitalEmployeeId String   @map("digital_employee_id")
+  key               String
+  enabled           Boolean  @default(true)
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  digitalEmployee DigitalEmployee @relation(fields: [digitalEmployeeId], references: [id], onDelete: Cascade)
+
+  @@unique([digitalEmployeeId, key])
+  @@index([companyId])
+  @@map("employee_responsibilities")
+}
+
+/// US10 — Regras da empresa específicas do funcionário (não confundir com
+/// System Limits, que são fixos/não editáveis e vivem em código —
+/// `system-limits.ts`, nunca nesta tabela).
+model WorkManualRule {
+  id                String   @id @default(uuid())
+  companyId         String   @map("company_id")
+  digitalEmployeeId String   @map("digital_employee_id")
+  text              String
+  appliesWhen       String?  @map("applies_when")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  digitalEmployee DigitalEmployee @relation(fields: [digitalEmployeeId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([digitalEmployeeId])
+  @@map("work_manual_rules")
+}
+
+/// US11 — Autonomia por responsabilidade. Recomendação inicial e teto
+/// máximo são constantes de código (`autonomy-catalog.ts`, PD7/TD14) — só
+/// o nível *escolhido pelo gestor* (e a condição, quando 🟡) persiste aqui.
+model EmployeeAutonomyPolicy {
+  id                String        @id @default(uuid())
+  companyId         String        @map("company_id")
+  digitalEmployeeId String        @map("digital_employee_id")
+  responsibilityKey String        @map("responsibility_key")
+  level             AutonomyLevel
+  condition         String?
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  digitalEmployee DigitalEmployee @relation(fields: [digitalEmployeeId], references: [id], onDelete: Cascade)
+
+  @@unique([digitalEmployeeId, responsibilityKey])
+  @@index([companyId])
+  @@map("employee_autonomy_policies")
+}
+
+/// US12 — Pessoas e responsáveis. `userId` deve referenciar um
+/// `CompanyMembership` ativo da mesma empresa (validado no service, não
+/// só por FK — um usuário pode ter sido removido da empresa depois).
+model EmployeeResponsible {
+  id                String          @id @default(uuid())
+  companyId         String          @map("company_id")
+  digitalEmployeeId String          @map("digital_employee_id")
+  userId            String          @map("user_id")
+  kind              ResponsibleKind
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+
+  digitalEmployee DigitalEmployee @relation(fields: [digitalEmployeeId], references: [id], onDelete: Cascade)
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([digitalEmployeeId, kind])
+  @@index([companyId])
+  @@map("employee_responsibles")
+}
+
+/// US13 — Estilo de comunicação, 1:1 com o funcionário.
+model EmployeeCommunicationStyle {
+  id                String                   @id @default(uuid())
+  companyId         String                   @map("company_id")
+  digitalEmployeeId String                   @unique @map("digital_employee_id")
+  tone              CommunicationTone?
+  addressing        CommunicationAddressing?
+  length            CommunicationLength?
+  emojis            CommunicationEmojis?
+  preferredTerms    String[]                 @map("preferred_terms")
+  avoidTerms        String[]                 @map("avoid_terms")
+  updatedAt         DateTime                 @updatedAt @map("updated_at")
+
+  digitalEmployee DigitalEmployee @relation(fields: [digitalEmployeeId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@map("employee_communication_styles")
+}
+
+/// US14 — Recursos de trabalho. Escopo da Company (a conta/número
+/// conectado é da empresa, não do funcionário — docs/technical/20-
+/// sprint-02-tech-readiness.md §4); a obrigatoriedade por funcionário é
+/// sempre derivada em runtime das responsabilidades habilitadas, nunca
+/// uma coluna própria (evita dessincronia).
+model Integration {
+  id                   String            @id @default(uuid())
+  companyId            String            @map("company_id")
+  type                 IntegrationType
+  status               IntegrationStatus @default(NOT_CONFIGURED)
+  externalAccountRef   String?           @map("external_account_ref")
+  // Placeholder até KMS/secrets manager existir no ambiente
+  // (docs/technical/20-sprint-02-tech-readiness.md §24.2) — nunca
+  // credencial real em texto plano; nesta sprint não há OAuth real
+  // conectado, então o campo fica vazio em uso normal.
+  credentialsEncrypted String?           @map("credentials_encrypted")
+  // Product Review 01: nunca inferir "verificado" a partir de status
+  // sozinho — SIMULATED é o único valor que o código de hoje sabe
+  // produzir (não há OAuth real implementado ainda); REAL fica
+  // reservado para quando o callback real existir. A autoridade de
+  // completude (PreparationReadinessService) exige REAL em produção.
+  connectionMode       IntegrationConnectionMode @default(SIMULATED) @map("connection_mode")
+  connectedAt          DateTime?         @map("connected_at")
+  lastSyncAt           DateTime?         @map("last_sync_at")
+  updatedAt            DateTime          @updatedAt @map("updated_at")
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, type])
+  @@index([companyId])
+  @@map("integrations")
 }
 
 // ---------------------------------------------------------------------------
