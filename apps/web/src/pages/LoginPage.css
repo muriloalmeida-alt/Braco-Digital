@@ -47,8 +47,14 @@
 }
 
 .braco-login-page__compact-logo {
-  height: 88px;
-  width: auto;
+  /* Escala com a largura da viewport em vez de um px fixo — é a ÚNICA
+   * referência de marca na tela no Compact (o painel institucional só
+   * existe em Expanded), então precisa ler como destaque em qualquer
+   * aparelho, de um celular pequeno (~360px) a um tablet perto do
+   * breakpoint de 900px, não só num tamanho testado manualmente.
+   * docs/design/21-logo-usage.md §9 (permanecer reconhecível). */
+  width: clamp(160px, 42vw, 240px);
+  height: auto;
 }
 
 .braco-login-page__card {
