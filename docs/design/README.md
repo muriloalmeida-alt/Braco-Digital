@@ -9,29 +9,50 @@ No BRAÇO, o GPT exerce papel duplo:
 - **Product Manager**
 - **Product Designer**
 
-Portanto, requisitos funcionais e experiência de produto são definidos de forma integrada antes do handoff para Engenharia.
+Portanto, requisitos funcionais e experiência de produto são definidos de
+forma integrada antes do handoff para Engenharia.
 
-## Fonte de verdade
+## Fontes de verdade
+
+### Design System
 
 O **Google Material Design 3 (M3)** é o Design System canônico do BRAÇO.
 
-O BRAÇO não mantém um Design System paralelo ao M3.
+M3 governa:
 
-A camada própria do produto serve para:
+- componentes;
+- estados;
+- comportamento;
+- acessibilidade;
+- responsividade/adaptabilidade;
+- color roles;
+- typography roles;
+- shape roles;
+- motion.
 
-1. tematizar o M3 com a identidade BRAÇO;
-2. definir princípios de experiência;
-3. criar padrões específicos do domínio;
-4. definir arquitetura de informação;
-5. definir navegação;
-6. definir fluxos;
-7. documentar estados e regras responsivas;
-8. preparar histórias para desenvolvimento.
+### Identidade visual
+
+O **Guia de Identidade Visual do BRAÇO Digital v1.0** é a fonte de verdade
+para expressão da marca:
+
+- logo;
+- cores de marca;
+- tipografia de marca;
+- tom visual;
+- iconografia;
+- proporção e aplicação da identidade.
+
+Quando uma decisão provisória anterior do Tema BRAÇO conflitar com o Guia,
+o Guia prevalece para a expressão da marca.
+
+Isso não substitui o M3.
 
 ## Hierarquia
 
 ```text
 Material Design 3
+        +
+Guia de Identidade Visual BRAÇO
         ↓
 Tema BRAÇO
         ↓
@@ -48,11 +69,18 @@ Implementação
 
 ## Regra
 
-> **Material 3 define a linguagem do sistema. BRAÇO define a experiência do trabalho.**
+> **M3 define como a interface funciona. A identidade BRAÇO define como ela se expressa.**
 
-Quando o M3 já resolve corretamente um problema de interface, o padrão M3 deve ser utilizado.
+O produto não cria um Design System concorrente ao M3.
 
-Componentes próprios são exceção e devem preferencialmente ser composições de componentes M3.
+## Documentos de marca no produto
+
+- `03-theme-strategy.md`
+- `04-color-system.md`
+- `05-typography.md`
+- `06-shape-elevation-iconography.md`
+- `20-brand-ui-integration.md`
+- `21-logo-usage.md`
 
 ## Gate
 

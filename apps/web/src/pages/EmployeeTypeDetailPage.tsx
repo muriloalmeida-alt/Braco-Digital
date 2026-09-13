@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api, ApiError, type EmployeeType } from '../api/client';
 import { Button } from '../components/Button';
@@ -54,7 +55,7 @@ export function EmployeeTypeDetailPage() {
   return (
     <div className="braco-employee-detail">
       <Link to="/equipe/contratar" className="braco-employee-detail__back">
-        ← Voltar para catálogo
+        <ArrowLeft size={16} aria-hidden="true" /> Voltar para catálogo
       </Link>
 
       <div className="braco-employee-detail__header">

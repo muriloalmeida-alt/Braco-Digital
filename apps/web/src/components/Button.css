@@ -3,7 +3,8 @@
   font-size: var(--md-sys-typescale-label-large-size);
   font-weight: var(--md-sys-typescale-label-large-weight);
   line-height: var(--md-sys-typescale-label-large-line-height);
-  border-radius: var(--md-sys-shape-corner-full);
+  /* Botões: 8-10px, não pill — docs/design/06-shape-elevation-iconography.md §1 */
+  border-radius: var(--md-sys-shape-corner-small);
   padding: 10px 24px;
   border: none;
   cursor: pointer;

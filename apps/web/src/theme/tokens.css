@@ -1,41 +1,43 @@
 /* Gerado por scripts/generate-theme.mjs — não editar à mão.
- * Seeds: primary #3156A3, secondary #586578, tertiary #006B5E
+ * Seeds oficiais (Guia de Identidade Visual BRAÇO Digital v1.0):
+ *   primary #0B4F86 (Azul BRAÇO), secondary #66717D (Cinza Médio),
+ *   tertiary #32B44A (Verde Capacidade)
  * (docs/design/03-theme-strategy.md, 04-color-system.md).
- * Para alterar cores, edite as seeds acima e rode: npm run theme:generate
+ * Para alterar cores, edite as seeds no script e rode: npm run theme:generate
  */
 :root {
-  --md-sys-color-primary: #375ca9;
+  --md-sys-color-primary: #0B4F86;
   --md-sys-color-on-primary: #ffffff;
-  --md-sys-color-primary-container: #d9e2ff;
-  --md-sys-color-on-primary-container: #001945;
-  --md-sys-color-secondary: #525f72;
+  --md-sys-color-primary-container: #d2e4ff;
+  --md-sys-color-on-primary-container: #001c37;
+  --md-sys-color-secondary: #55606b;
   --md-sys-color-on-secondary: #ffffff;
-  --md-sys-color-secondary-container: #d6e3fa;
-  --md-sys-color-on-secondary-container: #0f1c2c;
-  --md-sys-color-tertiary: #006b5e;
+  --md-sys-color-secondary-container: #d8e4f1;
+  --md-sys-color-on-secondary-container: #121d26;
+  --md-sys-color-tertiary: #006e22;
   --md-sys-color-on-tertiary: #ffffff;
-  --md-sys-color-tertiary-container: #9ff2e1;
-  --md-sys-color-on-tertiary-container: #00201b;
+  --md-sys-color-tertiary-container: #DDF5E2;
+  --md-sys-color-on-tertiary-container: #002105;
   --md-sys-color-error: #b4271f;
   --md-sys-color-on-error: #ffffff;
   --md-sys-color-error-container: #ffdad5;
   --md-sys-color-on-error-container: #410001;
-  --md-sys-color-surface: #fbf8fd;
-  --md-sys-color-on-surface: #1b1b1f;
-  --md-sys-color-surface-variant: #e1e2ec;
-  --md-sys-color-on-surface-variant: #44464f;
-  --md-sys-color-outline: #757780;
-  --md-sys-color-outline-variant: #c5c6d0;
-  --md-sys-color-surface-dim: #dbd9dd;
-  --md-sys-color-surface-bright: #fbf8fd;
+  --md-sys-color-surface: #F7F9FA;
+  --md-sys-color-on-surface: #1C2530;
+  --md-sys-color-surface-variant: #dfe2eb;
+  --md-sys-color-on-surface-variant: #66717D;
+  --md-sys-color-outline: #73777f;
+  --md-sys-color-outline-variant: #E8ECEF;
+  --md-sys-color-surface-dim: #dad9dd;
+  --md-sys-color-surface-bright: #faf9fc;
   --md-sys-color-surface-container-lowest: #ffffff;
-  --md-sys-color-surface-container-low: #f5f3f7;
-  --md-sys-color-surface-container: #efedf1;
-  --md-sys-color-surface-container-high: #e9e7ec;
+  --md-sys-color-surface-container-low: #f4f3f7;
+  --md-sys-color-surface-container: #eeedf1;
+  --md-sys-color-surface-container-high: #e8e8eb;
   --md-sys-color-surface-container-highest: #e3e2e6;
-  --md-sys-color-inverse-surface: #303034;
-  --md-sys-color-inverse-on-surface: #f2f0f4;
-  --md-sys-color-inverse-primary: #b0c6ff;
+  --md-sys-color-inverse-surface: #2f3033;
+  --md-sys-color-inverse-on-surface: #f1f0f4;
+  --md-sys-color-inverse-primary: #a0caff;
 
   /* Extensões de domínio BRAÇO — docs/design/04-color-system.md §4 */
   --md-ext-color-success: var(--md-sys-color-tertiary);
@@ -46,42 +48,48 @@
   --md-ext-color-on-attention: #ffffff;
   --md-ext-color-attention-container: #ffdcbf;
   --md-ext-color-on-attention-container: #2d1600;
+
+  /* App Shell / marca — docs/design/04-color-system.md §5, §7 */
+  --braco-color-nav-surface: #07345A;
+  --braco-color-on-nav-surface: #FFFFFF;
+  --braco-color-surface-secondary: #E8F3FB;
+  --braco-color-on-surface-secondary: #003259;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-  --md-sys-color-primary: #b0c6ff;
-  --md-sys-color-on-primary: #002c6f;
-  --md-sys-color-primary-container: #1a438f;
-  --md-sys-color-on-primary-container: #d9e2ff;
-  --md-sys-color-secondary: #bac7dd;
-  --md-sys-color-on-secondary: #243142;
-  --md-sys-color-secondary-container: #3b485a;
-  --md-sys-color-on-secondary-container: #d6e3fa;
-  --md-sys-color-tertiary: #83d5c5;
-  --md-sys-color-on-tertiary: #003730;
-  --md-sys-color-tertiary-container: #005046;
-  --md-sys-color-on-tertiary-container: #9ff2e1;
+  --md-sys-color-primary: #a0caff;
+  --md-sys-color-on-primary: #003259;
+  --md-sys-color-primary-container: #00497e;
+  --md-sys-color-on-primary-container: #d2e4ff;
+  --md-sys-color-secondary: #bcc8d5;
+  --md-sys-color-on-secondary: #27313c;
+  --md-sys-color-secondary-container: #3d4853;
+  --md-sys-color-on-secondary-container: #d8e4f1;
+  --md-sys-color-tertiary: #62df6f;
+  --md-sys-color-on-tertiary: #00390e;
+  --md-sys-color-tertiary-container: #005318;
+  --md-sys-color-on-tertiary-container: #7ffd88;
   --md-sys-color-error: #ffb4aa;
   --md-sys-color-on-error: #690003;
   --md-sys-color-error-container: #910809;
   --md-sys-color-on-error-container: #ffdad5;
   --md-sys-color-surface: #121316;
   --md-sys-color-on-surface: #e3e2e6;
-  --md-sys-color-surface-variant: #44464f;
-  --md-sys-color-on-surface-variant: #c5c6d0;
-  --md-sys-color-outline: #8f9099;
-  --md-sys-color-outline-variant: #44464f;
+  --md-sys-color-surface-variant: #43474e;
+  --md-sys-color-on-surface-variant: #c3c6cf;
+  --md-sys-color-outline: #8d9199;
+  --md-sys-color-outline-variant: #43474e;
   --md-sys-color-surface-dim: #121316;
-  --md-sys-color-surface-bright: #39393c;
+  --md-sys-color-surface-bright: #38393c;
   --md-sys-color-surface-container-lowest: #0d0e11;
-  --md-sys-color-surface-container-low: #1b1b1f;
-  --md-sys-color-surface-container: #1f1f23;
+  --md-sys-color-surface-container-low: #1a1c1e;
+  --md-sys-color-surface-container: #1e2022;
   --md-sys-color-surface-container-high: #292a2d;
-  --md-sys-color-surface-container-highest: #343438;
+  --md-sys-color-surface-container-highest: #333538;
   --md-sys-color-inverse-surface: #e3e2e6;
-  --md-sys-color-inverse-on-surface: #303034;
-  --md-sys-color-inverse-primary: #375ca9;
+  --md-sys-color-inverse-on-surface: #2f3033;
+  --md-sys-color-inverse-primary: #286199;
 
   /* Extensões de domínio BRAÇO — docs/design/04-color-system.md §4 */
   --md-ext-color-success: var(--md-sys-color-tertiary);
@@ -92,42 +100,48 @@
   --md-ext-color-on-attention: #4a2800;
   --md-ext-color-attention-container: #6a3b00;
   --md-ext-color-on-attention-container: #ffdcbf;
+
+  /* App Shell / marca — docs/design/04-color-system.md §5, §7 */
+  --braco-color-nav-surface: #07345A;
+  --braco-color-on-nav-surface: #FFFFFF;
+  --braco-color-surface-secondary: #003b68;
+  --braco-color-on-surface-secondary: #d2e4ff;
   }
 }
 
 :root[data-theme='dark'] {
-  --md-sys-color-primary: #b0c6ff;
-  --md-sys-color-on-primary: #002c6f;
-  --md-sys-color-primary-container: #1a438f;
-  --md-sys-color-on-primary-container: #d9e2ff;
-  --md-sys-color-secondary: #bac7dd;
-  --md-sys-color-on-secondary: #243142;
-  --md-sys-color-secondary-container: #3b485a;
-  --md-sys-color-on-secondary-container: #d6e3fa;
-  --md-sys-color-tertiary: #83d5c5;
-  --md-sys-color-on-tertiary: #003730;
-  --md-sys-color-tertiary-container: #005046;
-  --md-sys-color-on-tertiary-container: #9ff2e1;
+  --md-sys-color-primary: #a0caff;
+  --md-sys-color-on-primary: #003259;
+  --md-sys-color-primary-container: #00497e;
+  --md-sys-color-on-primary-container: #d2e4ff;
+  --md-sys-color-secondary: #bcc8d5;
+  --md-sys-color-on-secondary: #27313c;
+  --md-sys-color-secondary-container: #3d4853;
+  --md-sys-color-on-secondary-container: #d8e4f1;
+  --md-sys-color-tertiary: #62df6f;
+  --md-sys-color-on-tertiary: #00390e;
+  --md-sys-color-tertiary-container: #005318;
+  --md-sys-color-on-tertiary-container: #7ffd88;
   --md-sys-color-error: #ffb4aa;
   --md-sys-color-on-error: #690003;
   --md-sys-color-error-container: #910809;
   --md-sys-color-on-error-container: #ffdad5;
   --md-sys-color-surface: #121316;
   --md-sys-color-on-surface: #e3e2e6;
-  --md-sys-color-surface-variant: #44464f;
-  --md-sys-color-on-surface-variant: #c5c6d0;
-  --md-sys-color-outline: #8f9099;
-  --md-sys-color-outline-variant: #44464f;
+  --md-sys-color-surface-variant: #43474e;
+  --md-sys-color-on-surface-variant: #c3c6cf;
+  --md-sys-color-outline: #8d9199;
+  --md-sys-color-outline-variant: #43474e;
   --md-sys-color-surface-dim: #121316;
-  --md-sys-color-surface-bright: #39393c;
+  --md-sys-color-surface-bright: #38393c;
   --md-sys-color-surface-container-lowest: #0d0e11;
-  --md-sys-color-surface-container-low: #1b1b1f;
-  --md-sys-color-surface-container: #1f1f23;
+  --md-sys-color-surface-container-low: #1a1c1e;
+  --md-sys-color-surface-container: #1e2022;
   --md-sys-color-surface-container-high: #292a2d;
-  --md-sys-color-surface-container-highest: #343438;
+  --md-sys-color-surface-container-highest: #333538;
   --md-sys-color-inverse-surface: #e3e2e6;
-  --md-sys-color-inverse-on-surface: #303034;
-  --md-sys-color-inverse-primary: #375ca9;
+  --md-sys-color-inverse-on-surface: #2f3033;
+  --md-sys-color-inverse-primary: #286199;
 
   /* Extensões de domínio BRAÇO — docs/design/04-color-system.md §4 */
   --md-ext-color-success: var(--md-sys-color-tertiary);
@@ -138,41 +152,47 @@
   --md-ext-color-on-attention: #4a2800;
   --md-ext-color-attention-container: #6a3b00;
   --md-ext-color-on-attention-container: #ffdcbf;
+
+  /* App Shell / marca — docs/design/04-color-system.md §5, §7 */
+  --braco-color-nav-surface: #07345A;
+  --braco-color-on-nav-surface: #FFFFFF;
+  --braco-color-surface-secondary: #003b68;
+  --braco-color-on-surface-secondary: #d2e4ff;
 }
 
 :root[data-theme='light'] {
-  --md-sys-color-primary: #375ca9;
+  --md-sys-color-primary: #0B4F86;
   --md-sys-color-on-primary: #ffffff;
-  --md-sys-color-primary-container: #d9e2ff;
-  --md-sys-color-on-primary-container: #001945;
-  --md-sys-color-secondary: #525f72;
+  --md-sys-color-primary-container: #d2e4ff;
+  --md-sys-color-on-primary-container: #001c37;
+  --md-sys-color-secondary: #55606b;
   --md-sys-color-on-secondary: #ffffff;
-  --md-sys-color-secondary-container: #d6e3fa;
-  --md-sys-color-on-secondary-container: #0f1c2c;
-  --md-sys-color-tertiary: #006b5e;
+  --md-sys-color-secondary-container: #d8e4f1;
+  --md-sys-color-on-secondary-container: #121d26;
+  --md-sys-color-tertiary: #006e22;
   --md-sys-color-on-tertiary: #ffffff;
-  --md-sys-color-tertiary-container: #9ff2e1;
-  --md-sys-color-on-tertiary-container: #00201b;
+  --md-sys-color-tertiary-container: #DDF5E2;
+  --md-sys-color-on-tertiary-container: #002105;
   --md-sys-color-error: #b4271f;
   --md-sys-color-on-error: #ffffff;
   --md-sys-color-error-container: #ffdad5;
   --md-sys-color-on-error-container: #410001;
-  --md-sys-color-surface: #fbf8fd;
-  --md-sys-color-on-surface: #1b1b1f;
-  --md-sys-color-surface-variant: #e1e2ec;
-  --md-sys-color-on-surface-variant: #44464f;
-  --md-sys-color-outline: #757780;
-  --md-sys-color-outline-variant: #c5c6d0;
-  --md-sys-color-surface-dim: #dbd9dd;
-  --md-sys-color-surface-bright: #fbf8fd;
+  --md-sys-color-surface: #F7F9FA;
+  --md-sys-color-on-surface: #1C2530;
+  --md-sys-color-surface-variant: #dfe2eb;
+  --md-sys-color-on-surface-variant: #66717D;
+  --md-sys-color-outline: #73777f;
+  --md-sys-color-outline-variant: #E8ECEF;
+  --md-sys-color-surface-dim: #dad9dd;
+  --md-sys-color-surface-bright: #faf9fc;
   --md-sys-color-surface-container-lowest: #ffffff;
-  --md-sys-color-surface-container-low: #f5f3f7;
-  --md-sys-color-surface-container: #efedf1;
-  --md-sys-color-surface-container-high: #e9e7ec;
+  --md-sys-color-surface-container-low: #f4f3f7;
+  --md-sys-color-surface-container: #eeedf1;
+  --md-sys-color-surface-container-high: #e8e8eb;
   --md-sys-color-surface-container-highest: #e3e2e6;
-  --md-sys-color-inverse-surface: #303034;
-  --md-sys-color-inverse-on-surface: #f2f0f4;
-  --md-sys-color-inverse-primary: #b0c6ff;
+  --md-sys-color-inverse-surface: #2f3033;
+  --md-sys-color-inverse-on-surface: #f1f0f4;
+  --md-sys-color-inverse-primary: #a0caff;
 
   /* Extensões de domínio BRAÇO — docs/design/04-color-system.md §4 */
   --md-ext-color-success: var(--md-sys-color-tertiary);
@@ -183,4 +203,10 @@
   --md-ext-color-on-attention: #ffffff;
   --md-ext-color-attention-container: #ffdcbf;
   --md-ext-color-on-attention-container: #2d1600;
+
+  /* App Shell / marca — docs/design/04-color-system.md §5, §7 */
+  --braco-color-nav-surface: #07345A;
+  --braco-color-on-nav-surface: #FFFFFF;
+  --braco-color-surface-secondary: #E8F3FB;
+  --braco-color-on-surface-secondary: #003259;
 }

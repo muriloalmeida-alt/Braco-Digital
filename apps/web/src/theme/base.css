@@ -4,20 +4,26 @@
  */
 
 :root {
-  --md-ref-typeface: 'Roboto Flex', Roboto, system-ui, -apple-system, sans-serif;
+  /* Manrope é a tipografia oficial da marca, com Inter como fallback web
+   * antes da pilha de sistema (docs/design/05-typography.md §1/§8). Os
+   * typography ROLES do M3 continuam canônicos — o que muda aqui é a
+   * família e os pesos por role (§3). */
+  --md-ref-typeface: 'Manrope', 'Inter', system-ui, -apple-system, sans-serif;
 
-  /* Type scale M3 (roles usados no produto — docs/design/05-typography.md) */
+  /* Type scale M3 (roles usados no produto — docs/design/05-typography.md).
+   * Pesos seguem §3: headline 700-800, title 600-700, body 400-500,
+   * label 500-600. */
   --md-sys-typescale-headline-medium-size: 1.75rem;
   --md-sys-typescale-headline-medium-line-height: 2.25rem;
-  --md-sys-typescale-headline-medium-weight: 500;
+  --md-sys-typescale-headline-medium-weight: 800;
 
   --md-sys-typescale-title-large-size: 1.375rem;
   --md-sys-typescale-title-large-line-height: 1.75rem;
-  --md-sys-typescale-title-large-weight: 500;
+  --md-sys-typescale-title-large-weight: 700;
 
   --md-sys-typescale-title-medium-size: 1rem;
   --md-sys-typescale-title-medium-line-height: 1.5rem;
-  --md-sys-typescale-title-medium-weight: 500;
+  --md-sys-typescale-title-medium-weight: 600;
 
   --md-sys-typescale-body-large-size: 1rem;
   --md-sys-typescale-body-large-line-height: 1.5rem;
@@ -29,13 +35,19 @@
 
   --md-sys-typescale-label-large-size: 0.875rem;
   --md-sys-typescale-label-large-line-height: 1.25rem;
-  --md-sys-typescale-label-large-weight: 500;
+  --md-sys-typescale-label-large-weight: 600;
 
   --md-sys-typescale-label-medium-size: 0.75rem;
   --md-sys-typescale-label-medium-line-height: 1rem;
-  --md-sys-typescale-label-medium-weight: 500;
+  --md-sys-typescale-label-medium-weight: 600;
 
-  /* Shape scale M3 — docs/design/06-shape-elevation-iconography.md */
+  /* Números/indicadores — docs/design/05-typography.md §3 ("números e
+   * indicadores: 600"). Não é um type role M3 novo, é um peso utilitário
+   * aplicado sobre o role em uso (ex.: contagens, valores). */
+  --braco-weight-numeric: 600;
+
+  /* Shape scale M3 — docs/design/06-shape-elevation-iconography.md §1:
+   * cards 12px, campos/botões 8-10px, badges pill/999px. */
   --md-sys-shape-corner-extra-small: 4px;
   --md-sys-shape-corner-small: 8px;
   --md-sys-shape-corner-medium: 12px;

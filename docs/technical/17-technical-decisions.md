@@ -173,3 +173,79 @@ respeitada.
 **Impacto futuro:** migração para provedor gerenciado é possível quando
 exigências de segurança/enterprise crescerem (ver R14 em
 `15-technical-risks.md`).
+
+---
+
+## TD11 — Brand UI Foundation: `primary` do M3 fixado no hex de marca, demais tons algorítmicos
+
+**Contexto:** aplicação da identidade visual oficial (Guia de Identidade
+Visual BRAÇO Digital v1.0) antes da Sprint 02 — `docs/design/03-theme-
+strategy.md`, `04-color-system.md`. Os critérios de aceite exigem que "Azul
+BRAÇO é o CTA principal" de forma reconhecível, mas o algoritmo M3
+(`@material/material-color-utilities`) deriva o tom 40 (role `primary`) a
+partir do HCT do seed, que só coincide com o hex de entrada quando o
+próprio seed já tem tom (L*) 40 — não é o caso de `#0B4F86`. Gerar o tom 40
+puro do seed produzia `#286199`, visivelmente mais claro/saturado que a
+marca.
+**Opções:** (a) usar o tom 40 algorítmico, aceitando o desvio visual; (b)
+fixar `--md-sys-color-primary` (light) literalmente em `#0B4F86` e deixar
+só os tons derivados (container, dark scheme) algorítmicos; (c) reconstruir
+a paleta inteira para que o tom 40 caia exatamente no seed.
+**Decisão:** (b) — `primary` (light) é fixado no hex de marca;
+`primaryContainer`/`onPrimaryContainer` e todo o Dark Scheme continuam
+gerados pelo algoritmo a partir da mesma `TonalPalette` (mesmo hue/chroma).
+**Justificativa:** contraste de `#0B4F86` com `onPrimary` branco é 8.5:1
+(WCAG AAA) — fixar o tom não tem custo de acessibilidade, e é o único role
+citado nominalmente como "CTA principal" nos critérios de aceite. (c) foi
+descartado por exigir reimplementar a geração de tons, contrariando "M3
+continua responsável pelos roles e estados" (`03-theme-strategy.md`).
+**Por que `tertiary` (Verde Capacidade) NÃO recebeu o mesmo tratamento:**
+o hex cru do seed (`#32B44A`) usado como texto sobre superfícies claras dá
+~2.5:1 de contraste (reprova WCAG AA); o tom 40 algorítmico (`#006e22`) dá
+~5.8:1. `tertiaryContainer` (fundo, não texto) já usa o hex de marca exato
+(`#DDF5E2`, "success-background") porque ali o contraste é resolvido pelo
+`onTertiaryContainer` escuro gerado pelo algoritmo.
+**Trade-offs:** o mapeamento hue/chroma → tom deixa de ser 100% derivado
+para o role mais visível (`primary`); qualquer reajuste de seed exige
+conferir o hex fixo manualmente.
+**Reversibilidade:** alta — é uma única linha no gerador
+(`apps/web/scripts/generate-theme.mjs`); remover o override volta ao
+comportamento 100% algorítmico.
+**Impacto futuro:** nenhum bloqueio; documentado para que o próximo ajuste
+de paleta (nova seed) reavalie se o desvio tom-40-vs-seed ainda existe
+antes de decidir fixar ou não.
+
+---
+
+## TD12 — Manrope via Google Fonts (CDN) e Lucide via `lucide-react`, sem self-hosting
+
+**Contexto:** `docs/design/05-typography.md` define Manrope (fallback
+Inter) como tipografia oficial e deixa a forma de carregamento como decisão
+de Engenharia; `docs/design/06-shape-elevation-iconography.md` define
+Lucide como família de ícones preferencial para o produto web.
+**Opções tipografia:** self-host dos arquivos de fonte no repositório ·
+`<link>` para Google Fonts (mesmo mecanismo já usado para Roboto/Roboto
+Flex na Sprint 01).
+**Decisão tipografia:** manter Google Fonts via `<link rel="stylesheet">`
+com `display=swap`, carregando Manrope (400/500/600/700/800) e Inter
+(400/500/600/700) como fallback web antes da pilha de sistema.
+**Justificativa:** consistente com o padrão já estabelecido na Sprint 01;
+evita versionar/distribuir arquivos de fonte manualmente, que o próprio
+PM/Design pediu para evitar ("não versionar nem compartilhar arquivos de
+fonte manualmente se não for necessário").
+**Opções iconografia:** SVGs próprios recortados manualmente · biblioteca
+de ícones como dependência.
+**Decisão iconografia:** `lucide-react` (`^1.45.0`) como dependência de
+produção — ícones importados sob demanda como componentes React
+tree-shakeable, tamanho controlado via prop (`size`), sempre com
+`aria-hidden="true"` porque o label textual do status/ação já é o elemento
+acessível (ícone nunca substitui o label, `06-shape-elevation-
+iconography.md` §7).
+**Trade-offs:** dependência de uma CDN externa em runtime para fontes (sem
+fallback offline); uma dependência de terceiro a mais no bundle do
+frontend para ícones (mitigado por ser tree-shakeable e ter apenas
+`react` como peer dependency).
+**Reversibilidade:** alta nos dois casos — trocar o `<link>` por self-host
+não muda a variável `--md-ref-typeface`; trocar de biblioteca de ícones
+fica isolado aos `import` de cada tela, sem API própria por cima.
+**Impacto futuro:** nenhum bloqueio.

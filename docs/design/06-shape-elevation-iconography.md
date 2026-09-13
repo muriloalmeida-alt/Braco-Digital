@@ -2,43 +2,98 @@
 
 ## 1. Shape
 
-Usar a escala de shapes do M3.
+Usar o sistema de shapes do M3 tematizado com a identidade BRAÇO.
 
-Direção BRAÇO:
-- superfícies amigáveis sem aparência infantil;
-- cards com radius moderado;
-- elementos de ação seguindo variantes M3;
-- evitar radius excessivo em toda superfície.
+Valores de referência oficiais:
 
-## 2. Uso conceitual
+- Cards: **12px**
+- Campos: **8–10px**
+- Botões: **8–10px**
+- Badges: **999px / pill**
 
-- Extra Small: elementos compactos.
-- Small: controles pequenos.
-- Medium: cards e containers operacionais.
-- Large: painéis e superfícies de destaque.
-- Extra Large: dialogs e experiências de onboarding quando adequado.
+Esses valores devem ser mapeados para tokens, não repetidos arbitrariamente
+em cada componente.
+
+## 2. Direção
+
+- cantos moderadamente arredondados;
+- proximidade sem aparência infantil;
+- sem excesso de cápsulas;
+- pills reservadas principalmente a badges/status.
 
 ## 3. Elevation
 
+Sombras devem ser discretas.
+
 Preferir hierarquia por:
 
-- surface roles;
-- tonal elevation;
-- espaçamento;
-- agrupamento.
+- espaço;
+- superfície;
+- contraste;
+- bordas leves;
+- tonal elevation.
 
 Sombras fortes são exceção.
 
 ## 4. Iconografia
 
-Usar linguagem Material Symbols/ícones coerentes com M3.
+Direção visual oficial:
 
-Regras:
-- ícone não substitui texto em ação ambígua;
-- status crítico deve ter label;
-- usar ícones familiares;
-- não inventar iconografia abstrata para conceitos simples.
+- simples;
+- outline;
+- espessura consistente;
+- sem 3D;
+- sem futurismo genérico.
 
-## 5. Funcionários digitais
+Família de referência:
 
-Avatar/identidade do funcionário pode possuir representação própria de produto, mas não deve induzir o cliente a acreditar que é uma pessoa real.
+> **Lucide**
+
+Para o produto web, Lucide é a família visual preferencial.
+
+Isso não altera o M3:
+
+- tamanho;
+- semântica;
+- touch target;
+- estado;
+- acessibilidade
+
+continuam seguindo o componente/padrão M3.
+
+## 5. Regra de consistência
+
+Não misturar famílias de ícones na mesma superfície.
+
+Ao migrar telas existentes:
+
+- priorizar Lucide nas áreas visíveis do produto;
+- evitar manter Material Symbols e Lucide lado a lado sem necessidade.
+
+## 6. Tamanhos
+
+Preferir:
+
+- 20px em controles compactos;
+- 24px em ações e navegação principais.
+
+Outros tamanhos apenas quando a hierarquia justificar.
+
+## 7. Status
+
+Ícone nunca substitui label de status.
+
+Status crítico sempre precisa de texto.
+
+## 8. Funcionários digitais
+
+Avatar/identidade visual do funcionário pode possuir representação própria
+do produto, mas não deve induzir o usuário a acreditar que se trata de uma
+pessoa real.
+
+Evitar:
+
+- robô humanoide;
+- cérebro de IA;
+- mascote futurista;
+- glow/neon.

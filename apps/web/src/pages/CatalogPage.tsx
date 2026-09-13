@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api, ApiError, type EmployeeType } from '../api/client';
 import { EmployeeTypeCard } from '../components/EmployeeTypeCard';
@@ -66,6 +67,7 @@ export function CatalogPage() {
 
       {state === 'error' && (
         <div className="braco-catalog-page__error">
+          <AlertCircle size={24} aria-hidden="true" className="braco-catalog-page__error-icon" />
           <p>Não foi possível carregar os funcionários.</p>
           <p>Tente novamente. Se o problema continuar, volte mais tarde.</p>
           <Button variant="outlined" onClick={load}>

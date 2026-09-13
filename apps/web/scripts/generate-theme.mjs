@@ -1,30 +1,70 @@
 /**
  * Gera docs/design/03-theme-strategy.md + 04-color-system.md como CSS real:
- * deriva os Color Schemes Light e Dark do M3 a partir das seeds de marca
- * (#3156A3 primary, #586578 secondary, #006B5E tertiary), usando o
- * algoritmo oficial do Material (@material/material-color-utilities) —
- * não se aproxima a paleta manualmente (docs/technical/13-frontend-m3-
+ * deriva os Color Schemes Light e Dark do M3 a partir das seeds oficiais de
+ * marca (Guia de Identidade Visual BRAÇO Digital v1.0), usando o algoritmo
+ * oficial do Material (@material/material-color-utilities) — não se
+ * aproxima a paleta manualmente (docs/technical/13-frontend-m3-
  * implementation.md §2).
  *
  * Roda em build-time (não é dependência de runtime do bundle). Saída:
  * src/theme/tokens.css.
  *
- * Extensões de domínio (não substituem M3, são tokens adicionais —
- * docs/design/04-color-system.md §4):
- *   --md-ext-color-success*      -> alias da família tertiary (decisão do
- *                                    Design: "base visual recomendada:
- *                                    família tertiary")
- *   --md-ext-color-attention*    -> seed âmbar/ocre própria, acessível
+ * Seeds oficiais (docs/design/03-theme-strategy.md, 04-color-system.md §3):
+ *   Primary   -> Azul BRAÇO      #0B4F86
+ *   Secondary -> Cinza Médio     #66717D
+ *   Tertiary  -> Verde Capacidade #32B44A
+ *
+ * Âncoras de marca do Light Scheme (docs/design/03-theme-strategy.md §3,
+ * docs/design/04-color-system.md §2/§4) — o M3 continua responsável pelos
+ * demais roles e tons intermediários, mas estes valores precisam permanecer
+ * reconhecíveis e por isso são fixados em vez de puramente calculados:
+ *   surface (fundo principal)     -> #F7F9FA (Off White)
+ *   onSurface (texto principal)   -> #1C2530 (Grafite)
+ *   onSurfaceVariant (texto sec.) -> #66717D (Cinza Médio)
+ *   outlineVariant (bordas)       -> #E8ECEF (Cinza Claro)
+ *   tertiaryContainer (success-background) -> #DDF5E2 (Verde Claro)
+ *   primary (CTA principal)       -> #0B4F86 (Azul BRAÇO), exato — é o
+ *      único role de marca citado nominalmente como "CTA principal" nos
+ *      critérios de aceite; contraste com onPrimary branco é 8.5:1 (WCAG AAA),
+ *      então fixar o tom exato não tem custo de acessibilidade.
+ * `surfaceContainerLowest` (cards) já resulta em #FFFFFF por definição do
+ * algoritmo (tone 100 é sempre branco), sem necessidade de override.
+ *
+ * O tom 40 algorítmico de tertiary (usado como `--md-sys-color-tertiary`,
+ * texto de status "success") NÃO é fixado no hex cru do seed (#32B44A):
+ * como texto sobre superfícies claras, o verde puro da marca dá ~2.5:1 de
+ * contraste (reprova WCAG AA), enquanto o tom 40 gerado pelo algoritmo dá
+ * ~5.8:1. O hex de marca continua vivo em `tertiaryContainer`
+ * (success-background) e em qualquer preenchimento sólido/ícone maior, que
+ * são os usos onde a marca precisa ser reconhecível — texto pequeno usa o
+ * tom acessível.
+ *
+ * Extensões de domínio (não são roles M3, são tokens adicionais de marca —
+ * docs/design/04-color-system.md §4/§5/§7):
+ *   --braco-color-nav-surface        -> Azul Profundo #07345A, fixo nos dois
+ *                                        schemes (App Shell/navegação, não
+ *                                        varia com light/dark — é a mesma
+ *                                        superfície institucional escura).
+ *   --braco-color-surface-secondary  -> Azul Claro (#E8F3FB no light;
+ *                                        derivado do primary no dark) para
+ *                                        áreas informativas/empty states.
+ *   --md-ext-color-success*          -> alias da família tertiary (decisão
+ *                                        de Design: "base visual recomendada:
+ *                                        família tertiary")
+ *   --md-ext-color-attention*        -> seed âmbar/ocre própria, acessível
  */
 import { argbFromHex, hexFromArgb, TonalPalette } from '@material/material-color-utilities';
 import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-const PRIMARY_SEED = '#3156A3';
-const SECONDARY_SEED = '#586578';
-const TERTIARY_SEED = '#006B5E';
+const PRIMARY_SEED = '#0B4F86'; // Azul BRAÇO
+const SECONDARY_SEED = '#66717D'; // Cinza Médio
+const TERTIARY_SEED = '#32B44A'; // Verde Capacidade
 const ERROR_SEED = '#B3261E'; // baseline M3 error hue
 const ATTENTION_SEED = '#8C5000'; // âmbar/ocre acessível — extensão de domínio
+
+const BRAND_NAV_SURFACE = '#07345A'; // Azul Profundo — fixo, não varia com o scheme
+const BRAND_SURFACE_SECONDARY_LIGHT = '#E8F3FB'; // Azul Claro
 
 const primary = TonalPalette.fromInt(argbFromHex(PRIMARY_SEED));
 const secondary = TonalPalette.fromInt(argbFromHex(SECONDARY_SEED));
@@ -66,8 +106,8 @@ function roles(scheme) {
         inverseSurface: 20, inverseOnSurface: 95, inversePrimary: 80,
       };
 
-  return `
-  --md-sys-color-primary: ${tone(primary, t.primary)};
+  let css = `
+  --md-sys-color-primary: ${isDark ? tone(primary, t.primary) : PRIMARY_SEED};
   --md-sys-color-on-primary: ${tone(primary, t.onPrimary)};
   --md-sys-color-primary-container: ${tone(primary, t.primaryContainer)};
   --md-sys-color-on-primary-container: ${tone(primary, t.onPrimaryContainer)};
@@ -77,18 +117,18 @@ function roles(scheme) {
   --md-sys-color-on-secondary-container: ${tone(secondary, t.onSecondaryContainer)};
   --md-sys-color-tertiary: ${tone(tertiary, t.tertiary)};
   --md-sys-color-on-tertiary: ${tone(tertiary, t.onTertiary)};
-  --md-sys-color-tertiary-container: ${tone(tertiary, t.tertiaryContainer)};
+  --md-sys-color-tertiary-container: ${isDark ? tone(tertiary, t.tertiaryContainer) : '#DDF5E2'};
   --md-sys-color-on-tertiary-container: ${tone(tertiary, t.onTertiaryContainer)};
   --md-sys-color-error: ${tone(error, t.error)};
   --md-sys-color-on-error: ${tone(error, t.onError)};
   --md-sys-color-error-container: ${tone(error, t.errorContainer)};
   --md-sys-color-on-error-container: ${tone(error, t.onErrorContainer)};
-  --md-sys-color-surface: ${tone(neutral, t.surface)};
-  --md-sys-color-on-surface: ${tone(neutral, t.onSurface)};
+  --md-sys-color-surface: ${isDark ? tone(neutral, t.surface) : '#F7F9FA'};
+  --md-sys-color-on-surface: ${isDark ? tone(neutral, t.onSurface) : '#1C2530'};
   --md-sys-color-surface-variant: ${tone(neutralVariant, t.surfaceVariant)};
-  --md-sys-color-on-surface-variant: ${tone(neutralVariant, t.onSurfaceVariant)};
+  --md-sys-color-on-surface-variant: ${isDark ? tone(neutralVariant, t.onSurfaceVariant) : '#66717D'};
   --md-sys-color-outline: ${tone(neutralVariant, t.outline)};
-  --md-sys-color-outline-variant: ${tone(neutralVariant, t.outlineVariant)};
+  --md-sys-color-outline-variant: ${isDark ? tone(neutralVariant, t.outlineVariant) : '#E8ECEF'};
   --md-sys-color-surface-dim: ${tone(neutral, t.surfaceDim)};
   --md-sys-color-surface-bright: ${tone(neutral, t.surfaceBright)};
   --md-sys-color-surface-container-lowest: ${tone(neutral, t.surfaceContainerLowest)};
@@ -108,13 +148,23 @@ function roles(scheme) {
   --md-ext-color-attention: ${tone(attention, t.attention)};
   --md-ext-color-on-attention: ${tone(attention, t.onAttention)};
   --md-ext-color-attention-container: ${tone(attention, t.attentionContainer)};
-  --md-ext-color-on-attention-container: ${tone(attention, t.onAttentionContainer)};`;
+  --md-ext-color-on-attention-container: ${tone(attention, t.onAttentionContainer)};
+
+  /* App Shell / marca — docs/design/04-color-system.md §5, §7 */
+  --braco-color-nav-surface: ${BRAND_NAV_SURFACE};
+  --braco-color-on-nav-surface: #FFFFFF;
+  --braco-color-surface-secondary: ${isDark ? tone(primary, 24) : BRAND_SURFACE_SECONDARY_LIGHT};
+  --braco-color-on-surface-secondary: ${isDark ? tone(primary, 90) : tone(primary, 20)};`;
+
+  return css;
 }
 
 const css = `/* Gerado por scripts/generate-theme.mjs — não editar à mão.
- * Seeds: primary ${PRIMARY_SEED}, secondary ${SECONDARY_SEED}, tertiary ${TERTIARY_SEED}
+ * Seeds oficiais (Guia de Identidade Visual BRAÇO Digital v1.0):
+ *   primary ${PRIMARY_SEED} (Azul BRAÇO), secondary ${SECONDARY_SEED} (Cinza Médio),
+ *   tertiary ${TERTIARY_SEED} (Verde Capacidade)
  * (docs/design/03-theme-strategy.md, 04-color-system.md).
- * Para alterar cores, edite as seeds acima e rode: npm run theme:generate
+ * Para alterar cores, edite as seeds no script e rode: npm run theme:generate
  */
 :root {${roles('light')}
 }

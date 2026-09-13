@@ -6,6 +6,9 @@
 }
 
 .braco-employee-detail__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   color: var(--md-sys-color-on-surface-variant);
   text-decoration: none;
   font-size: var(--md-sys-typescale-body-medium-size);
@@ -24,9 +27,12 @@
   margin-bottom: 4px;
 }
 
+/* "Em breve" é informação, não erro/warning (docs/design/18-catalog-
+ * availability-ui-spec.md §6) — usa a superfície informativa Azul Claro,
+ * não uma cor de alerta (docs/design/04-color-system.md §7). */
 .braco-employee-detail__coming-soon {
-  background: var(--md-sys-color-secondary-container);
-  color: var(--md-sys-color-on-secondary-container);
+  background: var(--braco-color-surface-secondary);
+  color: var(--braco-color-on-surface-secondary);
   padding: var(--braco-space-3);
   border-radius: var(--md-sys-shape-corner-small);
 }

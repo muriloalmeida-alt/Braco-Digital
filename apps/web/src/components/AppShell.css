@@ -1,18 +1,132 @@
+.braco-app-shell {
+  display: flex;
+  min-height: 100%;
+}
+
+/* ---------- Navigation Drawer (Expanded, >=900px) ----------
+ * docs/design/20-brand-ui-integration.md §3, docs/design/04-color-system.md §5.
+ */
+.braco-app-shell__drawer {
+  display: none;
+  flex-direction: column;
+  width: 260px;
+  flex-shrink: 0;
+  background: var(--braco-color-nav-surface);
+  color: var(--braco-color-on-nav-surface);
+  padding: var(--braco-space-5) var(--braco-space-4);
+  gap: var(--braco-space-6);
+}
+
+.braco-app-shell__drawer-logo {
+  height: 32px;
+  width: auto;
+  /* Área de proteção — docs/design/21-logo-usage.md §2 */
+  margin: 0 var(--braco-space-2);
+}
+
+.braco-app-shell__drawer-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--braco-space-1);
+}
+
+.braco-app-shell__nav-link {
+  display: flex;
+  align-items: center;
+  gap: var(--braco-space-3);
+  text-decoration: none;
+  color: var(--braco-color-on-nav-surface);
+  opacity: 0.85;
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  font-size: var(--md-sys-typescale-label-large-size);
+  padding: var(--braco-space-3) var(--braco-space-3);
+  border-radius: var(--md-sys-shape-corner-small);
+}
+
+/* Estado ativo: container tonal translúcido claro, sem glow/neon e sem
+ * Verde Capacidade (docs/design/20-brand-ui-integration.md §3). */
+.braco-app-shell__nav-link.is-active {
+  background: rgba(255, 255, 255, 0.16);
+  opacity: 1;
+}
+
+.braco-app-shell__nav-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  opacity: 1;
+}
+
+.braco-app-shell__drawer-footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--braco-space-2);
+  padding-top: var(--braco-space-4);
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.braco-app-shell__user-name {
+  font-size: var(--md-sys-typescale-body-medium-size);
+  opacity: 0.85;
+}
+
+.braco-app-shell__logout {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--braco-space-2);
+  background: transparent;
+  border: none;
+  color: var(--braco-color-on-nav-surface);
+  font-family: inherit;
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  cursor: pointer;
+  padding: var(--braco-space-2) 0;
+  align-self: flex-start;
+}
+
+.braco-app-shell__logout:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Top App Bar (Compact/Medium, <900px) ---------- */
+.braco-app-shell__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .braco-app-shell__topbar {
   display: flex;
   align-items: center;
   gap: var(--braco-space-5);
   padding: var(--braco-space-3) var(--braco-space-5);
-  background: var(--md-sys-color-surface-container);
+  background: var(--md-sys-color-surface-container-lowest);
   border-bottom: 1px solid var(--md-sys-color-outline-variant);
   flex-wrap: wrap;
 }
 
-.braco-app-shell__logo {
-  font-size: var(--md-sys-typescale-title-large-size);
-  font-weight: 700;
-  color: var(--md-sys-color-primary);
-  letter-spacing: 0.04em;
+/* Logo horizontal colorida quando há largura; ícone do app quando não há
+ * espaço para a assinatura — docs/design/21-logo-usage.md §3 "Compact". */
+.braco-app-shell__topbar-logo {
+  display: none;
+  height: 28px;
+  width: auto;
+}
+
+.braco-app-shell__topbar-icon {
+  display: block;
+  height: 32px;
+  width: 32px;
+}
+
+@media (min-width: 480px) {
+  .braco-app-shell__topbar-logo {
+    display: block;
+  }
+  .braco-app-shell__topbar-icon {
+    display: none;
+  }
 }
 
 .braco-app-shell__nav {
@@ -21,31 +135,52 @@
   flex: 1;
 }
 
-.braco-app-shell__nav a {
-  text-decoration: none;
+.braco-app-shell__nav .braco-app-shell__nav-link {
   color: var(--md-sys-color-on-surface-variant);
-  font-weight: 500;
-  padding: var(--braco-space-2) 0;
   border-bottom: 2px solid transparent;
+  border-radius: 0;
+  padding: var(--braco-space-2) 0;
+  opacity: 1;
 }
 
-.braco-app-shell__nav a.is-active {
+.braco-app-shell__nav .braco-app-shell__nav-link.is-active {
+  background: none;
   color: var(--md-sys-color-primary);
   border-bottom-color: var(--md-sys-color-primary);
+}
+
+.braco-app-shell__nav .braco-app-shell__nav-link:hover {
+  background: none;
 }
 
 .braco-app-shell__user {
   display: flex;
   align-items: center;
-  gap: var(--braco-space-2);
+  gap: var(--braco-space-3);
   font-size: var(--md-sys-typescale-body-medium-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.braco-app-shell__user .braco-app-shell__logout {
   color: var(--md-sys-color-on-surface-variant);
 }
 
 .braco-app-shell__content {
   max-width: 1120px;
+  width: 100%;
   margin: 0 auto;
   padding: var(--braco-space-5);
+}
+
+/* Expanded: troca Top App Bar por Navigation Drawer permanente —
+ * docs/design/20-brand-ui-integration.md §3/§4. */
+@media (min-width: 900px) {
+  .braco-app-shell__drawer {
+    display: flex;
+  }
+  .braco-app-shell__topbar {
+    display: none;
+  }
 }
 
 @media (max-width: 600px) {

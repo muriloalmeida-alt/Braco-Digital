@@ -62,6 +62,29 @@
 - Status de conteúdo: **Content Design Ready**; disponibilidade operacional
   depende de aprovação/configuração Meta/BSP.
 
+### Identidade Visual v1 — aplicação no produto
+
+- O Guia de Identidade Visual BRAÇO Digital v1.0 passa a ser a fonte de
+  verdade da expressão visual da marca.
+- M3 continua sendo a fonte de verdade do Design System.
+- Regra: **M3 define como funciona; BRAÇO define como se expressa.**
+- Seeds provisórias anteriores são substituídas por:
+  - Primary `#0B4F86`
+  - Secondary `#66717D`
+  - Tertiary `#32B44A`
+- Azul Profundo `#07345A` é a superfície de marca preferencial para
+  navegação expandida e áreas escuras.
+- Verde Capacidade `#32B44A` é acento funcional positivo, não CTA padrão.
+- Tipografia principal: **Manrope**, fallback **Inter**.
+- Cards: 12px; campos/botões: 8–10px; badges: pill.
+- Iconografia preferencial do produto: **Lucide**, outline e consistente.
+- App Shell deve ser humano, simples e atraente, com Off White como fundo,
+  Branco em cards e Azul BRAÇO em ações principais.
+- Assets oficiais de logo devem ser usados sem alteração.
+- Regras completas:
+  - `docs/design/20-brand-ui-integration.md`
+  - `docs/design/21-logo-usage.md`
+
 ## Product Decisions Required — resolução (pós Technical Discovery v1)
 
 Decisões tomadas por Murilo (PO) em resposta a

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { api, type DigitalEmployee } from '../api/client';
 import { Button } from '../components/Button';
@@ -46,7 +47,9 @@ export function MyTeamPage() {
 
       {state === 'loaded' && employees.length === 0 && (
         <Card className="braco-my-team-page__empty">
-          <p>Sua equipe digital ainda está vazia. Contrate seu primeiro funcionário para começar.</p>
+          <Users size={28} aria-hidden="true" className="braco-my-team-page__empty-icon" />
+          <h2 className="braco-my-team-page__empty-title">Sua equipe ainda está vazia</h2>
+          <p>Contrate seu primeiro funcionário digital para começar a trabalhar com o BRAÇO.</p>
           <Link to="/equipe/contratar">
             <Button>Conhecer funcionários</Button>
           </Link>

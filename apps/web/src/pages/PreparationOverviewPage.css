@@ -3,15 +3,26 @@
 }
 
 .braco-preparation-page__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   color: var(--md-sys-color-on-surface-variant);
   text-decoration: none;
   font-size: var(--md-sys-typescale-body-medium-size);
-  display: inline-block;
   margin-bottom: var(--braco-space-4);
 }
 
-.braco-preparation-page__next {
+.braco-numeric {
+  font-weight: var(--braco-weight-numeric);
+}
+
+/* Próximo item recomendado é uma superfície informativa, não um alerta —
+ * Azul Claro (docs/design/20-brand-ui-integration.md §7). */
+.braco-card.braco-preparation-page__next {
   margin: var(--braco-space-4) 0;
+  background: var(--braco-color-surface-secondary);
+  color: var(--braco-color-on-surface-secondary);
+  border-color: transparent;
 }
 
 .braco-preparation-page__sections {
@@ -39,6 +50,9 @@
 }
 
 .braco-preparation-page__section-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-size: var(--md-sys-typescale-label-medium-size);
   color: var(--md-sys-color-on-surface-variant);
 }

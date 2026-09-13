@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api, type DigitalEmployee } from '../api/client';
 import { Button } from '../components/Button';
@@ -40,7 +41,7 @@ export function EmployeeOverviewPage() {
   return (
     <div className="braco-employee-overview">
       <Link to="/equipe" className="braco-employee-overview__back">
-        ← Minha Equipe
+        <ArrowLeft size={16} aria-hidden="true" /> Minha Equipe
       </Link>
 
       <Card className="braco-employee-overview__card">
