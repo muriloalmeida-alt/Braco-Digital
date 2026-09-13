@@ -5,8 +5,16 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // CORS_ORIGIN: lista separada por vírgula de origens exatas permitidas em
+  // produção (ex.: a URL pública do serviço apps/web no Railway). Localhost
+  // continua sempre permitido para desenvolvimento.
+  const configuredOrigins = (process.env.CORS_ORIGIN ?? '')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+
   app.enableCors({
-    origin: [/^http:\/\/localhost:\d+$/],
+    origin: [/^http:\/\/localhost:\d+$/, ...configuredOrigins],
     credentials: true,
   });
 

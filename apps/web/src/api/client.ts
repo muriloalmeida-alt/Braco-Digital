@@ -1,4 +1,9 @@
-const API_BASE = '/api';
+// Em dev, '/api' é reescrito pelo proxy do Vite (vite.config.ts) para
+// http://localhost:3001, sem prefixo. Em produção (build), aponte
+// VITE_API_BASE_URL para a URL pública do serviço apps/api no Railway
+// (ex.: https://braco-api.up.railway.app) — sem "/api" no final, já que a
+// API não usa esse prefixo nas rotas (docs/technical/18-running-the-app.md).
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '/api';
 
 export class ApiError extends Error {
   constructor(
