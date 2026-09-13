@@ -91,3 +91,6 @@ Implementação em código das histórias US01–US06, US53 e US54, conforme
 
 Instruções completas de setup, seed e testes:
 `docs/technical/18-running-the-app.md`.
+
+Passo a passo de deploy no Railway (dois serviços, `apps/api` e
+`apps/web`): `docs/technical/19-deploy-railway.md`.

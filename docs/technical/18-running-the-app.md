@@ -108,6 +108,9 @@ transparência, não alterações de produto:
 
 ## 7. Deploy no Railway
 
+> Passo a passo completo, com a navegação no painel do Railway e um
+> checklist de verificação: `19-deploy-railway.md`.
+
 `apps/api` e `apps/web` são dois deployáveis independentes
 (`01-architecture.md`) — no Railway, cada um deve ser um **serviço
 separado**, com o *Root Directory* apontando para o respectivo diretório
