@@ -292,12 +292,14 @@ tempo real — construir relacional agora evita reescrita depois.
 
 **Contexto:** Sprint 02, US11 — `docs/design/22-work-manual-content-
 model.md` §8 exige "produto pode definir nível máximo permitido; gestor
-pode ser mais conservador, nunca mais permissivo", mas não tabula esse
-teto separadamente da recomendação inicial (ver PD7,
-`16-product-decisions-required.md`).
+pode ser mais conservador, nunca mais permissivo". Na versão original
+desta TD, o valor exato desse teto por responsabilidade ainda não estava
+tabulado separadamente da recomendação inicial (PD7,
+`16-product-decisions-required.md`, então **PENDING PO/DESIGN
+CONFIRMATION**).
 **Opções:** (a) validar o teto só na UI (desabilitar opção mais
 permissiva no formulário); (b) validar também no backend, com uma
-constante `RESPONSIBILITY_MAX_AUTONOMY` por responsabilidade.
+constante por responsabilidade.
 **Decisão:** (b), sempre. A UI pode (e deve) já impedir a seleção
 inválida, mas o `PATCH` do backend revalida contra a mesma constante
 antes de persistir — mesmo padrão de "nunca confiar só no frontend" já
@@ -312,6 +314,24 @@ desprezível.
 lados (idealmente compartilhada via um pacote/arquivo único para não
 divergir UI vs. backend).
 **Impacto futuro:** nenhum bloqueio.
+
+**Atualização — PD7 RESOLVED (patch "Sprint 02 PD6/PD7 Closure"):** o
+mecanismo acima está confirmado e **não muda** — a novidade é só o valor
+de negócio, agora explícito. Duas correções ao desenho original desta
+TD, ambas de nomenclatura/modelo, não de arquitetura:
+- **Recomendação e teto são duas constantes distintas**
+  (`RESPONSIBILITY_RECOMMENDED_AUTONOMY` e
+  `RESPONSIBILITY_MAX_AUTONOMY`), não a mesma lida duas vezes — mesmo
+  que, para o Braço Atendimento v1, os dois arrays tenham exatamente os
+  mesmos valores nas 14 responsabilidades (tabela oficial em
+  `docs/design/22-work-manual-content-model.md` §8). Isso já antecipa
+  sem custo uma recomendação futura mais conservadora que o teto.
+- **Mensagem de UI padronizada** para o nível bloqueado: "Este nível de
+  autonomia não está disponível para esta responsabilidade." — a opção
+  continua visível (não desaparece do seletor), só fica desabilitada,
+  nunca dependendo apenas de opacity/cor.
+- **US11 é TECH READY** (não mais "with caveats") — nenhuma parte do
+  mecanismo de enforcement precisou mudar, só o dado que faltava.
 
 ---
 

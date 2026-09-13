@@ -1,8 +1,17 @@
 # BRAÇO — Sprint 02 Technical Readiness (Track A + Track B)
 
 **Status:** Tech Ready — ver classificação por história (§22)
-**Gate:** Product Ready ✅ + Design Ready ✅ + Tech Ready (este documento)
+**Gate:** Product Ready ✅ + Design Ready ✅ + Tech Ready ✅ (este documento, fechado após PD6/PD7)
 **Código autorizado nesta execução:** NÃO — este documento é só análise/arquitetura.
+
+> **Atualização (patch "Sprint 02 PD6/PD7 Closure"):** PD6 e PD7 —
+> levantadas na primeira versão deste documento como lacunas de
+> especificação — foram fechadas por PM/Product Design. **PD6:** Product
+> Direction Confirmed / Legal Validation Required (Launch Gate, não
+> bloqueia construção). **PD7:** RESOLVED (tabela de teto de autonomia
+> oficial publicada). Consequência direta: **US11 passa de TECH READY
+> WITH CAVEATS para TECH READY** (§22). Todas as seções abaixo já
+> refletem o estado fechado; nada na arquitetura proposta mudou.
 
 > **Nota de numeração:** o pacote de instruções pedia este documento em
 > `docs/technical/19-sprint-02-tech-readiness.md`. Esse número já foi
@@ -32,10 +41,10 @@ dos dois tracks. Os itens de maior atenção são:
 2. **Track B introduz superfície pública com escrita** — exige isolamento
    de dados novo (fora do modelo de tenant), rate limiting e validação de
    input que não existem hoje no backend (§7, §16).
-3. **Duas lacunas de especificação** (não conflitos, lacunas) foram
-   identificadas e registradas em `16-product-decisions-required.md`
-   como PD6 e PD7 — nenhuma bloqueia o início da implementação porque
-   Engenharia registra uma interpretação padrão e segue (§25).
+3. **Duas lacunas de especificação** identificadas nesta análise (PD6 e
+   PD7) já foram **fechadas por PM/Product Design** — PD6 confirmada
+   como Launch Gate (não bloqueia construção), PD7 resolvida com tabela
+   de teto oficial (§25).
 4. **Privacidade do lead da landing é Launch Gate, não bloqueio técnico**
    — desenvolvimento segue; captação real de lead publicado não (§24.3).
 
@@ -554,13 +563,15 @@ relevante desta análise é Tech Ready.
 | US08 — Cadastrar produtos e serviços | YES | YES | **TECH READY WITH CAVEATS** | Nova tabela `ProductService`; definir política de exclusão de item referenciado (nenhum Braço "trava" a exclusão nesta sprint — confirmar não-bloqueio é suficiente) |
 | US09 — Definir responsabilidades | YES | YES | **TECH READY** | Catálogo fixo em código; desbloqueia obrigatoriedade dinâmica de US14 |
 | US10 — Definir regras e limites | YES | YES | **TECH READY** | Limites de sistema são conteúdo estático versionado em código, não linha de banco |
-| US11 — Definir autonomia | YES | YES | **TECH READY WITH CAVEATS** | Depende de PD7 (§25) para o valor exato do teto por responsabilidade; mecanismo de enforcement já está definido |
+| US11 — Definir autonomia | YES | YES | **TECH READY** | PD7 resolvida (§25) — tabela oficial de teto em `docs/design/22-work-manual-content-model.md` §8; mecanismo de enforcement (TD14) inalterado |
 | US12 — Informar equipe e responsáveis | YES | YES | **TECH READY** | Reaproveita `CompanyMembership` existente |
 | US13 — Definir estilo de comunicação | YES | YES | **TECH READY** | Sem LLM; preview é interpolação estática |
 | US14 — Configurar recursos de trabalho | YES | YES | **TECH READY WITH CAVEATS** | Depende de credenciais externas (BSP/Google, §24.2) e de KMS/secrets manager ainda não implementado; UI/modelo/estado podem ser construídos com credenciais sandbox |
 | US15 — Revisar Manual de Trabalho | YES | YES | **TECH READY** | Depende do `PreparationReadinessService` (§10), que precisa existir antes |
 | US16 — Identificar preparação incompleta | YES | YES | **TECH READY** | Mesma dependência de US15 |
 | US17 — Visualizar status de preparação | YES | YES | **TECH READY** | Extensão direta do Employee Status já existente |
+
+**Track A: 8 TECH READY · 3 TECH READY WITH CAVEATS · 0 NOT TECH READY.**
 
 ### Track B
 
@@ -574,6 +585,8 @@ relevante desta análise é Tech Ready.
 | US82 — Visualizar disponibilidade dos Braços recomendados | YES | YES | **TECH READY** | Consulta a mesma fonte de catálogo (§12), sem duplicação |
 | US83 — Registrar lead interessado | YES | YES | **TECH READY WITH CAVEATS** | Primeiro endpoint público de escrita do produto — depende de rate limiting, role de banco isolada e validação novos (§7, §16), nenhum dos quais existe hoje; nenhum é bloqueio, todos são trabalho previsto desta sprint |
 
+**Track B: 4 TECH READY · 3 TECH READY WITH CAVEATS · 0 NOT TECH READY.**
+
 ## 23. Risks
 
 | Risco | Track | Mitigação |
@@ -583,8 +596,12 @@ relevante desta análise é Tech Ready.
 | Autosave mal calibrado gera excesso de requests | A | Debounce + fila de 1 requisição em voo (§9) mitigam desde o design |
 | Landing pública ser o primeiro alvo de abuso do produto | B | Rate limit + role de banco isolada desde o primeiro commit, não como retrofit (§7/§16) |
 | SEO fraco por ser SPA CSR | B | Aceito para MVP; pré-renderização é evolução isolada (§15) |
-| Ambiguidade de teto de autonomia (PD7) implementada errado | A | Registrado antes de codificar (§25), não durante revisão de PR |
 | Track B consumir capacidade de Track A | Ambos | Nenhum sinal disso nesta análise — todas as 18 histórias são Tech Ready/Tech Ready with Caveats; se surgir durante a sprint, volta ao PO/PM, não é decidido por Engenharia sozinha (regra explícita das instruções) |
+
+> Risco removido nesta atualização: "Ambiguidade de teto de autonomia
+> (PD7) implementada errado" — PD7 foi **RESOLVED** por PM/Product
+> Design (§25), com tabela oficial publicada; o risco de implementar com
+> a interpretação errada deixou de existir.
 
 ## 24. External Gates
 
@@ -624,14 +641,28 @@ histórias que dependem deles não fiquem paradas quando chegar a vez:
 
 ## 25. Product Decisions Required
 
-Dois itens novos, adicionados a `docs/technical/16-product-decisions-
-required.md` preservando o histórico existente:
+**Status atual: NENHUMA pendente.** As duas lacunas identificadas nesta
+análise foram fechadas por PM/Product Design (patch "Sprint 02 PD6/PD7
+Closure") antes do merge do PR #19:
 
-- **PD6 — Privacidade do lead da landing (Launch Gate).**
-- **PD7 — Teto de autonomia por responsabilidade não tabulado
-  separadamente da recomendação inicial.**
+- **PD6 — Privacidade do lead da landing.** Status final:
+  **PRODUCT DIRECTION CONFIRMED / LEGAL VALIDATION REQUIRED**. Não é mais
+  uma decisão de Produto em aberto — é um **Launch Gate / Legal** (§24.3):
+  desenvolvimento integral do Track B autorizado; publicação com
+  captação real de lead permanece bloqueada até validação jurídica;
+  testes/staging usam dados sintéticos até lá.
+- **PD7 — Teto de autonomia por responsabilidade.** Status final:
+  **RESOLVED**. Recomendação inicial e teto máximo são propriedades
+  distintas (para o Braço Atendimento v1, com os mesmos valores nas 14
+  responsabilidades); tabela oficial publicada em
+  `docs/design/22-work-manual-content-model.md` §8. Consequência: **US11
+  é TECH READY** (§22); TD14 atualizada (`17-technical-decisions.md`)
+  sem reabrir o mecanismo de enforcement, só o valor de negócio.
 
 Detalhe completo de cada um em `16-product-decisions-required.md`.
+
+Nenhuma Product Decision nova foi identificada durante a aplicação deste
+patch de fechamento.
 
 ## 26. Recommended Implementation Sequence
 
@@ -696,10 +727,15 @@ para forçar uma ordem entre os tracks.
 
 ## 27. Final Sprint Readiness
 
+> **Product Ready: YES**
+> **Design Ready: YES**
+> **Tech Ready: YES**
+>
 > **Track A Ready for Development: YES**
 > **Track B Ready for Development: YES**
 > **Sprint 02 Ready for Development: YES**
 
 Nenhum Technical Blocker impede o início. Pendências reais são External
 Credential/Environment (§24.2) e Launch Gates (§24.3) — nenhuma delas
-impede começar a escrever código nesta sprint.
+impede começar a escrever código nesta sprint. Nenhuma Product Decision
+está pendente (§25).

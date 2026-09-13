@@ -167,36 +167,57 @@ Para concluir:
 
 Definida **por responsabilidade habilitada**.
 
+Níveis:
+
 - 🟢 **Pode decidir**
 - 🟡 **Pode decidir sob regras**
 - 🔴 **Precisa de humano**
 
 Cor nunca substitui label.
 
-Regra:
-- produto pode definir nível máximo permitido;
-- gestor pode ser mais conservador, nunca mais permissivo.
+Ordem de permissividade:
 
-Recomendação inicial:
+> 🟢 Pode decidir → 🟡 Pode decidir sob regras → 🔴 Precisa de humano
 
-| Responsabilidade | Recomendação |
-|---|---|
-| Receber clientes | 🟢 |
-| Identificar necessidade | 🟢 |
-| Encaminhar para humano | 🟢 |
-| Responder dúvidas cadastradas | 🟢 |
-| Explicar produtos/serviços | 🟢 |
-| Informar preços autorizados | 🟢 |
-| Agendar | 🟢 |
-| Confirmar | 🟢 |
-| Reagendar | 🟡 |
-| Cancelar | 🟡 |
-| Follow-up | 🟡 |
-| Recuperação | 🟡 |
-| Lembretes | 🟡 |
-| Identificar insatisfação | 🟢 |
+### Recomendação inicial vs. teto máximo
 
-Toda opção 🟡 exige **Condição**.
+**Decisão PD7:** são conceitos distintos.
+
+- **Recomendação inicial** é o nível sugerido ao gestor.
+- **Teto máximo permitido** é o nível mais permissivo que o produto autoriza.
+- O gestor pode escolher o teto ou qualquer nível mais conservador.
+- O gestor nunca pode escolher um nível mais permissivo que o teto.
+- No Braço Atendimento v1, recomendação e teto possuem os mesmos valores.
+- Essa coincidência vale para o catálogo v1; versões futuras podem recomendar
+  um nível mais conservador que o teto sem alterar a regra estrutural.
+
+| Responsabilidade | Recomendação inicial | Teto máximo permitido |
+|---|---|---|
+| Receber clientes | 🟢 Pode decidir | 🟢 Pode decidir |
+| Identificar necessidade | 🟢 Pode decidir | 🟢 Pode decidir |
+| Encaminhar para humano | 🟢 Pode decidir | 🟢 Pode decidir |
+| Responder dúvidas cadastradas | 🟢 Pode decidir | 🟢 Pode decidir |
+| Explicar produtos/serviços | 🟢 Pode decidir | 🟢 Pode decidir |
+| Informar preços autorizados | 🟢 Pode decidir | 🟢 Pode decidir |
+| Agendar | 🟢 Pode decidir | 🟢 Pode decidir |
+| Confirmar | 🟢 Pode decidir | 🟢 Pode decidir |
+| Reagendar | 🟡 Pode decidir sob regras | 🟡 Pode decidir sob regras |
+| Cancelar | 🟡 Pode decidir sob regras | 🟡 Pode decidir sob regras |
+| Follow-up | 🟡 Pode decidir sob regras | 🟡 Pode decidir sob regras |
+| Recuperação | 🟡 Pode decidir sob regras | 🟡 Pode decidir sob regras |
+| Lembretes | 🟡 Pode decidir sob regras | 🟡 Pode decidir sob regras |
+| Identificar insatisfação | 🟢 Pode decidir | 🟢 Pode decidir |
+
+### Comportamento
+
+- toda responsabilidade habilitada deve possuir nível válido;
+- toda opção 🟡 exige **Condição**;
+- opções mais permissivas que o teto devem permanecer compreensíveis na UI,
+  mas indisponíveis para seleção;
+- a UI deve explicar:
+  **"Este nível de autonomia não está disponível para esta responsabilidade."**
+- o backend também deve rejeitar valor acima do teto;
+- limites de sistema continuam prevalecendo sobre qualquer escolha do gestor.
 
 ## 9. Pessoas e responsáveis
 

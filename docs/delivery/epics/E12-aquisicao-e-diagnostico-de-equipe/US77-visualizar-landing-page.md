@@ -5,7 +5,7 @@
 **Sprint:** Sprint 02 — Track B Growth  
 **Product Ready:** YES  
 **Design Ready:** YES  
-**Tech Ready:** PENDING ENGINEERING REVIEW
+**Tech Ready:** TECH READY WITH CAVEATS
 
 ## Contexto
 

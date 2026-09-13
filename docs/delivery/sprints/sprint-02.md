@@ -1,6 +1,6 @@
 # Sprint 02 — Manual de Trabalho + Growth Foundation
 
-**Status:** Product Ready + Design Ready / Tech Ready Pending  
+**Status:** READY FOR DEVELOPMENT — Product Ready + Design Ready + Tech Ready  
 **Owner Produto/Design:** GPT  
 **Owner Tech Ready:** Claude / Engineering
 
@@ -149,7 +149,22 @@ Se capacidade técnica exigir negociação de escopo:
 
 ## Tech Ready
 
-> **PENDING ENGINEERING REVIEW — TRACK A + TRACK B**
+> **YES — TRACK A + TRACK B**
+
+Technical Readiness aceito, com caveats não bloqueantes documentados em
+`docs/technical/20-sprint-02-tech-readiness.md`.
+
+### Readiness consolidado após resolução de PD7
+
+Track A:
+- TECH READY: US09, US10, US11, US12, US13, US15, US16, US17
+- TECH READY WITH CAVEATS: US07, US08, US14
+
+Track B:
+- TECH READY: US79, US80, US81, US82
+- TECH READY WITH CAVEATS: US77, US78, US83
+
+Nenhuma história está `NOT TECH READY`.
 
 Engenharia deve validar especialmente:
 
@@ -211,6 +226,19 @@ Não reduzir silenciosamente a placeholder visual.
 
 ### Estado Pronto
 Não confundir preparação com ativação.
+
+### PD7 — Autonomia
+**RESOLVED.**
+
+Recomendação e teto são propriedades distintas. No Braço Atendimento v1,
+os valores coincidem. Engenharia deve tratar o teto como regra própria,
+sem assumir equivalência estrutural para futuras versões.
+
+### PD6 — Privacidade do lead
+**PRODUCT DIRECTION CONFIRMED / LEGAL VALIDATION REQUIRED.**
+
+Desenvolvimento do Track B está autorizado. Publicação com captação real de
+lead permanece bloqueada até validação jurídico/compliance.
 
 ### Track B — Privacidade pública
 Desenvolvimento pode seguir, mas publicação com captação real depende de

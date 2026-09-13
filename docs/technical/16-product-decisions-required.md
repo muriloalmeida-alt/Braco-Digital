@@ -15,8 +15,8 @@ necessária.
 | PD3 | Retenção, Exclusão e LGPD | **PENDING LEGAL VALIDATION** | **Não** (gate é antes da Sprint 03) |
 | PD4 | Google Tasks | **RESOLVED** | Não |
 | PD5 | Catálogo de Funcionários | **RESOLVED** | Não (já aplicada) |
-| PD6 | Privacidade do lead da landing (Track B) | **PENDING LEGAL VALIDATION** | **Não** (gate é antes do Public Launch com captação real) |
-| PD7 | Teto de autonomia por responsabilidade não tabulado | **PENDING PO/DESIGN CONFIRMATION** | Não (Engenharia segue com interpretação registrada) |
+| PD6 | Privacidade do lead da landing (Track B) | **PRODUCT DIRECTION CONFIRMED / LEGAL VALIDATION REQUIRED** | **Não** (gate é antes do Public Launch com captação real) |
+| PD7 | Teto de autonomia por responsabilidade não tabulado | **RESOLVED** | Não |
 
 O histórico completo de cada decisão (problema original → alternativas →
 recomendação → decisão tomada) é mantido abaixo — nada foi apagado.
@@ -256,7 +256,7 @@ de mockup restante).
 
 ---
 
-## PD6 — Privacidade do lead da landing (Track B) — **PENDING LEGAL VALIDATION**
+## PD6 — Privacidade do lead da landing (Track B) — **PRODUCT DIRECTION CONFIRMED / LEGAL VALIDATION REQUIRED**
 
 **Requisito atual:** `docs/prd/04-aquisicao-e-diagnostico-de-equipe.md`
 §18 e §26/instruções de execução exigem que o formulário de captura de
@@ -302,9 +302,28 @@ construção técnica da Sprint 02.**
 equipe.md`, `docs/13-data-privacy-and-retention.md` (precedente de PD3),
 `docs/technical/20-sprint-02-tech-readiness.md`.
 
+**Resolução final (Murilo/PO, via PM/Product Design — patch "Sprint 02
+PD6/PD7 Closure"):**
+- Status corrigido para **PRODUCT DIRECTION CONFIRMED / LEGAL VALIDATION
+  REQUIRED** — PD6 deixa de ser uma decisão de Produto/PO em aberto.
+  **Não é mais item pendente de decisão de Produto.**
+- Confirmada a opção 2 (recomendação de Engenharia): **Track B pode ser
+  desenvolvido integralmente.** A arquitetura suporta aviso de
+  privacidade, link aplicável, registro da manifestação/aceite quando
+  juridicamente definido, e timestamp/metadado aplicável — sem que
+  Produto ou Engenharia invente texto jurídico, base legal ou política
+  de privacidade.
+- **Public Launch com captação real permanece BLOQUEADO** até validação
+  jurídico/compliance. Confirmado explicitamente: isso é **Launch Gate /
+  Legal**, e **não** é Technical Blocker, Product Blocker nem Sprint
+  Blocker.
+- Enquanto o gate não for concluído, testes/staging usam dados
+  sintéticos/de teste — nunca leads reais de produção.
+- **Não bloqueia o início da implementação da Sprint 02.**
+
 ---
 
-## PD7 — Teto de autonomia por responsabilidade não tabulado separadamente da recomendação inicial — **PENDING PO/DESIGN CONFIRMATION**
+## PD7 — Teto de autonomia por responsabilidade — **RESOLVED**
 
 **Requisito atual:** `docs/design/22-work-manual-content-model.md` §8
 (Autonomia) diz: "produto pode definir nível máximo permitido; gestor
@@ -349,6 +368,35 @@ responsabilidade.
 **Arquivos relacionados:** `docs/design/22-work-manual-content-model.md`
 §8, `docs/technical/17-technical-decisions.md` TD14,
 `docs/technical/20-sprint-02-tech-readiness.md`.
+
+**Resolução final (Murilo/PO, via PM/Product Design — patch "Sprint 02
+PD6/PD7 Closure"):**
+- **RESOLVED.** A interpretação proposta por Engenharia (opção 1) foi
+  confirmada, com uma correção conceitual importante: **recomendação
+  inicial e teto máximo são propriedades distintas**, não a mesma
+  propriedade lida duas vezes. Para o Braço Atendimento v1, os *valores*
+  de recomendação e teto coincidem em todas as 14 responsabilidades —
+  mas o modelo de dados/negócio trata as duas como campos separados,
+  porque uma recomendação futura mais conservadora que o teto (produto
+  sugerindo 🟡 quando o teto permitiria 🟢, por exemplo) é um cenário
+  explicitamente antecipado.
+- **Tabela oficial de teto** (idêntica à de recomendação para v1, mas
+  agora nomeada e tabulada separadamente) publicada em
+  `docs/design/22-work-manual-content-model.md` §8 — fonte de verdade.
+- **Comportamento do seletor confirmado:** o gestor pode escolher o teto
+  ou qualquer nível mais conservador (ordem de permissividade
+  🟢 → 🟡 → 🔴). Uma opção mais permissiva que o teto **continua
+  visível** (para que a regra seja compreensível) mas fica indisponível,
+  com o texto "Este nível de autonomia não está disponível para esta
+  responsabilidade." — nunca dependendo só de opacity/cor. **O backend
+  também rejeita** qualquer valor acima do teto, não só a UI.
+- **US11 passa de TECH READY WITH CAVEATS para TECH READY** — o
+  mecanismo técnico proposto em TD14 (validação server-side contra uma
+  constante) continua válido; o que faltava era o valor de negócio, agora
+  definido.
+- Detalhe funcional completo também em US11
+  (`docs/delivery/epics/E02-preparacao-do-funcionario/US11-definir-
+  autonomia.md`).
 
 ---
 

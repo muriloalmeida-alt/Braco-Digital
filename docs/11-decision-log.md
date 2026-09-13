@@ -116,6 +116,41 @@ Referências:
 - `docs/design/28-growth-wireframes.md`
 
 
+### PD6 — Privacidade do lead da Landing
+
+**Status de Produto:** PRODUCT DIRECTION CONFIRMED / LEGAL VALIDATION REQUIRED.
+
+Decisão:
+- Track B pode ser desenvolvido integralmente;
+- a arquitetura deve suportar aviso, link e registro da manifestação aplicável;
+- Produto e Engenharia não inventam texto jurídico ou base legal;
+- lançamento público com captação real fica bloqueado até validação
+  jurídico/compliance;
+- enquanto o gate não estiver concluído, ambientes de teste devem usar dados
+  sintéticos/de teste, não leads reais de produção.
+
+PD6 deixa de ser uma decisão de PO/Product em aberto e permanece como:
+
+> **Launch Gate / Legal**
+
+### PD7 — Teto de autonomia por responsabilidade
+
+**Status:** RESOLVED.
+
+Decisão:
+- recomendação inicial e teto máximo permitido são conceitos distintos;
+- o teto é regra própria e deve ser validado também no backend;
+- no Braço Atendimento v1, recomendação e teto possuem os mesmos valores;
+- responsabilidades recomendadas em 🟢 possuem teto 🟢;
+- responsabilidades recomendadas em 🟡 possuem teto 🟡;
+- o gestor sempre pode escolher nível mais conservador;
+- opção mais permissiva que o teto fica indisponível e explicada na UI e é
+  rejeitada no backend;
+- versões futuras podem mudar recomendação sem necessariamente mudar o teto.
+
+Tabela oficial:
+`docs/design/22-work-manual-content-model.md`.
+
 ## Product Decisions Required — resolução (Technical Discovery v1)
 
 ### PD1 — Registro e Onboarding — **RESOLVED**

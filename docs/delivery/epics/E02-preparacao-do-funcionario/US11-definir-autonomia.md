@@ -5,7 +5,7 @@
 **Sprint planejada:** Sprint 02  
 **Product Ready:** YES  
 **Design Ready:** YES  
-**Tech Ready:** PENDING ENGINEERING REVIEW
+**Tech Ready:** TECH READY
 
 ## Contexto
 
@@ -23,8 +23,10 @@ chamar uma pessoa**.
 - [ ] Cada responsabilidade habilitada aparece em Autonomia.
 - [ ] Cada item usa Pode decidir, Pode decidir sob regras ou Precisa de humano.
 - [ ] Texto acompanha toda cor/ícone.
-- [ ] O produto apresenta nível recomendado.
-- [ ] O gestor pode tornar uma decisão mais conservadora, nunca mais permissiva que o limite do produto.
+- [ ] O produto apresenta nível recomendado e teto máximo por responsabilidade.
+- [ ] Recomendação e teto são conceitos distintos; no Braço Atendimento v1 os valores coincidem.
+- [ ] O gestor pode escolher o teto ou qualquer nível mais conservador.
+- [ ] Opção mais permissiva que o teto fica indisponível com explicação textual e também é rejeitada pelo backend.
 - [ ] Pode decidir sob regras exige uma condição.
 - [ ] Todas as responsabilidades habilitadas precisam ter nível válido.
 - [ ] A etapa só fica Completa quando níveis/condições obrigatórios estiverem válidos.
@@ -33,7 +35,9 @@ chamar uma pessoa**.
 ## Regras de negócio
 
 - Autonomia é por responsabilidade, não global.
-- 🟢 mais autônomo, 🟡 condicional, 🔴 humano.
+- 🟢 é mais permissivo, 🟡 é condicional e 🔴 é mais conservador.
+- Recomendação inicial e teto máximo são propriedades distintas.
+- Para Braço Atendimento v1, recomendação e teto possuem os mesmos valores.
 - Limites de sistema prevalecem.
 - 🟡 sem condição fica incompleto.
 

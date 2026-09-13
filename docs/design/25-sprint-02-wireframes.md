@@ -197,13 +197,18 @@ Autonomia
 
 Responder dúvidas
 Recomendado: Pode decidir
+Autonomia máxima: Pode decidir
+
 (•) Pode decidir
 ( ) Pode decidir sob regras
 ( ) Precisa de humano
 
 Reagendar
 Recomendado: Sob regras
-( ) Pode decidir
+Autonomia máxima: Sob regras
+
+(×) Pode decidir
+    Este nível de autonomia não está disponível para esta responsabilidade.
 (•) Pode decidir sob regras
 ( ) Precisa de humano
 
@@ -211,7 +216,11 @@ Condição *
 [ Pode reagendar quando houver horário disponível e... ]
 
 Cancelar
-( ) Pode decidir
+Recomendado: Sob regras
+Autonomia máxima: Sob regras
+
+(×) Pode decidir
+    Este nível de autonomia não está disponível para esta responsabilidade.
 (•) Pode decidir sob regras
 ( ) Precisa de humano
 
@@ -221,7 +230,10 @@ Condição *
                                                 [Continuar]
 ```
 
-No Compact, cada responsabilidade vira um card vertical.
+`(×)` representa uma opção visível, porém indisponível.
+
+No Compact, cada responsabilidade vira um card vertical e a explicação do
+teto permanece imediatamente associada ao controle.
 
 ## 8. Pessoas e responsáveis
 

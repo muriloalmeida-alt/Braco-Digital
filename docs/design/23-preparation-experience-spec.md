@@ -137,15 +137,47 @@ Mostrar:
 
 ## 12. Autonomia
 
-Cada responsabilidade:
+Cada responsabilidade apresenta:
+
 - nome;
 - explicação;
-- selector dos 3 níveis;
-- condição quando 🟡;
-- limite máximo quando existir.
+- nível recomendado;
+- teto máximo permitido;
+- seletor dos níveis de autonomia;
+- condição quando 🟡.
 
-Compact: bloco vertical.  
-Expanded: lista estruturada, não tabela densa.
+### Recomendação e teto
+
+São conceitos distintos.
+
+No Braço Atendimento v1, os valores coincidem conforme
+`docs/design/22-work-manual-content-model.md`.
+
+O componente deve continuar preparado para uma evolução futura em que:
+
+> recomendação inicial < teto máximo permitido
+
+sem necessidade de mudar o modelo conceitual.
+
+### Opção acima do teto
+
+Quando um nível for mais permissivo que o teto:
+
+- manter a opção visível para tornar a regra compreensível;
+- apresentar o controle como indisponível;
+- associar texto acessível:
+  **"Este nível de autonomia não está disponível para esta responsabilidade."**
+- não depender apenas de cor ou opacity;
+- impedir seleção por mouse, teclado e API.
+
+Compact:
+- bloco vertical por responsabilidade;
+- labels completas;
+- helper text junto à opção indisponível.
+
+Expanded:
+- lista estruturada;
+- evitar tabela operacional densa.
 
 ## 13. Produtos/serviços
 
