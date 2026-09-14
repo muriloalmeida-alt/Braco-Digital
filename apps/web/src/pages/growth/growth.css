@@ -20,14 +20,16 @@
 
 /* ---------- Hero ---------- */
 
-/* Bloco institucional escuro (Azul Profundo) — mesmo token já usado pelo
- * App Shell autenticado (`--braco-color-nav-surface`,
- * docs/design/04-color-system.md §5/§7), aplicado aqui como "bloco
- * institucional selecionado" permitido por docs/design/26 §11 mesmo numa
- * landing de superfícies predominantemente claras. */
+/* Bloco claro com leve tonalidade (mesmo par de tokens já usado em
+ * "Bloco de integrações" mais abaixo, `--braco-color-surface-secondary`/
+ * `--braco-color-on-surface-secondary`, docs/design/04-color-system.md
+ * §5/§7) — dá ritmo/diferenciação ao hero sem recorrer a um fundo escuro
+ * (docs/design/26-growth-landing-experience.md §11: "superfícies
+ * claras"; §16 revisado — a v2 usava Azul Profundo aqui, revertido a
+ * pedido do PO). */
 .braco-growth-hero-band {
-  background: var(--braco-color-nav-surface);
-  color: var(--braco-color-on-nav-surface);
+  background: var(--braco-color-surface-secondary);
+  color: var(--braco-color-on-surface-secondary);
 }
 
 .braco-growth-hero {
@@ -55,13 +57,6 @@
   margin: 0 0 var(--braco-space-3);
 }
 
-/* No hero escuro, o Azul BRAÇO perde contraste — usa a cor de destaque
- * já prevista pelo color system para superfícies inversas
- * (`--md-sys-color-inverse-primary`), sem introduzir uma cor nova. */
-.braco-growth-hero-band .braco-growth-hero__eyebrow {
-  color: var(--md-sys-color-inverse-primary);
-}
-
 .braco-growth-eyebrow--centered {
   text-align: center;
 }
@@ -76,12 +71,12 @@
 }
 
 .braco-growth-hero__headline-accent {
-  color: var(--md-sys-color-inverse-primary);
+  color: var(--md-sys-color-primary);
 }
 
 .braco-growth-hero__support {
   font-size: var(--md-sys-typescale-body-large-size);
-  opacity: 0.92;
+  opacity: 0.85;
   max-width: 48ch;
   margin: 0 0 var(--braco-space-5);
 }
@@ -93,33 +88,14 @@
   margin-bottom: var(--braco-space-4);
 }
 
-/* CTA primário sobre fundo escuro: em vez de introduzir uma cor de
- * destaque nova (fora do color system aprovado), usa um botão claro de
- * alto contraste — o mesmo princípio M3 de "botão sobre superfície
- * inversa" — mantendo o Azul BRAÇO como cor de texto/ação (docs/design/
- * 26-growth-landing-experience.md §11: "Azul BRAÇO como ação"). */
-.braco-growth-hero__cta-primary.braco-button {
-  background: var(--md-sys-color-surface-container-lowest);
-  color: var(--md-sys-color-primary);
-}
-
-.braco-growth-hero__cta-primary.braco-button:hover:not(:disabled) {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-}
-
-.braco-growth-hero__cta-secondary.braco-button--outlined {
-  color: var(--braco-color-on-nav-surface);
-  border-color: rgba(255, 255, 255, 0.4);
-}
-
-.braco-growth-hero__cta-secondary.braco-button--outlined:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.08);
-}
+/* Sem fundo escuro no hero, os botões voltam ao tratamento padrão
+ * (Button.css): filled em Azul BRAÇO, outlined com borda/texto Azul
+ * BRAÇO — nenhuma variante própria de cor é mais necessária aqui. */
 
 .braco-growth-hero__microcopy {
   margin: 0;
   font-size: var(--md-sys-typescale-body-medium-size);
-  opacity: 0.85;
+  opacity: 0.75;
 }
 
 .braco-growth-hero__visual {
@@ -138,8 +114,9 @@
   justify-content: flex-start;
   padding: var(--braco-space-5);
   border-radius: var(--md-sys-shape-corner-extra-large);
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--md-sys-color-surface-container-lowest);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  box-shadow: 0 8px 24px rgba(7, 52, 90, 0.12);
   overflow: hidden;
 }
 
@@ -147,7 +124,6 @@
   width: 42%;
   max-width: 190px;
   height: auto;
-  opacity: 0.8;
 }
 
 .braco-growth-hero__visual > .braco-wa-float {

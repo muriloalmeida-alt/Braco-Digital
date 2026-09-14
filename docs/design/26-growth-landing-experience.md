@@ -240,35 +240,40 @@ da v1 ("Sua empresa precisa de mais um braço? Agora tem.", §3 acima)
 como a frase primária; a frase da v1 permanece válida como variação
 secundária caso Produto queira reintroduzi-la em teste A/B futuro.
 
-**Hero como bloco institucional escuro (Azul Profundo):** §11 descreve a
-landing como predominantemente clara, com "Azul Profundo em blocos
-institucionais selecionados" — o hero passou a ser esse bloco
-selecionado, usando o token já existente `--braco-color-nav-surface` (o
-mesmo do App Shell autenticado, `docs/design/04-color-system.md` §5/§7),
-não uma cor nova. O CTA primário sobre esse fundo usa um botão claro
-(fundo branco, texto Azul BRAÇO) em vez de recolorir o botão para uma
-cor de destaque fora do color system — mantém "Azul BRAÇO como ação"
-(§11) com contraste adequado (~7:1) sobre o fundo escuro; o eyebrow/
-destaque de texto usa `--md-sys-color-inverse-primary` (já existente),
-não uma cor nova. Superfícies claras continuam predominantes no restante
-da página.
+**Hero com tonalidade clara (revisado — sem "modo escuro"):** a primeira
+versão deste redesign usava Azul Profundo (`--braco-color-nav-surface`)
+como fundo do hero, tratando-o como "bloco institucional selecionado"
+permitido por §11. A pedido do PO, essa versão foi revertida: o hero usa
+`--braco-color-surface-secondary`/`--braco-color-on-surface-secondary`
+(mesmo par de tokens do "Bloco de integrações" mais abaixo) — um azul
+claro, não um fundo escuro — mantendo alguma diferenciação de ritmo
+entre seções sem contrariar "superfícies claras" (§11). CTA primário e
+secundário voltam ao tratamento padrão de `Button.css` (filled/outlined
+em Azul BRAÇO); o destaque tipográfico no headline ("sua empresa.") usa
+`--md-sys-color-primary` diretamente, sem precisar de uma variante para
+superfície inversa. O painel que compõe o símbolo do BRAÇO no hero é
+branco (`--md-sys-color-surface-container-lowest`) com sombra suave, no
+lugar do painel translúcido pensado para fundo escuro.
 
 **Header fixo + footer institucional (novos):** `PublicShell.tsx` ganhou
 navegação completa (Conheça os Braços/Como funciona/Dúvidas — âncoras
 `/#id` para funcionar a partir de qualquer rota pública — Entrar, CTA) e
 um menu mobile acessível (`aria-expanded`, `Menu`/`X` do Lucide). O
-rodapé usa a logo negativa branca sobre o mesmo Azul Profundo do hero.
-"Política de Privacidade"/"Termos de Uso" aparecem como texto informativo
-(não como link) — as páginas reais dependem do gate jurídico (PD em
-`docs/technical/16-product-decisions-required.md`); nunca se fabricou
-conteúdo legal nem se apontou para uma rota inexistente.
+rodapé usa a logo horizontal colorida (fundo claro, `docs/design/21-
+logo-usage.md` §3) sobre uma superfície neutra clara
+(`--md-sys-color-surface-container-low`), não mais a logo negativa
+branca sobre fundo escuro da primeira versão. "Política de Privacidade"/
+"Termos de Uso" aparecem como texto informativo (não como link) — as
+páginas reais dependem do gate jurídico (PD em `docs/technical/16-
+product-decisions-required.md`); nunca se fabricou conteúdo legal nem se
+apontou para uma rota inexistente.
 
 **Demonstração concreta do produto no Hero:** card flutuante
 (`WhatsAppFloatingCard`) com o avatar oficial `08_avatar_whatsapp_e_
 perfil.png` — mensagem sempre ilustrativa, nunca dado real. O restante
 da composição visual do hero é o símbolo oficial do BRAÇO
-(`07_simbolo_colorido.png`) sobre um painel translúcido — não uma foto
-de pessoa: este ambiente de desenvolvimento não tem geração/banco de
+(`07_simbolo_colorido.png`) sobre um painel branco — não uma foto de
+pessoa: este ambiente de desenvolvimento não tem geração/banco de
 fotografia disponível, então nenhuma imagem de "empreendedor trabalhando"
 foi fabricada. **Pendência:** encomendar fotografia/ilustração real do
 empreendedor + equipe digital quando Produto/Design tiverem o asset.

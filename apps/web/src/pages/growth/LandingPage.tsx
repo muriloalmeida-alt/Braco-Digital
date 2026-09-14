@@ -78,10 +78,8 @@ export function LandingPage() {
               junto com a sua equipe — todos os dias.
             </p>
             <div className="braco-growth-hero__ctas">
-              <Button className="braco-growth-hero__cta-primary" onClick={() => navigate('/monte-sua-equipe')}>
-                Montar minha equipe →
-              </Button>
-              <Button variant="outlined" className="braco-growth-hero__cta-secondary" onClick={scrollToPortfolio}>
+              <Button onClick={() => navigate('/monte-sua-equipe')}>Montar minha equipe →</Button>
+              <Button variant="outlined" onClick={scrollToPortfolio}>
                 Conhecer os Braços
               </Button>
             </div>

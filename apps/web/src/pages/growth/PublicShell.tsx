@@ -102,7 +102,7 @@ export function PublicShell({ children }: { children: ReactNode }) {
 
       <footer className="braco-public-shell__footer">
         <img
-          src="/brand/06_logo_negativa_branca.png"
+          src="/brand/03_logo_horizontal_colorida.png"
           alt=""
           className="braco-public-shell__footer-logo"
           width={83}
