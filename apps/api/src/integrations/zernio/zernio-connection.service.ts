@@ -268,6 +268,49 @@ export class ZernioConnectionService {
     return status;
   }
 
+  /**
+   * Desconexão real, iniciada pelo BRAÇO (issue de UI real de Recursos —
+   * não confundir com `markDisconnected`, que reage a um webhook do
+   * próprio provedor). Chama o endpoint oficial do Zernio
+   * `DELETE /accounts/{accountId}` — nunca usa só o `ResourcesService`
+   * genérico (que só apaga a linha `Integration` local, sem avisar o
+   * provedor). Idempotente: sem `accountId` local, ou 404 do provedor
+   * (a conta já não existe do lado dele), é tratado como "já
+   * desconectado", não como erro.
+   */
+  async disconnectAccount(companyId: string): Promise<ZernioConnectionStatus> {
+    const connection = await this.prisma.withTenant(companyId, (tx) => tx.zernioConnection.findUnique({ where: { companyId } }));
+
+    if (connection?.accountId) {
+      try {
+        await this.client.request({ method: 'DELETE', path: `/accounts/${encodeURIComponent(connection.accountId)}` });
+      } catch (err) {
+        const isAlreadyGone = err instanceof ZernioApiError && err.code === 'not_found';
+        if (!isAlreadyGone) throw err;
+      }
+    }
+
+    // `upsert`, não `update`: uma empresa que nunca chegou a criar um
+    // profile (nenhuma linha `ZernioConnection` ainda) também deve poder
+    // chamar disconnect sem erro — idempotente mesmo nesse caso extremo.
+    await this.prisma.withTenant(companyId, (tx) =>
+      tx.zernioConnection.upsert({
+        where: { companyId },
+        create: { companyId, status: ZernioConnectionStatus.DISCONNECTED, disconnectedAt: new Date() },
+        update: {
+          status: ZernioConnectionStatus.DISCONNECTED,
+          accountId: null,
+          phoneNumber: null,
+          disconnectedAt: new Date(),
+          failureReason: null,
+        },
+      }),
+    );
+    await this.syncGenericIntegration(companyId, ZernioConnectionStatus.DISCONNECTED, null);
+    this.metrics.connectionStatus(ZernioConnectionStatus.DISCONNECTED);
+    return ZernioConnectionStatus.DISCONNECTED;
+  }
+
   /** Webhook `account.disconnected` — desconexão confirmada pelo próprio provedor. */
   async markDisconnected(companyId: string, reason: string): Promise<void> {
     await this.prisma.withTenant(companyId, (tx) =>
@@ -350,12 +393,13 @@ export class ZernioConnectionService {
   }
 
   private resultUrl(result: 'success' | 'error', reason?: string): string {
-    // Fora do escopo confirmado desta issue (não inclui apps/web): sem
-    // uma tela dedicada, o redirecionamento final aponta para a origem
-    // web configurada com uma querystring de resultado — ver docs/
-    // technical/21-zernio-whatsapp-integration.md, seção "Limitações".
+    // UI real de Recursos: aponta para o handler central de callback do
+    // apps/web (`/integrations/callback`), que reconstrói o estado a
+    // partir da querystring + do return path guardado em sessionStorage —
+    // funciona mesmo com hard reload, sem depender de estado React
+    // efêmero. Ver docs/technical/21-zernio-whatsapp-integration.md.
     const base = (process.env.CORS_ORIGIN ?? '').split(',')[0]?.trim() || 'http://localhost:5173';
-    const url = new URL(base);
+    const url = new URL('/integrations/callback', base);
     url.searchParams.set('zernio', result);
     if (reason) url.searchParams.set('reason', reason);
     return url.toString();

@@ -36,6 +36,19 @@ export class ZernioConnectionController {
   }
 
   /**
+   * Desconexão real, provider-aware (issue de UI real de Recursos): nunca
+   * só o `ResourcesService.disconnect` genérico — este endpoint chama o
+   * Zernio de verdade (`ZernioConnectionService.disconnectAccount`,
+   * `DELETE /accounts/{accountId}`, idempotente).
+   */
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.OWNER, Role.ADMIN)
+  @Post('disconnect')
+  disconnect(@CurrentUser() user: JwtPayload) {
+    return this.service.disconnectAccount(user.companyId).then((status) => ({ status }));
+  }
+
+  /**
    * Callback público do Embedded Signup (issue #30) — chega sem
    * autenticação (é o navegador do usuário voltando do Zernio, não uma
    * chamada da nossa própria SPA). A validação real é a correlação

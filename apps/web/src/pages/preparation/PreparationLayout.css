@@ -245,6 +245,33 @@
   gap: var(--braco-space-2);
 }
 
+/* UI real de Recursos (issue de UI real) — banner de resultado do
+ * callback OAuth, nota de somente-leitura (RBAC) e o link secundário
+ * "simular (apenas dev)", nunca a ação primária. */
+.braco-prep__resource-banner-success {
+  color: var(--md-sys-color-primary);
+  font-size: var(--md-sys-typescale-label-medium-size);
+  margin: 0;
+}
+
+.braco-prep__resource-readonly-note {
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-label-medium-size);
+  margin: 0 0 var(--braco-space-3);
+}
+
+.braco-prep__resource-simulate-link {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--md-sys-color-on-surface-variant);
+  text-decoration: underline;
+  font: inherit;
+  font-size: var(--md-sys-typescale-label-medium-size);
+  cursor: pointer;
+}
+
 .braco-prep__preview {
   background: var(--braco-color-surface-secondary);
   color: var(--braco-color-on-surface-secondary);

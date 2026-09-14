@@ -286,11 +286,17 @@ permanece intocado) — mesmo padrão de
   definitiva degradando conexão + recursos); isolamento entre tenants
   (3 cenários contra Postgres real).
 
-Resultado na branch: **40 novos testes unitários** (142/142 no total
-de `apps/api`, 17 suítes) e **21 novos testes e2e** (74/74 no total, 5
-suítes). `tsc --noEmit` e `nest build` limpos. Boot testado em três
-cenários (dev sem config, produção parcialmente configurada — falha
-clara, produção totalmente configurada — sobe normal).
+Resultado na branch (no momento em que esta issue foi entregue): **40
+novos testes unitários** (142/142 no total de `apps/api`, 17 suítes) e
+**21 novos testes e2e** (74/74 no total, 5 suítes). `tsc --noEmit` e
+`nest build` limpos. Boot testado em três cenários (dev sem config,
+produção parcialmente configurada — falha clara, produção totalmente
+configurada — sobe normal).
+
+Atualização (issue de UI real de Recursos): +4 testes e2e no módulo
+Zernio (desconexão real). Total consolidado do `apps/api` nesta
+revisão: **142/142 testes unitários** (17 suítes) e **78/78 testes
+e2e** (5 suítes).
 
 ## 14. Variáveis de ambiente
 
@@ -322,11 +328,15 @@ clara, produção totalmente configurada — sobe normal).
 
 - **Cifra não é "production grade"** — ver §9. Pendência real antes de
   produção com dados de clientes reais.
-- **Sem frontend.** Esta issue implementa só o backend — a UI de
-  `docs/design/24-work-resources-ui-spec.md` (conectar, selecionar
-  calendário, mostrar estados) ainda não foi construída em `apps/web`
-  (mesmo escopo confirmado da issue #30/Zernio, que também ficou
-  backend-only).
+- **Frontend (atualizado).** A UI real de `docs/design/24-work-
+  resources-ui-spec.md` (conectar, selecionar calendário, configurar
+  Tasks, mostrar estados) foi implementada em `apps/web` na issue de UI
+  real de Recursos — `GoogleResourceCard` em `RecursosStep.tsx` fala
+  direto com `googleApi.*`. `resultUrl()` (callback) redireciona para
+  `${CORS_ORIGIN}/integrations/callback?google=success|error&reason=`,
+  lido por `IntegrationsCallbackPage.tsx` (mesmo handler central do
+  Zernio) — nunca pede novo consentimento OAuth se a `GoogleConnection`
+  compartilhada já estiver `CONNECTED`.
 - **Sem uso operacional.** Nenhuma criação/edição real de evento ou
   tarefa acontece — só a conexão e a seleção do recurso. `06-google-
   calendar.md`/`07-google-tasks.md` continuam descrevendo essa camada
