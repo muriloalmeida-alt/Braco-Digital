@@ -1,7 +1,8 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { assertGoogleEnvValid } from './integrations/google/google-config';
+import { assertGoogleEnvValid, isGoogleFullyConfigured } from './integrations/google/google-config';
+import { assertCredentialsCipherEnvValid } from './integrations/google/kms/gcp-kms-config';
 import { assertZernioEnvValid } from './integrations/zernio/zernio-config';
 import { applyZernioWebhookRawBody } from './integrations/zernio/zernio-webhook.middleware';
 
@@ -14,6 +15,10 @@ async function bootstrap() {
   assertZernioEnvValid();
   // Issue #31: mesmo princípio, para o OAuth do Google (Calendar+Tasks).
   assertGoogleEnvValid();
+  // Issue de KMS production-grade: fail-closed — em produção, com Google
+  // habilitado, nunca aceita CREDENTIALS_CIPHER_PROVIDER=env (não
+  // production-grade). Nunca derruba o boot fora de produção.
+  assertCredentialsCipherEnvValid(process.env, isGoogleFullyConfigured());
 
   // `bodyParser: false` — o parser JSON automático do Nest roda ANTES de
   // qualquer `app.use()` adicionado depois de `create()` e já consome o

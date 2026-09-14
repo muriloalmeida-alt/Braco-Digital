@@ -30,6 +30,12 @@ dedicados no CI.
 - Chaves gerenciadas por um serviço de KMS gerenciado do provedor de nuvem
   escolhido — nunca chave simétrica hardcoded ou em variável de ambiente sem
   rotação.
+- Implementado para os tokens OAuth do Google: `GoogleCloudKmsCipher`
+  (`apps/api/src/integrations/google/kms/`), `isProductionGrade: true`,
+  Google Cloud KMS como provider (TD24 em `17-technical-decisions.md`).
+  Detalhe completo em `docs/technical/22-google-workspace-
+  integration.md` §9. Ainda não validado contra um projeto GCP real
+  (homologação pendente — issue dedicada).
 
 ## 5. Secrets
 

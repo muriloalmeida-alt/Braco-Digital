@@ -176,36 +176,55 @@ e marca `Integration(GOOGLE_TASKS)` → `CONNECTED`/`REAL`/
 
 `CredentialsCipher` (`credentials-cipher.ts`) é a única abstração que
 lida com bytes de chave/cifra — nada mais no módulo toca nisso
-diretamente.
+diretamente. Dois providers implementam a interface hoje (issue de KMS
+production-grade, TD24):
 
-Implementação atual: `EnvKeyAesGcmCipher` — AES-256-GCM real (IV
-aleatório por chamada, autenticação por tag, nunca texto plano) com uma
-chave simétrica fixa vinda de `GOOGLE_CREDENTIALS_ENCRYPTION_KEY`
-(env var, base64 de 32 bytes).
+**`EnvKeyAesGcmCipher`** — AES-256-GCM real (IV aleatório por chamada,
+autenticação por tag, nunca texto plano) com uma chave simétrica fixa
+vinda de `GOOGLE_CREDENTIALS_ENCRYPTION_KEY` (env var, base64 de 32
+bytes). `isProductionGrade: false` de propósito — **não satisfaz
+sozinha** o requisito de produção de `docs/technical/10-security-
+lgpd.md` §4 ("chave gerida por KMS com rotação"). Continua válida para
+desenvolvimento/homologação controlada.
 
-> **Isto NÃO satisfaz sozinho o requisito de produção de
-> `docs/technical/10-security-lgpd.md` §4** ("chave gerida por KMS com
-> rotação — nunca chave simétrica hardcoded ou em variável de ambiente
-> sem rotação"). É uma cifra real, não um placeholder de texto plano,
-> suficiente para desenvolvimento/homologação e para destravar o
-> restante desta issue (`docs/technical/20-sprint-02-tech-
-> readiness.md` §24.2 já registra que o KMS é "trabalho de Engenharia,
-> não uma credencial externa a pedir" — pendente antes de produção com
-> dados reais de clientes, não antes do início desta sprint).
->
-> **Antes de habilitar em produção real:** trocar `EnvKeyAesGcmCipher`
-> por uma implementação que use um provider de KMS gerenciado (AWS KMS,
-> Google Cloud KMS ou HashiCorp Vault Transit são os candidatos óbvios
-> dado o restante do stack) atrás da mesma interface `CredentialsCipher`
-> — troca local, `GoogleConnectionService` não muda. `isProductionGrade`
-> (campo da interface) é `false` nesta implementação de propósito, para
-> que isso nunca seja tratado como "já resolvido" silenciosamente.
+**`GoogleCloudKmsCipher`** (`kms/google-cloud-kms-cipher.ts`) —
+`isProductionGrade: true`. A chave nunca sai do Google Cloud KMS; só as
+operações `Encrypt`/`Decrypt` da API REST do Cloud KMS
+(`cloudkms.googleapis.com`) são chamadas, autenticadas via uma service
+account dedicada (fluxo OAuth2 "JWT Bearer" de service account, RFC
+7523 — implementado em cima de `node:crypto`/`fetch`, sem SDK oficial
+novo, mesmo padrão de `GoogleApiClient`/`ZernioClient`: cliente HTTP
+fino, `fetch` injetável, testável sem rede real). A identidade usada
+deve ter **só** `roles/cloudkms.cryptoKeyEncrypterDecrypter` na chave
+usada, nunca um papel mais amplo.
+
+**Ciphertext versionado**: `GoogleCloudKmsCipher.encrypt()` sempre
+grava com o prefixo `gcpkms:v1:`; ciphertext sem esse prefixo é tratado
+como o formato legado do `EnvKeyAesGcmCipher`. Isso permite os dois
+formatos coexistirem no banco durante uma migração — `decrypt()` lê
+qualquer um dos dois (delegando para um `EnvKeyAesGcmCipher` interno só
+para leitura do formato legado, nunca para escrita), mas **nunca
+reescreve** o formato antigo como efeito colateral de uma leitura
+normal. A reencriptação de fato é sempre uma ação explícita:
+`scripts/reencrypt-google-credentials.ts` (dry-run por padrão,
+`--apply` para gravar; nunca loga plaintext) ou o próximo refresh de
+token real de cada conexão (que sempre grava no formato novo).
+
+**Seleção do provider**: `CREDENTIALS_CIPHER_PROVIDER=env|gcp-kms`
+(default `env`, retrocompatível). Fail-closed em produção
+(`assertCredentialsCipherEnvValid`, chamado em `main.ts` ao lado de
+`assertGoogleEnvValid`): se o Google está habilitado em produção e o
+provider não é `gcp-kms` totalmente configurado, o boot falha — nunca
+um fallback silencioso para `env`.
 
 `assertGoogleEnvValid()` (chamado em `bootstrap()`, `main.ts`) exige
 `GOOGLE_CREDENTIALS_ENCRYPTION_KEY` junto das demais variáveis
 obrigatórias — falha o boot em produção se `GOOGLE_CLIENT_ID` estiver
 presente mas a chave de cifra (ou qualquer outra obrigatória) estiver
-ausente, mesmo padrão do Zernio.
+ausente, mesmo padrão do Zernio. Isso continua valendo mesmo com
+`CREDENTIALS_CIPHER_PROVIDER=gcp-kms`, porque `GOOGLE_CREDENTIALS_
+ENCRYPTION_KEY` ainda é útil para ler dados no formato legado durante a
+transição.
 
 ## 10. Refresh e revogação
 
@@ -307,6 +326,11 @@ e2e** (5 suítes).
 | `GOOGLE_REDIRECT_URI` | Sim, se `GOOGLE_CLIENT_ID` presente | Deve ser cadastrado exatamente igual no Google Cloud Console; aponta para `apps/api` |
 | `GOOGLE_CREDENTIALS_ENCRYPTION_KEY` | Sim, se `GOOGLE_CLIENT_ID` presente | Base64 de 32 bytes (`openssl rand -base64 32`) — ver §9 |
 | `GOOGLE_REQUEST_TIMEOUT_MS` | Não | Padrão `10000` |
+| `CREDENTIALS_CIPHER_PROVIDER` | Não (default `env`) | `gcp-kms` obrigatório em produção com Google habilitado (fail-closed) — ver §9 |
+| `GCP_KMS_KEY_NAME` | Sim, se `CREDENTIALS_CIPHER_PROVIDER=gcp-kms` | Resource name completo da chave no Cloud KMS |
+| `GCP_KMS_CLIENT_EMAIL` | Sim, se `CREDENTIALS_CIPHER_PROVIDER=gcp-kms` | Service account com só `roles/cloudkms.cryptoKeyEncrypterDecrypter` na chave |
+| `GCP_KMS_PRIVATE_KEY` | Sim, se `CREDENTIALS_CIPHER_PROVIDER=gcp-kms` | PEM da service account; `\n` literal aceito |
+| `GCP_KMS_REQUEST_TIMEOUT_MS` | Não | Padrão `10000` |
 
 ## 15. Configuração manual necessária (Google Cloud Console)
 
@@ -323,11 +347,25 @@ e2e** (5 suítes).
    `apps/api` (nunca versionar).
 6. Gerar `GOOGLE_CREDENTIALS_ENCRYPTION_KEY` (`openssl rand -base64
    32`) e configurá-la também.
+7. **Para produção (KMS production-grade — issue de KMS):** no mesmo
+   projeto GCP, ativar a **Cloud KMS API**; criar um key ring + uma
+   crypto key (`gcloud kms keyrings create`/`gcloud kms keys create`,
+   ou pelo Console); criar uma service account dedicada só para
+   cifrar/decifrar nessa chave (nome sugerido: `braco-kms`); conceder a
+   ela **apenas** o papel `roles/cloudkms.cryptoKeyEncrypterDecrypter`
+   na chave (nunca no projeto inteiro); gerar uma chave JSON dessa
+   service account e configurar `GCP_KMS_KEY_NAME`/
+   `GCP_KMS_CLIENT_EMAIL`/`GCP_KMS_PRIVATE_KEY` no `apps/api` com
+   `CREDENTIALS_CIPHER_PROVIDER=gcp-kms`.
 
 ## 16. Limitações conhecidas (fora de escopo desta issue)
 
-- **Cifra não é "production grade"** — ver §9. Pendência real antes de
-  produção com dados de clientes reais.
+- **Cifra em produção (atualizado).** `GoogleCloudKmsCipher`
+  (`isProductionGrade: true`) já existe — ver §9. O que continua
+  pendente: a issue de homologação ainda não validou o fluxo contra um
+  projeto GCP/chave KMS reais (sem credenciais disponíveis neste
+  ambiente até aqui); e nenhuma empresa real foi de fato migrada do
+  formato legado via `scripts/reencrypt-google-credentials.ts`.
 - **Frontend (atualizado).** A UI real de `docs/design/24-work-
   resources-ui-spec.md` (conectar, selecionar calendário, configurar
   Tasks, mostrar estados) foi implementada em `apps/web` na issue de UI
