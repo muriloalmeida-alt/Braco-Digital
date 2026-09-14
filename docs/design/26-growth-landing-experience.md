@@ -221,3 +221,88 @@ Em 1440px:
 - erros anunciáveis;
 - disponibilidade em texto;
 - contraste M3/BRAÇO.
+
+## 16. Redesign v2 (visual + arquitetura de seções)
+
+**Status:** Approved — implementado em `apps/web/src/pages/growth/LandingPage.tsx`
+(redesign de identidade/composição; nenhuma regra de negócio alterada).
+
+Motivação: a v1 lia como wireframe (pouca identidade visual, hero sem
+demonstração concreta, cards genéricos, FAQ em texto corrido, header/
+footer institucionais incompletos). O redesign manteve a UX/copy/regras
+de domínio da v1 (portfólio real via backend, disponibilidade nunca
+inventada, FAQ e "Como funciona" com o mesmo conteúdo aprovado) e mudou
+composição, hierarquia e acabamento visual.
+
+**Novo posicionamento central** (headline do hero, maior destaque da
+página): **"Mais capacidade para sua empresa."** — substitui a headline
+da v1 ("Sua empresa precisa de mais um braço? Agora tem.", §3 acima)
+como a frase primária; a frase da v1 permanece válida como variação
+secundária caso Produto queira reintroduzi-la em teste A/B futuro.
+
+**Hero como bloco institucional escuro (Azul Profundo):** §11 descreve a
+landing como predominantemente clara, com "Azul Profundo em blocos
+institucionais selecionados" — o hero passou a ser esse bloco
+selecionado, usando o token já existente `--braco-color-nav-surface` (o
+mesmo do App Shell autenticado, `docs/design/04-color-system.md` §5/§7),
+não uma cor nova. O CTA primário sobre esse fundo usa um botão claro
+(fundo branco, texto Azul BRAÇO) em vez de recolorir o botão para uma
+cor de destaque fora do color system — mantém "Azul BRAÇO como ação"
+(§11) com contraste adequado (~7:1) sobre o fundo escuro; o eyebrow/
+destaque de texto usa `--md-sys-color-inverse-primary` (já existente),
+não uma cor nova. Superfícies claras continuam predominantes no restante
+da página.
+
+**Header fixo + footer institucional (novos):** `PublicShell.tsx` ganhou
+navegação completa (Conheça os Braços/Como funciona/Dúvidas — âncoras
+`/#id` para funcionar a partir de qualquer rota pública — Entrar, CTA) e
+um menu mobile acessível (`aria-expanded`, `Menu`/`X` do Lucide). O
+rodapé usa a logo negativa branca sobre o mesmo Azul Profundo do hero.
+"Política de Privacidade"/"Termos de Uso" aparecem como texto informativo
+(não como link) — as páginas reais dependem do gate jurídico (PD em
+`docs/technical/16-product-decisions-required.md`); nunca se fabricou
+conteúdo legal nem se apontou para uma rota inexistente.
+
+**Demonstração concreta do produto no Hero:** card flutuante
+(`WhatsAppFloatingCard`) com o avatar oficial `08_avatar_whatsapp_e_
+perfil.png` — mensagem sempre ilustrativa, nunca dado real. O restante
+da composição visual do hero é o símbolo oficial do BRAÇO
+(`07_simbolo_colorido.png`) sobre um painel translúcido — não uma foto
+de pessoa: este ambiente de desenvolvimento não tem geração/banco de
+fotografia disponível, então nenhuma imagem de "empreendedor trabalhando"
+foi fabricada. **Pendência:** encomendar fotografia/ilustração real do
+empreendedor + equipe digital quando Produto/Design tiverem o asset.
+
+**Faixa de integrações (nova) + Demonstração de conversa (nova):** duas
+aparições das marcas WhatsApp/Google Calendar/Google Tasks (topo do hero
+e bloco dedicado antes do FAQ), sempre ícone + nome completo (nunca
+"Google" isolado). Assets em `apps/web/public/marks/` — ver README no
+mesmo diretório para proveniência/licença de cada um; o ícone do Google
+Tasks é uma versão monocromática (não foi possível obter o ícone colorido
+oficial completo nas condições de rede deste ambiente). **Pendência:**
+substituir por asset oficial completo quando disponível.
+`WhatsAppConversationDemo` é uma composição própria (Card BRAÇO + cores
+de balão do canal), não uma captura da UI do WhatsApp.
+
+**Portfólio com anatomia mais rica:** `BracoPortfolioCard` (ícone Lucide
+por `key` do tipo, nome, função, missão, até 3 responsabilidades,
+`CatalogAvailabilityLabel`, CTA só quando `AVAILABLE`) — sempre a partir
+de `publicApi.listEmployeeTypes()`, nunca hardcoded; trata `loading`/
+`error`/lista vazia com mensagem própria (antes, falha silenciosa virava
+lista vazia sem explicação). É um componente novo, não `EmployeeTypeCard`
+(que linka para rotas autenticadas — errado para um visitante anônimo).
+
+**FAQ como accordion acessível (`FaqAccordion`):** mesmo conteúdo já
+aprovado em §9, agora com `aria-expanded`/`aria-controls`, foco visível,
+funciona por mouse/toque/teclado, motion que respeita
+`prefers-reduced-motion`.
+
+**Seção "O que está faltando na sua equipe?" (teaser de diagnóstico,
+antigo §6/§7) removida como bloco isolado:** o mesmo intento (levar ao
+diagnóstico) já é coberto pelos CTAs do hero, do passo 1 de "Como
+funciona" e do CTA final — mantê-la seria repetir CTA sem contexto
+adicional (um dos problemas apontados no redesign). O diagnóstico
+continua exatamente como está (`/monte-sua-equipe`, sem login).
+
+Sem mudança de rotas, autenticação, contrato de API ou regra de
+disponibilidade/domínio.

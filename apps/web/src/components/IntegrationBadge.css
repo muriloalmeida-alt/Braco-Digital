@@ -1,0 +1,23 @@
+/* Selo de integração (WhatsApp/Google Calendar/Google Tasks) —
+ * docs/design/26-growth-landing-experience.md, adendo "Integrações".
+ * Chip neutro: normaliza o peso visual das três marcas (uma delas
+ * monocromática, outra multicolor) sem recolorir nenhuma. */
+.braco-integration-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--braco-space-2);
+  padding: var(--braco-space-2) var(--braco-space-4);
+  background: var(--md-sys-color-surface-container-lowest);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-full);
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  color: var(--md-sys-color-on-surface);
+  white-space: nowrap;
+}
+
+.braco-integration-badge__icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}

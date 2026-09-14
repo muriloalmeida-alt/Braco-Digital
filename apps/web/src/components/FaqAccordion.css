@@ -1,0 +1,79 @@
+/* Accordion acessível — docs/design/26-growth-landing-experience.md §15
+ * (foco visível, teclado, área de toque adequada) + §12 (motion discreto,
+ * respeita prefers-reduced-motion via a regra global em theme/base.css). */
+.braco-faq {
+  display: flex;
+  flex-direction: column;
+  gap: var(--braco-space-3);
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.braco-faq-item {
+  background: var(--md-sys-color-surface-container-lowest);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-medium);
+  overflow: hidden;
+}
+
+.braco-faq-item__trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--braco-space-3);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: var(--md-sys-color-on-surface);
+  font-size: var(--md-sys-typescale-title-medium-size);
+  font-weight: var(--md-sys-typescale-title-medium-weight);
+  /* Área de toque >=44px (mobile) — docs/design/14-accessibility.md */
+  min-height: 56px;
+  padding: var(--braco-space-4) var(--braco-space-5);
+}
+
+.braco-faq-item__trigger:hover {
+  background: var(--md-sys-color-surface-container);
+}
+
+.braco-faq-item__icon {
+  flex-shrink: 0;
+  transition: transform 180ms ease;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.braco-faq-item__trigger[aria-expanded='true'] .braco-faq-item__icon {
+  transform: rotate(180deg);
+}
+
+.braco-faq-item__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 180ms ease;
+}
+
+.braco-faq-item__panel.is-open {
+  grid-template-rows: 1fr;
+}
+
+.braco-faq-item__panel-inner {
+  overflow: hidden;
+}
+
+.braco-faq-item__panel p {
+  margin: 0;
+  padding: 0 var(--braco-space-5) var(--braco-space-4);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .braco-faq-item__panel {
+    transition: none;
+  }
+  .braco-faq-item__icon {
+    transition: none;
+  }
+}
