@@ -1,6 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { assertGoogleEnvValid } from './integrations/google/google-config';
 import { assertZernioEnvValid } from './integrations/zernio/zernio-config';
 import { applyZernioWebhookRawBody } from './integrations/zernio/zernio-webhook.middleware';
 
@@ -11,6 +12,8 @@ async function bootstrap() {
   // primeiro request real. Sem ZERNIO_API_KEY, não faz nada (integração
   // simplesmente desabilitada, não é um erro de ambiente).
   assertZernioEnvValid();
+  // Issue #31: mesmo princípio, para o OAuth do Google (Calendar+Tasks).
+  assertGoogleEnvValid();
 
   // `bodyParser: false` — o parser JSON automático do Nest roda ANTES de
   // qualquer `app.use()` adicionado depois de `create()` e já consome o

@@ -708,3 +708,98 @@ local ao `ZernioWebhookService`, mas exige infraestrutura nova).
 de responder — a regra já está documentada e teste-coberta
 (`shouldAutoRespond()`), mas nenhum consumidor existe ainda; isso é
 trabalho futuro, fora desta issue.
+
+---
+
+## TD23 — Google Calendar + Tasks: uma `GoogleConnection` compartilhada, nunca duas fontes de verdade do mesmo refresh token
+
+**Contexto:** issue #31. Produto fechou que Calendar e Tasks usam a
+*mesma* autorização OAuth do Google (um único consentimento, um único
+`refreshToken`), mas continuam aparecendo para o usuário como dois
+recursos independentes (`Integration.type: GOOGLE_CALENDAR` e
+`GOOGLE_TASKS`), cada um com seu próprio `connectionMode`/`status` lido
+por `PreparationReadinessService` (TD19). Isso cria uma tensão
+estrutural que o Zernio (TD22) não tinha: lá, uma linha `Integration`
+por tipo já bastava porque cada `Integration` também era o dono técnico
+da própria credencial. Aqui, gravar `refreshTokenEncrypted` em duas
+linhas `Integration` (uma para Calendar, outra para Tasks) duplicaria a
+mesma credencial como duas fontes de verdade — um refresh bem-sucedido
+numa teria que ser propagado manualmente para a outra, e uma revogação
+poderia deixar uma marcada `CONNECTED` enquanto a outra já está morta.
+**Opções:** (a) duplicar o token nas duas linhas `Integration` e
+sincronizá-las a cada refresh/revogação; (b) colapsar Calendar e Tasks
+em um único recurso `Integration` (`type: GOOGLE_WORKSPACE`) tratado
+como uma coisa só; (c) uma entidade técnica nova e compartilhada
+(`GoogleConnection`, 1:1 com `Company`) dona exclusiva da credencial
+OAuth, RLS-protegida, que as duas linhas `Integration` existentes
+apenas *espelham* a cada operação relevante — a mesma separação
+"infra de autorização vs. estado de recurso" que TD19 já assume ao
+tratar `Integration` como a única fonte de verdade de completude.
+**Decisão:** (c).
+**Justificativa:** (a) é exatamente a duplicação de fonte de verdade
+que a Decisão de Produto do brief da issue #31 proíbe explicitamente
+("nunca duplicar refresh token como duas fontes de verdade
+independentes") — além de criar uma janela de inconsistência real
+entre refresh/revogação de uma cópia e da outra. (b) resolveria a
+duplicação, mas quebraria a UI (`24-work-resources-ui-spec.md`) e a
+regra de obrigatoriedade por responsabilidade (TD11/`resources.service.ts`),
+que tratam Calendar e Tasks como bloqueios independentes — Calendar só
+é obrigatório se alguma responsabilidade ativa exige agenda, Tasks só
+se alguma exige follow-up; colapsar os dois exigiria reintroduzir essa
+distinção em outro lugar, sem ganho real. (c) preserva `Integration`
+como a única fonte lida por `PreparationReadinessService`/TD19 (zero
+mudança nesse serviço) e isola toda a complexidade de OAuth
+compartilhado — tokens, expiração, refresh, revogação — numa única
+tabela e serviço, na mesma lógica de isolamento por módulo que TD22 já
+estabeleceu para o Zernio.
+**Mecanismo:** ver `docs/technical/22-google-workspace-integration.md`
+para o detalhamento completo. Resumo dos pontos com maior superfície de
+decisão:
+- `GoogleConnection` guarda a credencial (`accessTokenEncrypted`,
+  `refreshTokenEncrypted`, `tokenExpiresAt`, `grantedScopes`) e o
+  estado técnico da autorização; `Integration` continua guardando
+  `status`/`connectionMode`/`externalAccountRef` por recurso
+  (`calendarId` ou `taskListId`) — nenhum dos dois lê o campo que é
+  responsabilidade do outro.
+- Um recurso só vira `connectionMode: REAL` + `status: CONNECTED` após
+  validação real contra a API do Google (accessRole do calendário
+  selecionado; existência confirmada da lista de tarefas) — nunca só
+  porque o callback OAuth teve sucesso, mesmo espírito de TD22
+  ("confirmação real do provedor é obrigatória antes de `CONNECTED`").
+- Falha definitiva de refresh ou revogação degrada a `GoogleConnection`
+  e força todo recurso Google ativo (`Integration` correspondente) para
+  `NEEDS_ATTENTION` — nunca deixa um recurso `CONNECTED` sem uma
+  credencial válida por trás.
+- Desconexão é ciente do compartilhamento: desconectar Calendar não
+  revoga a `GoogleConnection` enquanto Tasks continuar ativo (e
+  vice-versa); só quando nenhum recurso Google permanece conectado o
+  serviço tenta revogar (best-effort) e invalida a credencial
+  compartilhada.
+- RLS de `google_oauth_attempts` estende o padrão "lookup antes de
+  conhecer o tenant" de TD22/`company_memberships_self_lookup`
+  (`company_id = current tenant OR id = attempt em lookup`);
+  `google_connections` não precisa dessa extensão porque o Google nunca
+  entrega nada — nem o callback — sem um `state` já correlacionado a um
+  `companyId` conhecido.
+- Criptografia de credencial usa uma abstração (`CredentialsCipher`)
+  com um campo explícito `isProductionGrade: boolean` — a implementação
+  disponível hoje (`EnvKeyAesGcmCipher`, chave simétrica via variável de
+  ambiente) é real (AES-256-GCM, nunca texto plano em banco/log) mas
+  deliberadamente marcada `isProductionGrade: false`, para nunca ser
+  confundida com a exigência de KMS gerenciado de
+  `10-security-lgpd.md` §4.
+**Trade-offs:** mais uma tabela e mais uma camada de indireção
+(`GoogleConnection` → duas `Integration`) do que o modelo mais simples
+do Zernio (uma `Integration` = uma credencial); aceito porque é a única
+opção que respeita simultaneamente "um OAuth só" (Produto) e "uma única
+fonte de verdade de completude" (TD19) sem duplicar token.
+**Reversibilidade:** alta — `GoogleConnection` é aditiva e isolada
+(nenhuma mudança em `ResourcesService`/`PreparationReadinessService`);
+trocar `EnvKeyAesGcmCipher` por um KMS real é local à implementação de
+`CredentialsCipher`, sem mudar o contrato usado pelo resto do módulo.
+**Impacto futuro:** qualquer trabalho futuro de uso operacional real
+(criar/reagendar/cancelar evento via Runtime, execução de follow-up via
+Tasks, sincronização periódica, canais push/watch do Calendar) fica
+fora do escopo da issue #31 por decisão de Produto, mas pode ser
+construído sobre `GoogleConnection`/`GoogleApiClient` sem precisar
+tocar no fluxo de OAuth/seleção de recurso aqui descrito.

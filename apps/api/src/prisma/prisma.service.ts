@@ -129,4 +129,23 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       return fn(tx);
     });
   }
+
+  /**
+   * Mesma ideia de `withZernioAttemptLookup`, para o callback OAuth do
+   * Google (issue #31): localiza a `GoogleOAuthAttempt` pelo seu próprio
+   * `id` (o `state` de uso único) antes de saber a que empresa ela
+   * pertence.
+   */
+  async withGoogleAttemptLookup<T>(
+    attemptId: string,
+    fn: (tx: Prisma.TransactionClient) => Promise<T>,
+  ): Promise<T> {
+    return this.$transaction(async (tx) => {
+      await tx.$executeRawUnsafe(
+        `SELECT set_config('app.current_google_lookup_attempt_id', $1, true)`,
+        attemptId,
+      );
+      return fn(tx);
+    });
+  }
 }
