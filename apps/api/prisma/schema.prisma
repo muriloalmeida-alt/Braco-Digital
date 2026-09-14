@@ -166,6 +166,9 @@ model Company {
   zernioWebhookEvents      ZernioWebhookEvent[]
   zernioMessages           ZernioMessage[]
 
+  googleConnection    GoogleConnection?
+  googleOAuthAttempts GoogleOAuthAttempt[]
+
   @@map("companies")
 }
 
@@ -179,6 +182,7 @@ model User {
   memberships              CompanyMembership[]
   responsibleFor           EmployeeResponsible[]
   zernioOnboardingAttempts ZernioOnboardingAttempt[]
+  googleOAuthAttempts      GoogleOAuthAttempt[]
 
   @@map("users")
 }
@@ -613,6 +617,96 @@ model ZernioWebhookRegistration {
   updatedAt    DateTime @updatedAt @map("updated_at")
 
   @@map("zernio_webhook_registrations")
+}
+
+// ---------------------------------------------------------------------------
+// Integração real de Google Calendar + Google Tasks via OAuth (issue #31, US14)
+// docs/technical/22-google-workspace-integration.md
+//
+// `Integration` (acima, tipos GOOGLE_CALENDAR/GOOGLE_TASKS) continua sendo
+// o que `ResourcesService`/`PreparationReadinessService` leem — TD19 e o
+// guard de produção não mudam. `GoogleConnection` é infraestrutura de
+// autorização (uma por empresa, compartilhada entre os dois recursos,
+// decisão de Produto: "uma conexão OAuth Google por empresa"), nunca a
+// fonte funcional de estado de recurso.
+// ---------------------------------------------------------------------------
+
+/// Estado da autorização OAuth compartilhada em si — distinto do estado de
+/// cada recurso (`Integration.status`), que só fica CONNECTED depois da
+/// etapa específica de seleção/validação (calendário escolhido / lista de
+/// Tasks configurada).
+enum GoogleConnectionStatus {
+  NOT_CONNECTED
+  CONNECTING
+  CONNECTED
+  DEGRADED
+  DISCONNECTED
+  FAILED
+}
+
+/// Uma por empresa. Guarda as credenciais OAuth compartilhadas e a seleção
+/// de recurso (calendarId/taskListId) — nunca duas fontes de verdade para
+/// o mesmo refresh token (issue #31 §7/§2).
+model GoogleConnection {
+  id        String @id @default(uuid())
+  companyId String @unique @map("company_id")
+
+  status GoogleConnectionStatus @default(NOT_CONNECTED)
+
+  // Só para exibição na UI (docs/design/24-work-resources-ui-spec.md) —
+  // nunca usado para autorização/lookup.
+  googleAccountEmail String? @map("google_account_email")
+
+  // Credenciais — sempre criptografadas (CredentialsCipher), nunca texto
+  // plano. `refreshTokenEncrypted` nunca é sobrescrito por null quando o
+  // Google não devolve um novo refresh token numa reautorização (issue
+  // #31 §8) — só é limpo explicitamente no disconnect/revoke.
+  accessTokenEncrypted  String?   @map("access_token_encrypted")
+  refreshTokenEncrypted String?   @map("refresh_token_encrypted")
+  tokenExpiresAt        DateTime? @map("token_expires_at")
+  grantedScopes         String[]  @map("granted_scopes")
+
+  // Google Calendar — issue #31 §3: um calendário operacional selecionado
+  // explicitamente pelo gestor, nunca inferido.
+  calendarId      String? @map("calendar_id")
+  calendarSummary String? @map("calendar_summary")
+
+  // Google Tasks — issue #31 §4: lista "BRAÇO — Follow-ups",
+  // encontrada/criada de forma idempotente, nunca escolhida pelo gestor.
+  taskListId String? @map("task_list_id")
+
+  connectedAt    DateTime? @map("connected_at")
+  disconnectedAt DateTime? @map("disconnected_at")
+  lastRefreshAt  DateTime? @map("last_refresh_at")
+  failureReason  String?   @map("failure_reason")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("google_connections")
+}
+
+/// Correlação interna de uso único do fluxo OAuth (o `state`), criada
+/// ANTES de redirecionar ao Google e consumida no callback — mesmo
+/// padrão de `ZernioOnboardingAttempt` (issue #30). "Nunca confiar em
+/// companyId/userId vindo isoladamente da query string do callback"
+/// (issue #31 §6): o `id` aqui, enviado como `state`, é a única fonte de
+/// correlação que o callback valida.
+model GoogleOAuthAttempt {
+  id                String    @id @default(uuid())
+  companyId         String    @map("company_id")
+  initiatedByUserId String    @map("initiated_by_user_id")
+  expiresAt         DateTime  @map("expires_at")
+  consumedAt        DateTime? @map("consumed_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  company         Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  initiatedByUser User    @relation(fields: [initiatedByUserId], references: [id])
+
+  @@index([companyId])
+  @@map("google_oauth_attempts")
 }
 
 // ---------------------------------------------------------------------------
