@@ -201,6 +201,25 @@ persiste mensagem nem `IdempotencyKey` — permite retry legítimo depois
 que o chamador reconciliar, em vez de arriscar nunca mais poder
 reenviar com a mesma chave.
 
+### 3.7 Desconexão real (`disconnectAccount`, `POST /integrations/zernio/whatsapp/disconnect`, OWNER/ADMIN)
+
+Issue de UI real de Recursos — antes só existia `ResourcesService.
+disconnect` genérico (apaga a linha `Integration` local, sem avisar o
+Zernio). Este caminho é *provider-aware*:
+
+1. Com `accountId` local: `DELETE /accounts/{accountId}` no Zernio.
+   404 do provedor (a conta já não existe do lado dele) é tratado como
+   "já desconectado", nunca como erro — qualquer outro erro propaga.
+2. `ZernioConnection` vira `DISCONNECTED` (`accountId`/`phoneNumber`
+   limpos) via `upsert` — funciona mesmo se a empresa nunca chegou a
+   criar uma linha (`profileId` inexistente), sem lançar `P2025`.
+3. `Integration(WHATSAPP)` sincronizada para `DISCONNECTED` do mesmo
+   jeito que os outros fluxos (`syncGenericIntegration`).
+
+Idempotente: chamar duas vezes seguidas nunca falha nem repete a
+chamada ao Zernio na segunda vez (sem `accountId` local, não há nada
+para deletar remotamente).
+
 ## 4. Variáveis de ambiente
 
 | Variável | Obrigatória | Observação |
@@ -245,10 +264,21 @@ produção, não um artefato do ambiente de teste.**
   documentam a regra — nenhum consumidor de `ZernioMessage` dispara
   resposta automática hoje. Isso é o próximo passo natural (Runtime/IA
   de atendimento), fora do escopo desta issue.
-- **Sem tela dedicada no `apps/web`.** `resultUrl()` redireciona para a
-  primeira origem de `CORS_ORIGIN` com `?zernio=success|error&reason=`
-  — não existe uma página que leia essa querystring hoje. O plano
-  confirmado desta issue excluiu mudanças em `apps/web`.
+- **UI real de Recursos (atualizado).** `resultUrl()` redireciona para
+  `${CORS_ORIGIN}/integrations/callback?zernio=success|error&reason=` —
+  `apps/web/src/pages/IntegrationsCallbackPage.tsx` (issue de UI real de
+  Recursos) lê essa querystring, reconstrói o *return path* guardado em
+  `sessionStorage` antes do redirect e volta para
+  `RecursosStep`/`WhatsAppResourceCard`, que já falam com
+  `zernioApi.connect()`/`zernioApi.disconnect()` de verdade — não é mais
+  um caminho fora de escopo do `apps/web`.
+- **Desconexão real, provider-aware.** `POST /integrations/zernio/
+  whatsapp/disconnect` (`ZernioConnectionService.disconnectAccount`)
+  chama `DELETE /accounts/{accountId}` no Zernio antes de marcar
+  `Integration(WHATSAPP) = DISCONNECTED` — nunca só o `ResourcesService.
+  disconnect` genérico, que apagaria a linha local sem avisar o
+  provedor. Idempotente: sem `accountId` local, ou 404 do provedor, é
+  tratado como "já desconectado".
 - **Registro do webhook é manual.** `ensureWebhookRegistered()` existe
   e é idempotente, mas não é chamado automaticamente no bootstrap —
   precisa ser disparado manualmente (`npm run zernio:register-webhook`,
@@ -305,12 +335,19 @@ produção, não um artefato do ambiente de teste.**
   assinado, não o `Buffer` em si, para evitar essa serialização e
   preservar os bytes exatos sobre os quais a assinatura foi calculada.
 
-Resultado na branch: **102/102** testes unitários (14 suítes, 60 novos
-+ 42 pré-existentes) e **53/53** testes e2e (4 suítes, 14 novos +
-39 pré-existentes) passando. `tsc --noEmit` e `nest build` limpos.
-`npm run lint` continua indisponível nesta workspace (ESLint não
-instalado — débito pré-existente, já documentado em PRs anteriores;
-não introduzido nem resolvido por esta issue).
+Resultado na branch (no momento em que esta issue foi entregue):
+**102/102** testes unitários (14 suítes, 60 novos + 42 pré-existentes) e
+**53/53** testes e2e (4 suítes, 14 novos + 39 pré-existentes) passando.
+`tsc --noEmit` e `nest build` limpos. `npm run lint` continua
+indisponível nesta workspace (ESLint não instalado — débito
+pré-existente, já documentado em PRs anteriores; não introduzido nem
+resolvido por esta issue).
+
+Atualização (issue de UI real de Recursos): +4 testes e2e cobrindo
+`disconnectAccount` (desconexão real, 404 tratado como idempotente,
+idempotência numa segunda chamada, isolamento entre tenants) — ver
+`docs/technical/22-google-workspace-integration.md` §13 para o total
+consolidado mais recente do módulo `apps/api`.
 
 ## 8. Passos manuais para produção
 

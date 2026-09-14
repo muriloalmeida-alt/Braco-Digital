@@ -469,13 +469,13 @@ export class GoogleConnectionService {
   }
 
   private resultUrl(result: 'success' | 'error', reason?: GoogleCallbackErrorReason): string {
-    // Mesmo escopo confirmado da issue #30 (Zernio): sem uma tela
-    // dedicada em apps/web para isto, o redirecionamento final aponta
-    // para a origem web configurada com uma querystring de resultado —
-    // ver docs/technical/22-google-workspace-integration.md, seção
-    // "Limitações".
+    // UI real de Recursos: aponta para o handler central de callback do
+    // apps/web (`/integrations/callback`), que reconstrói o estado a
+    // partir da querystring + do return path guardado em sessionStorage —
+    // funciona mesmo com hard reload, sem depender de estado React
+    // efêmero. Ver docs/technical/22-google-workspace-integration.md.
     const base = (process.env.CORS_ORIGIN ?? '').split(',')[0]?.trim() || 'http://localhost:5173';
-    const url = new URL(base);
+    const url = new URL('/integrations/callback', base);
     url.searchParams.set('google', result);
     if (reason) url.searchParams.set('reason', reason);
     return url.toString();

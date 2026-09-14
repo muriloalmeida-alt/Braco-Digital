@@ -6,6 +6,7 @@ import { EmployeeOverviewPage } from './pages/EmployeeOverviewPage';
 import { EmployeeTypeDetailPage } from './pages/EmployeeTypeDetailPage';
 import { DiagnosticPage } from './pages/growth/DiagnosticPage';
 import { LandingPage } from './pages/growth/LandingPage';
+import { IntegrationsCallbackPage } from './pages/IntegrationsCallbackPage';
 import { LoginPage } from './pages/LoginPage';
 import { MyTeamPage } from './pages/MyTeamPage';
 import { PreparationOverviewPage } from './pages/PreparationOverviewPage';
@@ -21,6 +22,19 @@ export function App() {
         <Route path="/monte-sua-equipe" element={<DiagnosticPage />} />
 
         <Route path="/login" element={<LoginPage />} />
+
+        {/* Handler central de callback do OAuth real (Zernio + Google) —
+         * issue de UI real de Recursos. O backend redireciona para cá
+         * depois de processar o retorno do provedor; ver
+         * `IntegrationsCallbackPage`. */}
+        <Route
+          path="/integrations/callback"
+          element={
+            <ProtectedRoute>
+              <IntegrationsCallbackPage />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/equipe"

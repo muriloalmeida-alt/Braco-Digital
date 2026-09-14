@@ -512,6 +512,125 @@ describe('Zernio — WhatsApp real (e2e)', () => {
     });
   });
 
+  describe('Desconexão real', () => {
+    async function connectCompany(token: string, profileId: string, accountId: string) {
+      fetchImpl = async (url) => {
+        if (url.includes('/profiles')) return jsonRes({ _id: profileId });
+        if (url.includes('/connect/whatsapp')) return jsonRes({ authUrl: 'https://zernio.test/signup', state: 's' });
+        throw new Error(`chamada inesperada: ${url}`);
+      };
+      const connectRes = await request(app.getHttpServer()).post('/integrations/zernio/whatsapp/connect').set('Authorization', `Bearer ${token}`).expect(201);
+      const connectCall = fetchCalls.find((c) => c.url.includes('/connect/whatsapp'))!;
+      const correlationId = extractCorrelationId(new URL(connectCall.url).searchParams.get('redirect_url')!);
+
+      fetchImpl = async (url) => {
+        if (url.includes('/whatsapp/number-info')) {
+          return jsonRes({
+            phone: { display_phone_number: '+55', verified_name: 'E2E', name_status: 'APPROVED', quality_rating: 'GREEN', messaging_limit_tier: 'TIER_1K', status: 'CONNECTED', is_official_business_account: false, platform_type: 'CLOUD_API' },
+            waba: { name: 'E2E', business_verification_status: 'VERIFIED', timezone_id: 'America/Sao_Paulo' },
+          });
+        }
+        throw new Error('inesperado');
+      };
+      await request(app.getHttpServer())
+        .get('/integrations/zernio/whatsapp/callback')
+        .query({ correlationId, connected: 'whatsapp', profileId, accountId, username: '+5511900000000' })
+        .expect(302);
+      void connectRes;
+    }
+
+    it('chama DELETE /accounts/{accountId} no Zernio e sincroniza Integration para DISCONNECTED', async () => {
+      const company = await provisionCompany('disconnect-real');
+      await connectCompany(company.token, 'profile-disconnect-real', 'acc-disconnect-real');
+
+      let deleteCall: { url: string; init: RequestInit } | null = null;
+      fetchImpl = async (url, init) => {
+        if (init.method === 'DELETE' && url.includes('/accounts/')) {
+          deleteCall = { url, init };
+          return new Response(null, { status: 204 });
+        }
+        throw new Error(`chamada inesperada: ${url}`);
+      };
+
+      const res = await request(app.getHttpServer())
+        .post('/integrations/zernio/whatsapp/disconnect')
+        .set('Authorization', `Bearer ${company.token}`)
+        .expect(201);
+      expect(res.body.status).toBe('DISCONNECTED');
+      expect(deleteCall).not.toBeNull();
+      expect(deleteCall!.url).toContain('/accounts/acc-disconnect-real');
+      expect((deleteCall!.init.headers as Record<string, string>).Authorization).toBe(`Bearer ${ZERNIO_TEST_CONFIG.apiKey}`);
+
+      const [connection, integration] = await prisma.$transaction(async (tx) => {
+        await tx.$executeRawUnsafe(`SELECT set_config('app.current_company_id', $1, true)`, company.id);
+        return Promise.all([
+          tx.zernioConnection.findUnique({ where: { companyId: company.id } }),
+          tx.integration.findUnique({ where: { companyId_type: { companyId: company.id, type: 'WHATSAPP' } } }),
+        ]);
+      });
+      expect(connection?.status).toBe(ZernioConnectionStatus.DISCONNECTED);
+      expect(connection?.accountId).toBeNull();
+      expect(integration?.status).toBe('DISCONNECTED');
+    });
+
+    it('404 do provedor (conta já não existe lá) é tratado como já desconectado, não como erro', async () => {
+      const company = await provisionCompany('disconnect-404');
+      await connectCompany(company.token, 'profile-disconnect-404', 'acc-disconnect-404');
+
+      fetchImpl = async (url, init) => {
+        if (init.method === 'DELETE' && url.includes('/accounts/')) return new Response('', { status: 404 });
+        throw new Error(`chamada inesperada: ${url}`);
+      };
+
+      await request(app.getHttpServer())
+        .post('/integrations/zernio/whatsapp/disconnect')
+        .set('Authorization', `Bearer ${company.token}`)
+        .expect(201)
+        .expect((res) => expect(res.body.status).toBe('DISCONNECTED'));
+    });
+
+    it('idempotente: sem accountId local (já desconectado antes) não chama o provedor e continua DISCONNECTED', async () => {
+      const company = await provisionCompany('disconnect-idempotent');
+      await connectCompany(company.token, 'profile-disconnect-idempotent', 'acc-disconnect-idempotent');
+
+      fetchImpl = async (url, init) => {
+        if (init.method === 'DELETE' && url.includes('/accounts/')) return new Response(null, { status: 204 });
+        throw new Error(`chamada inesperada: ${url}`);
+      };
+      await request(app.getHttpServer()).post('/integrations/zernio/whatsapp/disconnect').set('Authorization', `Bearer ${company.token}`).expect(201);
+
+      fetchImpl = async () => {
+        throw new Error('não deveria chamar o Zernio numa segunda desconexão idempotente');
+      };
+      const second = await request(app.getHttpServer())
+        .post('/integrations/zernio/whatsapp/disconnect')
+        .set('Authorization', `Bearer ${company.token}`)
+        .expect(201);
+      expect(second.body.status).toBe('DISCONNECTED');
+    });
+
+    it('desconectar como empresa B nunca afeta a conexão real da empresa A', async () => {
+      const companyOwnerA = await provisionCompany('disconnect-iso-a');
+      const companyOwnerB = await provisionCompany('disconnect-iso-b');
+      await connectCompany(companyOwnerA.token, 'profile-disconnect-iso-a', 'acc-disconnect-iso-a');
+
+      fetchImpl = async () => {
+        throw new Error('empresa B não tem conta Zernio própria — não deveria chamar o provedor');
+      };
+      await request(app.getHttpServer())
+        .post('/integrations/zernio/whatsapp/disconnect')
+        .set('Authorization', `Bearer ${companyOwnerB.token}`)
+        .expect(201);
+
+      const connectionA = await prisma.$transaction(async (tx) => {
+        await tx.$executeRawUnsafe(`SELECT set_config('app.current_company_id', $1, true)`, companyOwnerA.id);
+        return tx.zernioConnection.findUnique({ where: { companyId: companyOwnerA.id } });
+      });
+      expect(connectionA?.status).toBe(ZernioConnectionStatus.CONNECTED);
+      expect(connectionA?.accountId).toBe('acc-disconnect-iso-a');
+    });
+  });
+
   describe('Isolamento entre tenants', () => {
     it('a conexão da empresa A não é visível sob o tenant da empresa B', async () => {
       const connectionUnderB = await prisma.$transaction(async (tx) => {
