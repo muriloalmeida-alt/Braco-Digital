@@ -53,4 +53,26 @@ describe('EnvKeyAesGcmCipher', () => {
     const cipher = createCredentialsCipher({ GOOGLE_CREDENTIALS_ENCRYPTION_KEY: key });
     expect(await cipher.decrypt(await cipher.encrypt('ok'))).toBe('ok');
   });
+
+  describe('createCredentialsCipher — seleção de provider (KMS production-grade)', () => {
+    it('CREDENTIALS_CIPHER_PROVIDER=gcp-kms devolve um cipher production-grade, nunca EnvKeyAesGcmCipher', () => {
+      const cipher = createCredentialsCipher(
+        {
+          CREDENTIALS_CIPHER_PROVIDER: 'gcp-kms',
+          GCP_KMS_KEY_NAME: 'projects/p/locations/l/keyRings/r/cryptoKeys/k',
+          GCP_KMS_CLIENT_EMAIL: 'x@p.iam.gserviceaccount.com',
+          GCP_KMS_PRIVATE_KEY: 'chave-de-teste',
+        },
+        jest.fn() as unknown as typeof fetch,
+      );
+      expect(cipher.isProductionGrade).toBe(true);
+      expect(cipher).not.toBeInstanceOf(EnvKeyAesGcmCipher);
+    });
+
+    it('sem CREDENTIALS_CIPHER_PROVIDER (default), continua devolvendo EnvKeyAesGcmCipher — retrocompatível', () => {
+      const cipher = createCredentialsCipher({ GOOGLE_CREDENTIALS_ENCRYPTION_KEY: key });
+      expect(cipher).toBeInstanceOf(EnvKeyAesGcmCipher);
+      expect(cipher.isProductionGrade).toBe(false);
+    });
+  });
 });

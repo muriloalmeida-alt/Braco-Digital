@@ -1,4 +1,8 @@
 import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
+import { getCredentialsCipherProvider, getGcpKmsConfig, isGcpKmsFullyConfigured } from './kms/gcp-kms-config';
+import { GcpKmsClient } from './kms/gcp-kms-client';
+import { GcpServiceAccountTokenProvider } from './kms/gcp-service-account-token-provider';
+import { GoogleCloudKmsCipher } from './kms/google-cloud-kms-cipher';
 
 /**
  * Abstração de criptografia de credenciais (issue #31 §9,
@@ -82,10 +86,32 @@ export class EnvKeyAesGcmCipher implements CredentialsCipher {
   }
 }
 
-export function createCredentialsCipher(env: NodeJS.ProcessEnv = process.env): CredentialsCipher {
-  const key = env.GOOGLE_CREDENTIALS_ENCRYPTION_KEY?.trim();
-  if (!key) {
+/**
+ * `fetchImpl` é injetável (default: `fetch` global) só para permitir
+ * testar a seleção do provider `gcp-kms` sem rede real — a instância
+ * devolvida (`GoogleCloudKmsCipher`) só faz uma chamada de verdade
+ * quando `encrypt`/`decrypt` é chamado, nunca na construção.
+ */
+export function createCredentialsCipher(env: NodeJS.ProcessEnv = process.env, fetchImpl: typeof fetch = fetch): CredentialsCipher {
+  const provider = getCredentialsCipherProvider(env);
+  const legacyKey = env.GOOGLE_CREDENTIALS_ENCRYPTION_KEY?.trim();
+  const legacyCipher = legacyKey ? new EnvKeyAesGcmCipher(legacyKey) : null;
+
+  if (provider === 'gcp-kms') {
+    // Config `null` é aceitável na construção (mesmo padrão de
+    // `GoogleApiClient`/`ZernioClient`) — só falha (503) na primeira
+    // chamada real de encrypt/decrypt, nunca no boot.
+    const kmsConfig = isGcpKmsFullyConfigured(env) ? getGcpKmsConfig(env) : null;
+    const tokenProvider = new GcpServiceAccountTokenProvider(kmsConfig, fetchImpl);
+    const kmsClient = new GcpKmsClient(kmsConfig, fetchImpl, tokenProvider);
+    // `legacyCipher` aqui é só para LEITURA de dados gravados antes da
+    // migração para KMS — `GoogleCloudKmsCipher` nunca escreve no
+    // formato antigo (ver comentário na classe).
+    return new GoogleCloudKmsCipher(kmsClient, legacyCipher);
+  }
+
+  if (!legacyCipher) {
     throw new Error('GOOGLE_CREDENTIALS_ENCRYPTION_KEY não configurada — não é possível cifrar/decifrar credenciais do Google.');
   }
-  return new EnvKeyAesGcmCipher(key);
+  return legacyCipher;
 }

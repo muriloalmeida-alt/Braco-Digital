@@ -803,3 +803,94 @@ Tasks, sincronização periódica, canais push/watch do Calendar) fica
 fora do escopo da issue #31 por decisão de Produto, mas pode ser
 construído sobre `GoogleConnection`/`GoogleApiClient` sem precisar
 tocar no fluxo de OAuth/seleção de recurso aqui descrito.
+
+---
+
+## TD24 — KMS production-grade: Google Cloud KMS via REST+JWT próprio, ciphertext versionado, nunca reescrita silenciosa
+
+**Contexto:** issue de KMS production-grade (aberta a partir do
+fechamento da #31). TD23 já previa a troca de `EnvKeyAesGcmCipher`
+(`isProductionGrade: false`) por um provider de KMS gerenciado atrás da
+mesma interface `CredentialsCipher`, sem tocar `GoogleConnectionService`.
+Esta issue implementa essa troca e precisa resolver dois problemas que
+TD23 não cobria: (1) qual provider e como autenticar nele sem adicionar
+uma dependência pesada nova ao repositório; (2) como fazer a transição
+sem exigir uma reencriptação síncrona de todos os dados existentes no
+momento do deploy.
+**Opções (provider):** (a) AWS KMS; (b) HashiCorp Vault Transit; (c)
+Google Cloud KMS.
+**Decisão:** (c), Google Cloud KMS.
+**Justificativa:** a integração Google (issue #31) já é uma dependência
+existente do produto — usar o mesmo provedor de nuvem evita introduzir
+uma segunda conta/credencial de infraestrutura só para isto, sem nenhum
+ganho de segurança correspondente (AWS KMS e Vault Transit resolveriam
+o mesmo problema tecnicamente, mas exigiriam uma conta/infra nova que
+nada mais no produto usa hoje).
+**Opções (forma de acesso ao KMS):** (a) instalar o SDK oficial
+`@google-cloud/kms` (e sua cadeia de dependências gRPC/`google-auth-
+library`); (b) cliente REST fino próprio, no mesmo padrão de
+`GoogleApiClient`/`ZernioClient` já estabelecido no repositório.
+**Decisão:** (b).
+**Justificativa:** o repositório já tem um padrão consolidado e testado
+para "falar com uma API do Google" sem SDK oficial — cliente HTTP fino
+com `fetch` injetável (testável sem rede real), mapeamento de erro
+próprio, log sanitizado. O Cloud KMS expõe uma API REST completa
+(`cryptoKeys.encrypt`/`.decrypt`) autenticável via OAuth2 "JWT Bearer"
+de service account (RFC 7523), que `node:crypto.createSign('RSA-
+SHA256')` assina sem biblioteca adicional. Adotar o SDK oficial
+importaria uma cadeia de dependências gRPC bem maior só para duas
+operações (`encrypt`/`decrypt`), quebrando a consistência do resto do
+módulo sem necessidade técnica comprovada — mesmo raciocínio de TD2/TD9
+(não adicionar infra que o caso de uso atual não exige).
+**Opções (transição do formato antigo para o novo):** (a) migração
+"big bang" síncrona no deploy (bloqueia o deploy até reencriptar tudo);
+(b) ciphertext versionado (prefixo `gcpkms:v1:` para o formato novo;
+ausência de prefixo = formato legado do `EnvKeyAesGcmCipher`), com
+leitura de ambos os formatos e um script one-shot explícito
+(`scripts/reencrypt-google-credentials.ts`, dry-run por padrão) para
+converter os dados existentes.
+**Decisão:** (b).
+**Justificativa:** (a) acopla o deploy do código a uma operação de dados
+potencialmente lenta/arriscada (reencriptar N linhas dentro da janela
+de deploy) e não tem retrocesso fácil. (b) segue o mesmo princípio já
+usado no restante da issue de KMS ("nunca migrar silenciosamente numa
+request normal", vindo do brief original de #31): a leitura aceita os
+dois formatos (nunca quebra uma conexão existente no dia em que o
+provider muda), mas a escrita de dados novos já é sempre no formato de
+produção — a migração completa dos dados antigos é uma ação
+administrativa explícita, auditável (loga só IDs técnicos, nunca
+plaintext), nunca um efeito colateral automático.
+**Mecanismo:** ver `docs/technical/22-google-workspace-integration.md`
+§9 para o detalhamento completo (arquitetura, service account de menor
+privilégio, variáveis de ambiente, script de reencriptação). Resumo dos
+pontos com maior superfície de decisão:
+- `GoogleCloudKmsCipher.decrypt()` delega para um `EnvKeyAesGcmCipher`
+  interno *só para leitura* quando o ciphertext não tem o prefixo novo
+  — nunca para escrita; sem essa chave legada configurada, um
+  ciphertext legado encontrado nessas condições lança um erro claro em
+  vez de falhar de forma confusa ou (pior) tentar interpretar os bytes
+  errados como se fossem um envelope do KMS.
+- `CREDENTIALS_CIPHER_PROVIDER` (`env`, default, ou `gcp-kms`) e
+  `assertCredentialsCipherEnvValid` (chamado em `main.ts`) implementam o
+  fail-closed pedido: em produção, com o Google habilitado, o boot
+  falha se o provider não for `gcp-kms` totalmente configurado — nunca
+  um fallback automático para `env`.
+- A service account usada pelo `GcpServiceAccountTokenProvider` deve
+  ter só `roles/cloudkms.cryptoKeyEncrypterDecrypter` na chave usada
+  (menor privilégio) — nunca um papel de projeto inteiro.
+**Trade-offs:** manter dois formatos de ciphertext simultaneamente
+(mais um `if` em `decrypt()`, mais um cipher legado mantido vivo só
+para leitura) em vez de forçar uma migração única; aceito porque a
+alternativa (big bang) é estritamente mais arriscada para o mesmo
+resultado final.
+**Reversibilidade:** alta — `CredentialsCipher` continua sendo a única
+interface que `GoogleConnectionService` conhece; voltar a `env` é só
+mudar `CREDENTIALS_CIPHER_PROVIDER` (fora de produção; em produção o
+fail-closed impede isso de propósito). Trocar de Google Cloud KMS para
+outro provider no futuro é uma nova implementação atrás da mesma
+interface, sem tocar no resto do módulo.
+**Impacto futuro:** o script de reencriptação (`scripts/reencrypt-
+google-credentials.ts`) precisa ser rodado manualmente em cada ambiente
+que migrar de `env` para `gcp-kms` com dados já existentes — não há
+gatilho automático por decisão explícita desta TD (nunca migrar dados
+como efeito colateral de deploy ou de uma request normal).
