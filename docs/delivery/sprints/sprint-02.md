@@ -1,7 +1,7 @@
 # Sprint 02 — Manual de Trabalho + Growth Foundation
 
-**Status:** READY FOR DEVELOPMENT — Product Ready + Design Ready + Tech Ready  
-**Owner Produto/Design:** GPT  
+**Status:** ACCEPTED WITH ONE OPEN ITEM — ver `sprint-02-review.md` §11 (US14 aguarda homologação real; sem isso, a sprint não pode ser declarada ACCEPTED AND CLOSED)
+**Owner Produto/Design:** GPT
 **Owner Tech Ready:** Claude / Engineering
 
 ## Objetivo principal — Track A
@@ -261,17 +261,44 @@ replanejamento deve voltar ao PO/PM.
 
 ## Encerramento
 
+Detalhamento completo em `docs/delivery/sprints/sprint-02-review.md`.
+
 ### Resultado
-_A preencher._
+
+Track A e Track B implementados, testados e mergeados em `main`.
+17/18 histórias planejadas (US07–US17, US77–US83) genuinamente Done;
+US14 permanece Parcial — implementação completa (backend real +
+UI real + criptografia production-grade), mas sem validação de
+homologação contra um provedor real ainda (sem credenciais disponíveis
+neste ambiente). US83 aceito com o gate de PD6 explicitamente não
+resolvido por esta sprint (fora do controle de Engenharia).
 
 ### Histórias concluídas
-_A preencher._
+
+US07, US08, US09, US10, US11, US12, US13, US15, US16, US17 (Track A);
+US77, US78, US79, US80, US81, US82 (Track B). US83 aceito com ressalva
+de PD6. US14 não concluída — ver `sprint-02-review.md` §3.
 
 ### Histórias carregadas
-_A preencher._
+
+Nenhuma história foi carregada sem implementação. A única pendência
+formal é a validação de homologação de US14 (issue dedicada) — um
+requisito de evidência sobre uma história já implementada, não uma
+história pendente de código.
 
 ### Decisões
-_A preencher._
+
+TD19 (guard de produção, preservado sem alteração) + TD22/TD23/TD24
+(módulos isolados de integração real: Zernio, Google, KMS) — ver
+`docs/technical/17-technical-decisions.md`. PD7 resolvido
+(recomendação vs. teto de autonomia). PD6 confirmado para
+desenvolvimento, captação real de lead segue bloqueada até validação
+jurídica.
 
 ### Aprendizados
-_A preencher._
+
+Ver `sprint-02-review.md` §12 (issues pequenas e incrementais por
+capacidade — backend real / UI real / criptografia — tornaram o "o que
+falta para Done" sempre explícito; "REAL + CONNECTED observado de
+fato" precisa ser critério de aceite desde o início de qualquer issue
+de integração externa).
