@@ -31,6 +31,8 @@ apps/api/src/integrations/zernio/
   zernio-webhook.service.ts           verificação + dedup + roteamento de eventos
   zernio-webhook.controller.ts        POST /webhooks/zernio (rota pública)
   zernio-webhook.middleware.ts        corpo bruto só na rota do webhook
+
+apps/api/scripts/register-zernio-webhook.ts  registro idempotente do webhook (npm run zernio:register-webhook)
 ```
 
 `ResourcesService`/`PreparationReadinessService` (Track A, TD19,
@@ -249,9 +251,10 @@ produção, não um artefato do ambiente de teste.**
   confirmado desta issue excluiu mudanças em `apps/web`.
 - **Registro do webhook é manual.** `ensureWebhookRegistered()` existe
   e é idempotente, mas não é chamado automaticamente no bootstrap —
-  precisa ser disparado manualmente (script/rota administrativa a
-  criar) após configurar produção, para nunca recriar a assinatura a
-  cada deploy sem necessidade.
+  precisa ser disparado manualmente (`npm run zernio:register-webhook`,
+  `apps/api/scripts/register-zernio-webhook.ts`) após configurar
+  produção, para nunca recriar a assinatura a cada deploy sem
+  necessidade.
 - **Métricas são um placeholder in-process.** `ZernioMetrics` usa
   contadores em `Map`, não Prometheus/OpenTelemetry (nenhuma dependência
   nova de infra foi adicionada só para esta feature). Os nomes já
@@ -323,12 +326,17 @@ não introduzido nem resolvido por esta issue).
    precisar sobrescrever os padrões.
 5. Rodar a migração `20260913223000_zernio_whatsapp_integration` no
    banco de produção.
-6. Chamar `ZernioConnectionService.ensureWebhookRegistered()` uma vez
-   (script/rota administrativa a criar) com a URL pública de
-   `POST /webhooks/zernio` e os eventos: `message.received`,
-   `message.sent`, `message.delivered`, `message.read`,
-   `message.failed`, `account.connected`, `account.disconnected`, e os
-   `whatsapp.number.*` listados na seção 3.5 — é idempotente, seguro
+6. Rodar `npm run zernio:register-webhook` (dentro de `apps/api`, com as
+   variáveis do passo 1-4 já definidas no ambiente — em produção via
+   `railway run npm run zernio:register-webhook`, nunca passando
+   segredo por linha de comando). O script
+   (`apps/api/scripts/register-zernio-webhook.ts`) deriva a URL pública
+   do webhook a partir de `ZERNIO_REDIRECT_URL` e chama
+   `ZernioConnectionService.ensureWebhookRegistered()` com a lista
+   completa de eventos (`message.received`, `message.sent`,
+   `message.delivered`, `message.read`, `message.failed`,
+   `account.connected`, `account.disconnected`, e os
+   `whatsapp.number.*` listados na seção 3.5) — é idempotente, seguro
    rodar de novo sem criar assinatura duplicada.
 7. Confirmar que `ZERNIO_API_KEY`/`ZERNIO_WEBHOOK_SECRET` nunca chegam
    ao `apps/web` (nenhuma rota do frontend precisa delas — o backend é
