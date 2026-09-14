@@ -23,6 +23,23 @@ describe('google-config', () => {
     it('totalmente configurado com as quatro variáveis obrigatórias', () => {
       expect(isGoogleFullyConfigured(FULL_ENV)).toBe(true);
     });
+
+    describe('gate Google+KMS (revisão pós-TD24, TD25)', () => {
+      const { GOOGLE_CREDENTIALS_ENCRYPTION_KEY, ...withoutLegacyKey } = FULL_ENV;
+      void GOOGLE_CREDENTIALS_ENCRYPTION_KEY;
+
+      it('com CREDENTIALS_CIPHER_PROVIDER=gcp-kms, GOOGLE_CREDENTIALS_ENCRYPTION_KEY vira opcional', () => {
+        expect(isGoogleFullyConfigured({ ...withoutLegacyKey, CREDENTIALS_CIPHER_PROVIDER: 'gcp-kms' })).toBe(true);
+      });
+
+      it('sem CREDENTIALS_CIPHER_PROVIDER (default "env"), continua exigindo a chave legada — retrocompatível', () => {
+        expect(isGoogleFullyConfigured(withoutLegacyKey)).toBe(false);
+      });
+
+      it('com CREDENTIALS_CIPHER_PROVIDER=env explícito, também continua exigindo', () => {
+        expect(isGoogleFullyConfigured({ ...withoutLegacyKey, CREDENTIALS_CIPHER_PROVIDER: 'env' })).toBe(false);
+      });
+    });
   });
 
   describe('assertGoogleEnvValid', () => {
@@ -60,6 +77,13 @@ describe('google-config', () => {
     it('não lança em produção quando totalmente configurado', () => {
       process.env.NODE_ENV = 'production';
       expect(() => assertGoogleEnvValid(FULL_ENV)).not.toThrow();
+    });
+
+    it('com CREDENTIALS_CIPHER_PROVIDER=gcp-kms, não lança em produção mesmo sem GOOGLE_CREDENTIALS_ENCRYPTION_KEY — a exigência de GCP_KMS_* é responsabilidade de assertCredentialsCipherEnvValid, não desta função', () => {
+      process.env.NODE_ENV = 'production';
+      const { GOOGLE_CREDENTIALS_ENCRYPTION_KEY, ...withoutLegacyKey } = FULL_ENV;
+      void GOOGLE_CREDENTIALS_ENCRYPTION_KEY;
+      expect(() => assertGoogleEnvValid({ ...withoutLegacyKey, CREDENTIALS_CIPHER_PROVIDER: 'gcp-kms' })).not.toThrow();
     });
   });
 

@@ -219,6 +219,24 @@ describe('Zernio — WhatsApp real (e2e)', () => {
       expect(second.body.authUrl).toBeTruthy();
       expect(profileCreations).toBe(1); // não criou um segundo profile
     });
+
+    it('funciona normalmente quando o hosted flow não devolve `state` (changelog Zernio 2026-09-09) — nunca usado para correlação/segurança', async () => {
+      const company = await provisionCompany('no-remote-state');
+      fetchImpl = async (url) => {
+        if (url.includes('/profiles')) return jsonRes({ _id: 'profile-no-state' });
+        if (url.includes('/connect/whatsapp')) {
+          // Resposta real do hosted flow — sem o campo `state` remoto.
+          return jsonRes({ authUrl: 'https://zernio.test/embedded-signup?token=xyz' });
+        }
+        throw new Error(`chamada inesperada: ${url}`);
+      };
+
+      const res = await request(app.getHttpServer())
+        .post('/integrations/zernio/whatsapp/connect')
+        .set('Authorization', `Bearer ${company.token}`)
+        .expect(201);
+      expect(res.body.authUrl).toBe('https://zernio.test/embedded-signup?token=xyz');
+    });
   });
 
   describe('Callback', () => {

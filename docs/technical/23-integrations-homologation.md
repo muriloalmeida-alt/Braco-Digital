@@ -49,7 +49,7 @@ diretamente — `docs/technical/17-technical-decisions.md` TD22 —, não de
 | # | Cenário | Resultado esperado | Data | SHA | Ambiente | Observado | PASS/FAIL |
 |---|---|---|---|---|---|---|---|
 | Z1 | Hosted Embedded Signup ponta a ponta (`POST /connect`, redirect real ao Zernio) | Usuário completa o signup no Zernio e retorna ao BRAÇO | | | | | |
-| Z2 | Conectar um número de teste real | `GoogleConnection`/`ZernioConnection` reflete o número | | | | | |
+| Z2 | Conectar um número de teste real | `ZernioConnection` reflete a conta/número de teste conectado (Google não participa do fluxo Zernio — os dois OAuth/conexões são inteiramente independentes) | | | | | |
 | Z3 | Confirmação real do provedor (`GET /whatsapp/number-info`) | `Integration(WHATSAPP)` = `REAL` + `CONNECTED` só após a consulta confirmar `phone.status = CONNECTED` | | | | | |
 | Z4 | Registro do webhook via script existente (`docs/technical/21-zernio-whatsapp-integration.md` §8) | Webhook registrado uma única vez, idempotente numa segunda execução | | | | | |
 | Z5 | Validação de assinatura HMAC de um evento real | Evento com assinatura válida é aceito; assinatura inválida retorna 403 | | | | | |
@@ -76,7 +76,16 @@ a passo completo. Resumo do checklist:
 - [ ] OAuth Consent Screen configurado (modo Testing, com e-mails de teste cadastrados).
 - [ ] OAuth Client tipo "Web application" criado.
 - [ ] `GOOGLE_REDIRECT_URI` exata registrada como Authorized redirect URI.
-- [ ] `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`/`GOOGLE_CREDENTIALS_ENCRYPTION_KEY` nas variáveis de ambiente do serviço `apps/api` (nunca versionados).
+- [ ] `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` nas variáveis de ambiente do serviço `apps/api` (nunca versionados).
+- [ ] Criptografia de credenciais (TD24/TD25) — **em produção, exigir
+      `CREDENTIALS_CIPHER_PROVIDER=gcp-kms`** + `GCP_KMS_KEY_NAME`/
+      `GCP_KMS_CLIENT_EMAIL`/`GCP_KMS_PRIVATE_KEY` configurados (service
+      account só com `roles/cloudkms.cryptoKeyEncrypterDecrypter` na
+      chave). `GOOGLE_CREDENTIALS_ENCRYPTION_KEY` **não é mais a
+      configuração de produção** — trate-a só como chave legada/de
+      transição (necessária apenas se o ambiente estiver migrando de
+      `env` para `gcp-kms` e precisar ler ciphertext antigo; um ambiente
+      novo pode omiti-la).
 - [ ] Pelo menos uma conta Google de teste com um calendário próprio (accessRole owner/writer).
 
 ### 5.2 Smoke test
@@ -96,10 +105,11 @@ a passo completo. Resumo do checklist:
 | G11 | Disconnect de ambos (Calendar e Tasks) | Nenhum recurso Google ativo → `GoogleConnection` revogada best-effort (`revokeToken`) e credenciais locais limpas | | | | | |
 | G12 | Revogar externamente no Google (painel "Apps de terceiros com acesso à conta") | Ação feita fora do BRAÇO, sem chamada nossa | | | | | |
 | G13 | Confirmar `NEEDS_ATTENTION` no próximo refresh após G12 | Próxima chamada que precisar de `ensureValidAccessToken` detecta o refresh falho e marca `GoogleConnection = DEGRADED` + recursos ativos `NEEDS_ATTENTION` (nunca `CONNECTED` silenciosamente) | | | | | |
+| G14 | KMS real: confirmar que o ciphertext persistido em G1 tem o prefixo `gcpkms:v1:` e que um refresh de token subsequente decifra/recifra com sucesso contra o Cloud KMS real (não só HTTP mockado) | `access_token_encrypted`/`refresh_token_encrypted` começam com `gcpkms:v1:`; refresh funciona ponta a ponta | | | | | |
 
 ## 6. Critérios de aceite desta issue
 
-- Todos os cenários Z1–Z10 e G1–G13 executados e registrados como PASS,
+- Todos os cenários Z1–Z10 e G1–G14 executados e registrados como PASS,
   ou FAIL com issue de acompanhamento aberta e linkada aqui.
 - Nenhum segredo (token, client secret, número de telefone real, e-mail
   de conta de teste) versionado neste documento.

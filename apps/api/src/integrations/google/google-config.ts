@@ -1,4 +1,5 @@
 import { isProductionEnvironment } from '../../config/environment';
+import { getCredentialsCipherProvider } from './kms/gcp-kms-config';
 
 /**
  * Configuração do OAuth Google (issue #31). Único ponto que lê
@@ -37,9 +38,22 @@ function missingRequiredVars(env: NodeJS.ProcessEnv): string[] {
   const missing: string[] = [];
   if (!env.GOOGLE_CLIENT_SECRET?.trim()) missing.push('GOOGLE_CLIENT_SECRET');
   if (!env.GOOGLE_REDIRECT_URI?.trim()) missing.push('GOOGLE_REDIRECT_URI');
-  // A chave de cifra das credenciais é obrigatória junto do OAuth — nunca
-  // persistir token OAuth sem criptografia (issue #31 §9).
-  if (!env.GOOGLE_CREDENTIALS_ENCRYPTION_KEY?.trim()) missing.push('GOOGLE_CREDENTIALS_ENCRYPTION_KEY');
+  // GOOGLE_CREDENTIALS_ENCRYPTION_KEY (o formato "legado" de
+  // EnvKeyAesGcmCipher, TD24) só é obrigatória quando o provider ativo
+  // de fato depende dela: com CREDENTIALS_CIPHER_PROVIDER=env (default),
+  // é a própria chave de cifra — continua obrigatória, nunca persistir
+  // token OAuth sem criptografia (issue #31 §9). Com
+  // CREDENTIALS_CIPHER_PROVIDER=gcp-kms, ela vira OPCIONAL: serve só
+  // para LER ciphertext legado durante uma transição
+  // (GoogleCloudKmsCipher aceita legacyCipher=null) — um ambiente novo,
+  // sem dado legado, nunca deveria precisar dela. A exigência de
+  // GCP_KMS_* em si é responsabilidade separada de
+  // `assertCredentialsCipherEnvValid` (kms/gcp-kms-config.ts),
+  // deliberadamente independente desta função (revisão do gate
+  // Google+KMS, TD25).
+  if (getCredentialsCipherProvider(env) === 'env' && !env.GOOGLE_CREDENTIALS_ENCRYPTION_KEY?.trim()) {
+    missing.push('GOOGLE_CREDENTIALS_ENCRYPTION_KEY');
+  }
   return missing;
 }
 
@@ -81,7 +95,10 @@ export function assertGoogleEnvValid(env: NodeJS.ProcessEnv = process.env): void
  */
 export function getGoogleOAuthConfig(env: NodeJS.ProcessEnv = process.env): GoogleOAuthConfig {
   if (!isGoogleFullyConfigured(env)) {
-    throw new Error('Google não está totalmente configurado (GOOGLE_CLIENT_ID/CLIENT_SECRET/REDIRECT_URI/CREDENTIALS_ENCRYPTION_KEY).');
+    throw new Error(
+      'Google não está totalmente configurado (GOOGLE_CLIENT_ID/CLIENT_SECRET/REDIRECT_URI, mais GOOGLE_CREDENTIALS_ENCRYPTION_KEY ' +
+        'quando CREDENTIALS_CIPHER_PROVIDER=env).',
+    );
   }
 
   return {

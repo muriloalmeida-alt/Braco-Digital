@@ -14,7 +14,15 @@ export interface ZernioCreateProfileResponse {
 
 export interface ZernioConnectWhatsappResponse {
   authUrl: string;
-  state: string;
+  /**
+   * Changelog do Zernio de 2026-09-09: no hosted flow, `state` não deve
+   * ser assumido como presente na resposta — por isso opcional aqui. O
+   * BRAÇO nunca usou este campo para correlação/segurança: quem faz esse
+   * papel é o `correlationId` próprio, gerado e validado server-side em
+   * `ZernioConnectionService` (nunca o `state` remoto do provedor) —
+   * este ajuste é só de tipagem/contrato, não muda esse mecanismo.
+   */
+  state?: string;
 }
 
 export type ZernioCallbackErrorCode =
@@ -47,9 +55,16 @@ export interface ZernioNumberInfoResponse {
   };
 }
 
+/** Formato real da API (revisão de contrato pós-#42): objeto estruturado, nunca uma string solta. */
+export interface ZernioSendMessageWarning {
+  code: string;
+  param: string;
+  message: string;
+}
+
 export interface ZernioSendMessageResponse {
   success: boolean;
-  warnings: string[];
+  warnings: ZernioSendMessageWarning[];
   data: {
     messageId: string;
     conversationId: string;

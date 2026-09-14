@@ -13,6 +13,21 @@ arquitetura futura, não o estado implementado.
 > os tipos em `zernio-api-types.ts` são transcritos dos exemplos dados,
 > não validados contra o OpenAPI real. **Revisar contra o OpenAPI antes
 > de habilitar em produção.**
+>
+> **Revisão de contrato (hotfix pós-Sprint 02):** reconciliação contra a
+> documentação oficial atual do Zernio confirmou que auth, Embedded
+> Signup (`GET /v1/connect/whatsapp`), webhook (`POST /v1/webhooks/
+> settings`, HMAC-SHA256, dedup por `payload.id`), status
+> (`GET /v1/whatsapp/number-info`), disconnect (`DELETE /v1/accounts/
+> {accountId}`) e envio (`POST /v1/inbox/conversations/{id}/messages`,
+> Idempotency-Key) estão todos alinhados à implementação atual. Dois
+> ajustes de tipagem feitos: `ZernioConnectWhatsappResponse.state` virou
+> opcional (o changelog de 2026-09-09 do Zernio diz que o hosted flow
+> pode não devolver `state` — o BRAÇO nunca usou esse campo para
+> correlação/segurança, só o `correlationId` próprio); e
+> `ZernioSendMessageResponse.warnings` corrigido de `string[]` para
+> `{code, param, message}[]` (formato real da API — campo não
+> consumido hoje, ajuste só de contrato).
 
 ## 1. Onde vive o código
 
