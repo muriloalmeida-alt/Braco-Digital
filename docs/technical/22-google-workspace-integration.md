@@ -219,12 +219,17 @@ um fallback silencioso para `env`.
 
 `assertGoogleEnvValid()` (chamado em `bootstrap()`, `main.ts`) exige
 `GOOGLE_CREDENTIALS_ENCRYPTION_KEY` junto das demais variáveis
-obrigatórias — falha o boot em produção se `GOOGLE_CLIENT_ID` estiver
+obrigatórias **só quando `CREDENTIALS_CIPHER_PROVIDER` é `env`**
+(default) — falha o boot em produção se `GOOGLE_CLIENT_ID` estiver
 presente mas a chave de cifra (ou qualquer outra obrigatória) estiver
-ausente, mesmo padrão do Zernio. Isso continua valendo mesmo com
-`CREDENTIALS_CIPHER_PROVIDER=gcp-kms`, porque `GOOGLE_CREDENTIALS_
-ENCRYPTION_KEY` ainda é útil para ler dados no formato legado durante a
-transição.
+ausente, mesmo padrão do Zernio. **Com `CREDENTIALS_CIPHER_PROVIDER=
+gcp-kms`, `GOOGLE_CREDENTIALS_ENCRYPTION_KEY` vira opcional** (TD25) —
+um ambiente novo, sem ciphertext legado para ler, não precisa dela;
+continua útil só temporariamente, num ambiente em migração. A exigência
+de `GCP_KMS_*` em si é responsabilidade separada de
+`assertCredentialsCipherEnvValid` (§9 acima) — as duas funções compõem
+sem se sobrepor: `assertGoogleEnvValid` cobre as variáveis do OAuth,
+`assertCredentialsCipherEnvValid` cobre as do provider de cifra.
 
 ## 10. Refresh e revogação
 
@@ -324,7 +329,7 @@ e2e** (5 suítes).
 | `GOOGLE_CLIENT_ID` | Habilita a integração | Ausente = integração desabilitada (não é erro) |
 | `GOOGLE_CLIENT_SECRET` | Sim, se `GOOGLE_CLIENT_ID` presente | Nunca enviado ao frontend, nunca logado |
 | `GOOGLE_REDIRECT_URI` | Sim, se `GOOGLE_CLIENT_ID` presente | Deve ser cadastrado exatamente igual no Google Cloud Console; aponta para `apps/api` |
-| `GOOGLE_CREDENTIALS_ENCRYPTION_KEY` | Sim, se `GOOGLE_CLIENT_ID` presente | Base64 de 32 bytes (`openssl rand -base64 32`) — ver §9 |
+| `GOOGLE_CREDENTIALS_ENCRYPTION_KEY` | Sim, se `CREDENTIALS_CIPHER_PROVIDER=env` (default); opcional com `gcp-kms` (só leitura de legado, TD25) | Base64 de 32 bytes (`openssl rand -base64 32`) — ver §9 |
 | `GOOGLE_REQUEST_TIMEOUT_MS` | Não | Padrão `10000` |
 | `CREDENTIALS_CIPHER_PROVIDER` | Não (default `env`) | `gcp-kms` obrigatório em produção com Google habilitado (fail-closed) — ver §9 |
 | `GCP_KMS_KEY_NAME` | Sim, se `CREDENTIALS_CIPHER_PROVIDER=gcp-kms` | Resource name completo da chave no Cloud KMS |
@@ -345,8 +350,12 @@ e2e** (5 suítes).
    **Authorized redirect URI**.
 5. Copiar `client_id`/`client_secret` para as variáveis de ambiente do
    `apps/api` (nunca versionar).
-6. Gerar `GOOGLE_CREDENTIALS_ENCRYPTION_KEY` (`openssl rand -base64
-   32`) e configurá-la também.
+6. **Ambiente dev/test/homologação controlada** (provider `env`, default):
+   gerar `GOOGLE_CREDENTIALS_ENCRYPTION_KEY` (`openssl rand -base64
+   32`) e configurá-la. **Produção deve pular este passo e ir direto
+   para o 7** — sob `CREDENTIALS_CIPHER_PROVIDER=gcp-kms`, esta chave é
+   opcional (TD25): só é necessária se o ambiente estiver migrando de
+   `env` para `gcp-kms` e precisar ler ciphertext legado.
 7. **Para produção (KMS production-grade — issue de KMS):** no mesmo
    projeto GCP, ativar a **Cloud KMS API**; criar um key ring + uma
    crypto key (`gcloud kms keyrings create`/`gcloud kms keys create`,

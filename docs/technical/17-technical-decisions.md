@@ -894,3 +894,49 @@ google-credentials.ts`) precisa ser rodado manualmente em cada ambiente
 que migrar de `env` para `gcp-kms` com dados já existentes — não há
 gatilho automático por decisão explícita desta TD (nunca migrar dados
 como efeito colateral de deploy ou de uma request normal).
+
+---
+
+## TD25 — Gate Google: `GOOGLE_CREDENTIALS_ENCRYPTION_KEY` opcional sob `gcp-kms`
+
+**Contexto:** revisão pós-TD24. `google-config.ts` (`missingRequiredVars`)
+exigia `GOOGLE_CREDENTIALS_ENCRYPTION_KEY` incondicionalmente como parte
+de `isGoogleFullyConfigured()`/`assertGoogleEnvValid()`, mesmo quando
+`CREDENTIALS_CIPHER_PROVIDER=gcp-kms` já tornava essa chave dispensável
+(`GoogleCloudKmsCipher` aceita `legacyCipher: null` — ela só serve para
+ler ciphertext legado durante uma migração). Na prática, isso obrigava
+qualquer ambiente **novo**, sem nenhum dado legado, a gerar e configurar
+uma chave `env` que nunca seria usada, só para satisfazer um gate que
+não corresponde mais ao provider de produção real (TD24).
+**Opções:** (a) manter `GOOGLE_CREDENTIALS_ENCRYPTION_KEY`
+incondicionalmente obrigatória (o gate como estava); (b) tornar a
+exigência condicional ao provider ativo (`getCredentialsCipherProvider`)
+— obrigatória só sob `env`, opcional sob `gcp-kms`.
+**Decisão:** (b).
+**Justificativa:** (a) contraria o próprio racional de TD24 (a chave
+legada existe só para compatibilidade de leitura, nunca deveria ser
+"obrigatória" para quem não tem nada legado a ler) e cria fricção
+operacional sem ganho de segurança correspondente — gerar uma chave que
+nunca é lida/escrita não protege nada. (b) alinha o gate de
+`assertGoogleEnvValid` com o que o resto do sistema já faz: a exigência
+de `GCP_KMS_*` continua isolada em `assertCredentialsCipherEnvValid`
+(TD24), então as duas funções compõem sem se sobrepor nem criar uma
+lacuna — um ambiente com `gcp-kms` mal configurado ainda falha o boot em
+produção, só que pela função certa, com a mensagem certa.
+**Mecanismo:** `missingRequiredVars(env)` em `google-config.ts` só
+inclui `GOOGLE_CREDENTIALS_ENCRYPTION_KEY` na lista de faltantes quando
+`getCredentialsCipherProvider(env) === 'env'`. Nenhuma mudança em
+`assertCredentialsCipherEnvValid`, `GoogleModule` ou
+`GoogleCloudKmsCipher` — a composição das duas funções de assert em
+`main.ts` já cobria o caso corretamente, só a primeira estava
+verificando a variável errada para o provider `gcp-kms`.
+**Trade-offs:** nenhum identificado — é estritamente uma correção de um
+gate que não refletia mais a realidade pós-TD24, sem introduzir
+insegurança nova (o fail-closed de produção continua garantido pela
+mesma função que já existia para isso).
+**Reversibilidade:** alta — é uma condicional local a uma função pura,
+sem efeito em armazenamento/formato de dado nenhum.
+**Impacto futuro:** qualquer nova variável "só necessária sob um
+provider específico" deve seguir o mesmo padrão — condicionar a
+obrigatoriedade ao provider ativo, nunca duplicar a checagem numa
+segunda função de assert que não sabe do provider.
