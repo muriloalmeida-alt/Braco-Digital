@@ -5,11 +5,36 @@
   background: var(--md-sys-color-surface);
 }
 
+/* ---------- Skip link ---------- */
+
+.braco-public-shell__skip-link {
+  position: absolute;
+  left: var(--braco-space-3);
+  top: -48px;
+  background: var(--md-sys-color-surface-container-lowest);
+  color: var(--md-sys-color-primary);
+  padding: var(--braco-space-2) var(--braco-space-4);
+  border-radius: var(--md-sys-shape-corner-small);
+  z-index: 100;
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  transition: top 120ms ease;
+}
+
+.braco-public-shell__skip-link:focus {
+  top: var(--braco-space-2);
+}
+
+/* ---------- Header ---------- */
+
 .braco-public-shell__header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: var(--braco-space-4) var(--braco-space-5);
+  gap: var(--braco-space-4);
+  padding: var(--braco-space-3) var(--braco-space-5);
+  background: var(--md-sys-color-surface-container-lowest);
   border-bottom: 1px solid var(--md-sys-color-outline-variant);
 }
 
@@ -17,11 +42,39 @@
   display: flex;
   align-items: center;
   text-decoration: none;
+  /* Área de proteção da logo — docs/design/21-logo-usage.md §2 */
+  margin-right: var(--braco-space-2);
 }
 
 .braco-public-shell__logo {
   height: 28px;
   width: auto;
+}
+
+.braco-public-shell__nav {
+  display: none;
+  align-items: center;
+  gap: var(--braco-space-5);
+  flex: 1;
+}
+
+.braco-public-shell__nav-link {
+  color: var(--md-sys-color-on-surface);
+  text-decoration: none;
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  font-size: var(--md-sys-typescale-label-large-size);
+  padding: var(--braco-space-2) 0;
+}
+
+.braco-public-shell__nav-link:hover {
+  color: var(--md-sys-color-primary);
+}
+
+.braco-public-shell__actions {
+  display: none;
+  align-items: center;
+  gap: var(--braco-space-4);
+  margin-left: auto;
 }
 
 .braco-public-shell__enter {
@@ -34,13 +87,112 @@
 }
 
 .braco-public-shell__enter:hover {
-  background: var(--md-sys-color-surface-container-lowest);
+  background: var(--md-sys-color-surface-container);
 }
+
+.braco-public-shell__menu-toggle {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--md-sys-shape-corner-small);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  background: transparent;
+  color: var(--md-sys-color-on-surface);
+  cursor: pointer;
+}
+
+.braco-public-shell__menu-toggle:hover {
+  background: var(--md-sys-color-surface-container);
+}
+
+@media (min-width: 900px) {
+  .braco-public-shell__nav,
+  .braco-public-shell__actions {
+    display: flex;
+  }
+  .braco-public-shell__menu-toggle {
+    display: none;
+  }
+}
+
+/* ---------- Menu mobile ---------- */
+
+.braco-public-shell__mobile-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--braco-space-4);
+  padding: var(--braco-space-4) var(--braco-space-5) var(--braco-space-5);
+  background: var(--md-sys-color-surface-container-lowest);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.braco-public-shell__mobile-nav nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--braco-space-1);
+}
+
+.braco-public-shell__mobile-link {
+  color: var(--md-sys-color-on-surface);
+  text-decoration: none;
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  font-size: var(--md-sys-typescale-title-medium-size);
+  padding: var(--braco-space-3) var(--braco-space-2);
+  border-radius: var(--md-sys-shape-corner-small);
+}
+
+.braco-public-shell__mobile-link:hover {
+  background: var(--md-sys-color-surface-container);
+}
+
+.braco-public-shell__mobile-cta {
+  width: 100%;
+}
+
+@media (min-width: 900px) {
+  .braco-public-shell__mobile-nav {
+    display: none;
+  }
+}
+
+/* ---------- Footer ---------- */
 
 .braco-public-shell__footer {
   margin-top: auto;
-  padding: var(--braco-space-5);
+  background: var(--braco-color-nav-surface);
+  color: var(--braco-color-on-nav-surface);
+  padding: var(--braco-space-6) var(--braco-space-5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--braco-space-4);
   text-align: center;
-  color: var(--md-sys-color-on-surface-variant);
+}
+
+.braco-public-shell__footer-logo {
+  height: 24px;
+  width: auto;
+  /* Área de proteção — docs/design/21-logo-usage.md §2 */
+  margin-bottom: var(--braco-space-2);
+}
+
+.braco-public-shell__footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--braco-space-5);
+}
+
+.braco-public-shell__footer-pending {
+  opacity: 0.6;
+  font-size: var(--md-sys-typescale-body-medium-size);
+  cursor: default;
+}
+
+.braco-public-shell__copyright {
+  opacity: 0.75;
   font-size: var(--md-sys-typescale-body-medium-size);
 }

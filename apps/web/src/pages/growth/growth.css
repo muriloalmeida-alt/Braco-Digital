@@ -1,9 +1,13 @@
 /* BRAÇO — Growth (Landing + Monte sua equipe). Mais emocional que o app
  * gerencial, mas subordinado a M3/Brand UI Foundation
- * (docs/design/26-growth-landing-experience.md §2). */
+ * (docs/design/26-growth-landing-experience.md §2, §11 e adendo "Redesign
+ * v2" no mesmo documento). Cores usadas aqui vêm sempre de
+ * theme/tokens.css (M3/BRAÇO) — a única exceção documentada são as cores
+ * de balão de chat em WhatsAppShowcase.css, que são do canal, não da
+ * marca BRAÇO. */
 
 .braco-growth-section {
-  max-width: 1040px;
+  max-width: 1120px;
   margin: 0 auto;
   padding: var(--braco-space-6) var(--braco-space-5);
 }
@@ -14,10 +18,32 @@
   }
 }
 
+/* ---------- Hero ---------- */
+
+/* Bloco institucional escuro (Azul Profundo) — mesmo token já usado pelo
+ * App Shell autenticado (`--braco-color-nav-surface`,
+ * docs/design/04-color-system.md §5/§7), aplicado aqui como "bloco
+ * institucional selecionado" permitido por docs/design/26 §11 mesmo numa
+ * landing de superfícies predominantemente claras. */
+.braco-growth-hero-band {
+  background: var(--braco-color-nav-surface);
+  color: var(--braco-color-on-nav-surface);
+}
+
 .braco-growth-hero {
-  text-align: left;
   display: grid;
-  gap: var(--braco-space-4);
+  gap: var(--braco-space-6);
+  padding-top: var(--braco-space-6);
+  padding-bottom: var(--braco-space-6);
+}
+
+@media (min-width: 1024px) {
+  .braco-growth-hero {
+    grid-template-columns: 1.05fr 0.95fr;
+    align-items: center;
+    padding-top: var(--braco-space-6);
+    padding-bottom: var(--braco-space-6);
+  }
 }
 
 .braco-growth-hero__eyebrow {
@@ -26,37 +52,147 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
   font-size: var(--md-sys-typescale-label-large-size);
+  margin: 0 0 var(--braco-space-3);
+}
+
+/* No hero escuro, o Azul BRAÇO perde contraste — usa a cor de destaque
+ * já prevista pelo color system para superfícies inversas
+ * (`--md-sys-color-inverse-primary`), sem introduzir uma cor nova. */
+.braco-growth-hero-band .braco-growth-hero__eyebrow {
+  color: var(--md-sys-color-inverse-primary);
+}
+
+.braco-growth-eyebrow--centered {
+  text-align: center;
 }
 
 .braco-growth-hero__headline {
-  margin: 0;
+  margin: 0 0 var(--braco-space-4);
   font-family: var(--md-ref-typeface);
   font-weight: 800;
-  font-size: clamp(1.75rem, 4vw + 1rem, 3rem);
-  line-height: 1.15;
-  color: var(--md-sys-color-on-surface);
-  max-width: 18ch;
+  font-size: clamp(2rem, 5vw + 1rem, 3.25rem);
+  line-height: 1.1;
+  max-width: 16ch;
+}
+
+.braco-growth-hero__headline-accent {
+  color: var(--md-sys-color-inverse-primary);
 }
 
 .braco-growth-hero__support {
   font-size: var(--md-sys-typescale-body-large-size);
-  color: var(--md-sys-color-on-surface-variant);
-  max-width: 52ch;
+  opacity: 0.92;
+  max-width: 48ch;
+  margin: 0 0 var(--braco-space-5);
 }
 
 .braco-growth-hero__ctas {
   display: flex;
   gap: var(--braco-space-3);
   flex-wrap: wrap;
+  margin-bottom: var(--braco-space-4);
 }
 
-@media (min-width: 1024px) {
-  .braco-growth-hero {
-    grid-template-columns: 1.1fr 0.9fr;
-    align-items: center;
-    text-align: left;
+/* CTA primário sobre fundo escuro: em vez de introduzir uma cor de
+ * destaque nova (fora do color system aprovado), usa um botão claro de
+ * alto contraste — o mesmo princípio M3 de "botão sobre superfície
+ * inversa" — mantendo o Azul BRAÇO como cor de texto/ação (docs/design/
+ * 26-growth-landing-experience.md §11: "Azul BRAÇO como ação"). */
+.braco-growth-hero__cta-primary.braco-button {
+  background: var(--md-sys-color-surface-container-lowest);
+  color: var(--md-sys-color-primary);
+}
+
+.braco-growth-hero__cta-primary.braco-button:hover:not(:disabled) {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.braco-growth-hero__cta-secondary.braco-button--outlined {
+  color: var(--braco-color-on-nav-surface);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.braco-growth-hero__cta-secondary.braco-button--outlined:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.braco-growth-hero__microcopy {
+  margin: 0;
+  font-size: var(--md-sys-typescale-body-medium-size);
+  opacity: 0.85;
+}
+
+.braco-growth-hero__visual {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 260px;
+}
+
+.braco-growth-hero__visual-backdrop {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: var(--braco-space-5);
+  border-radius: var(--md-sys-shape-corner-extra-large);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.braco-growth-hero__symbol {
+  width: 42%;
+  max-width: 190px;
+  height: auto;
+  opacity: 0.8;
+}
+
+.braco-growth-hero__visual > .braco-wa-float {
+  position: relative;
+  align-self: flex-end;
+  margin-bottom: var(--braco-space-4);
+  margin-right: 5%;
+}
+
+@media (max-width: 1023px) {
+  .braco-growth-hero__visual {
+    min-height: 260px;
+  }
+  .braco-growth-hero__visual > .braco-wa-float {
+    margin-right: 0;
   }
 }
+
+/* ---------- Faixa de integrações ---------- */
+
+.braco-growth-integrations-strip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--braco-space-4);
+  text-align: center;
+  padding-top: var(--braco-space-5);
+  padding-bottom: var(--braco-space-5);
+}
+
+.braco-growth-integrations-strip__label {
+  margin: 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+}
+
+.braco-growth-integrations-strip__badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--braco-space-3);
+}
+
+/* ---------- Heading genérico de seção ---------- */
 
 .braco-growth-heading {
   margin: 0 0 var(--braco-space-2);
@@ -66,12 +202,58 @@
   text-align: center;
 }
 
+.braco-growth-heading--left {
+  text-align: left;
+}
+
 .braco-growth-support {
   text-align: center;
   color: var(--md-sys-color-on-surface-variant);
   max-width: 60ch;
   margin: 0 auto var(--braco-space-5);
 }
+
+.braco-growth-support--left {
+  margin: 0 0 var(--braco-space-4);
+  text-align: left;
+}
+
+/* ---------- Dores ---------- */
+
+.braco-growth-pains {
+  display: grid;
+  gap: var(--braco-space-4);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .braco-growth-pains {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.braco-growth-pain-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--braco-space-2);
+}
+
+.braco-growth-pain-card__icon {
+  color: var(--md-sys-color-primary);
+}
+
+.braco-growth-pain-card h3 {
+  margin: 0;
+  font-size: var(--md-sys-typescale-title-medium-size);
+}
+
+.braco-growth-pain-card p {
+  margin: 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-body-medium-size);
+}
+
+/* ---------- Como funciona ---------- */
 
 .braco-growth-steps {
   display: grid;
@@ -106,6 +288,8 @@
   margin: 0 auto;
 }
 
+/* ---------- Portfólio de Braços ---------- */
+
 .braco-growth-portfolio {
   display: grid;
   gap: var(--braco-space-4);
@@ -124,51 +308,104 @@
   }
 }
 
+.braco-growth-portfolio-status {
+  text-align: center;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
 .braco-growth-portfolio-card {
   display: flex;
   flex-direction: column;
-  gap: var(--braco-space-2);
+  gap: var(--braco-space-3);
+  height: 100%;
 }
 
-.braco-growth-portfolio-card h3 {
+.braco-growth-portfolio-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--braco-space-3);
+}
+
+.braco-growth-portfolio-card__heading {
+  flex: 1;
+  min-width: 0;
+}
+
+.braco-growth-portfolio-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  flex-shrink: 0;
+}
+
+.braco-growth-portfolio-card__heading h3 {
   margin: 0;
+  font-size: var(--md-sys-typescale-title-medium-size);
+  font-weight: var(--md-sys-typescale-title-medium-weight);
 }
 
-.braco-growth-portfolio-card p {
+.braco-growth-portfolio-card__role {
   margin: 0;
   color: var(--md-sys-color-on-surface-variant);
   font-size: var(--md-sys-typescale-body-medium-size);
 }
 
-.braco-growth-diagnostic-teaser {
+.braco-growth-portfolio-card__mission {
+  margin: 0;
+  font-size: var(--md-sys-typescale-body-medium-size);
+}
+
+.braco-growth-portfolio-card__capabilities {
+  margin: 0;
+  padding-left: 1.1em;
+  font-size: var(--md-sys-typescale-body-medium-size);
+  color: var(--md-sys-color-on-surface-variant);
+  flex: 1;
+}
+
+.braco-growth-portfolio-card__capabilities li {
+  margin-bottom: 2px;
+}
+
+.braco-growth-portfolio-card__action {
+  align-self: flex-start;
+  padding-left: 0;
+}
+
+/* ---------- Demonstração pelo WhatsApp ---------- */
+
+.braco-growth-whatsapp-demo {
+  display: grid;
+  gap: var(--braco-space-5);
+}
+
+@media (min-width: 1024px) {
+  .braco-growth-whatsapp-demo {
+    grid-template-columns: 0.9fr 1.1fr;
+    align-items: center;
+  }
+}
+
+/* ---------- Bloco de integrações (segundo, mais informativo) ---------- */
+
+.braco-growth-integrations-block {
   background: var(--braco-color-surface-secondary);
   color: var(--braco-color-on-surface-secondary);
   border-radius: var(--md-sys-shape-corner-large);
-  padding: var(--braco-space-6);
   text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: var(--braco-space-3);
-  align-items: center;
 }
 
-.braco-growth-faq {
-  display: flex;
-  flex-direction: column;
-  gap: var(--braco-space-4);
-  max-width: 720px;
-  margin: 0 auto;
+.braco-growth-integrations-block .braco-growth-support {
+  color: inherit;
+  opacity: 0.85;
 }
 
-.braco-growth-faq-item h3 {
-  margin: 0 0 4px;
-  font-size: var(--md-sys-typescale-title-medium-size);
-}
-
-.braco-growth-faq-item p {
-  margin: 0;
-  color: var(--md-sys-color-on-surface-variant);
-}
+/* ---------- CTA final ---------- */
 
 .braco-growth-cta-final {
   text-align: center;
@@ -185,6 +422,11 @@
 .braco-growth-cta-final h2 {
   margin: 0;
   max-width: 24ch;
+}
+
+.braco-growth-cta-final p {
+  margin: 0;
+  max-width: 48ch;
 }
 
 /* --- Diagnóstico / Wizard --------------------------------------------- */

@@ -1,0 +1,155 @@
+/* Demonstração visual de WhatsApp (redesign da landing, seções "Hero" e
+ * "Fale com seus Braços pelo WhatsApp"). Usa a identidade reconhecível do
+ * canal (verde oficial `#25D366` no indicador "online" e no ícone da
+ * marca, mais o verde característico do balão de mensagem enviada do
+ * próprio WhatsApp) sem reproduzir dados reais nem capturar a UI do app —
+ * é uma composição própria, com o Design System BRAÇO (Card, shape,
+ * type scale). As cores de balão de chat abaixo são intencionalmente
+ * locais a este componente (não fazem parte do color system M3/BRAÇO —
+ * ver docs/design/04-color-system.md — são só a referência visual do
+ * canal, mesmo espírito de docs/design/19-whatsapp-template-library.md). */
+
+.braco-wa-card {
+  --wa-bubble-out: #dcf8c6;
+  --wa-bubble-in: #ffffff;
+  --wa-green: #25d366;
+}
+
+/* ---------- Card flutuante do Hero ---------- */
+
+.braco-wa-float {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--braco-space-3);
+  max-width: 300px;
+  padding: var(--braco-space-4);
+  background: var(--md-sys-color-surface-container-lowest);
+  border-radius: var(--md-sys-shape-corner-large);
+  box-shadow: 0 12px 32px rgba(2, 12, 27, 0.28);
+}
+
+.braco-wa-float__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--md-sys-shape-corner-full);
+  flex-shrink: 0;
+}
+
+.braco-wa-float__body {
+  min-width: 0;
+}
+
+.braco-wa-float__title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.braco-wa-float__name {
+  margin: 0;
+  font-size: var(--md-sys-typescale-title-medium-size);
+  font-weight: var(--md-sys-typescale-title-medium-weight);
+  color: var(--md-sys-color-on-surface);
+}
+
+.braco-wa-float__status {
+  margin: 0 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--md-sys-typescale-label-medium-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.braco-wa-float__status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--wa-green);
+  flex-shrink: 0;
+}
+
+.braco-wa-float__bubble {
+  margin: 0;
+  background: var(--wa-bubble-out);
+  color: #0b3d12;
+  border-radius: var(--md-sys-shape-corner-medium) var(--md-sys-shape-corner-medium) var(--md-sys-shape-corner-medium) 2px;
+  padding: var(--braco-space-2) var(--braco-space-3);
+  font-size: var(--md-sys-typescale-body-medium-size);
+  line-height: 1.35;
+}
+
+.braco-wa-float__bubble-check {
+  display: inline-flex;
+  vertical-align: -2px;
+  margin-left: 4px;
+  color: #4fc3f7;
+}
+
+/* ---------- Demonstração de conversa (seção "Fale com seus Braços") ---------- */
+
+.braco-wa-thread {
+  display: flex;
+  flex-direction: column;
+  gap: var(--braco-space-3);
+  background: var(--md-ext-color-success-container);
+  padding: var(--braco-space-5);
+  border-radius: var(--md-sys-shape-corner-large);
+}
+
+.braco-wa-thread__bubble-row {
+  display: flex;
+  gap: var(--braco-space-2);
+  align-items: flex-end;
+}
+
+.braco-wa-thread__bubble-row--out {
+  justify-content: flex-end;
+}
+
+.braco-wa-thread__avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--md-sys-shape-corner-full);
+  flex-shrink: 0;
+}
+
+.braco-wa-thread__bubble {
+  margin: 0;
+  max-width: 78%;
+  padding: var(--braco-space-3) var(--braco-space-4);
+  font-size: var(--md-sys-typescale-body-medium-size);
+  line-height: 1.4;
+}
+
+.braco-wa-thread__bubble--in {
+  background: var(--wa-bubble-in);
+  color: var(--md-sys-color-on-surface);
+  border-radius: 2px var(--md-sys-shape-corner-medium) var(--md-sys-shape-corner-medium) var(--md-sys-shape-corner-medium);
+}
+
+.braco-wa-thread__bubble--out {
+  background: var(--wa-bubble-out);
+  color: #0b3d12;
+  border-radius: var(--md-sys-shape-corner-medium) 2px var(--md-sys-shape-corner-medium) var(--md-sys-shape-corner-medium);
+}
+
+.braco-wa-thread__result {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--md-sys-color-surface-container-lowest);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  padding: 6px 14px;
+  border-radius: var(--md-sys-shape-corner-full);
+  font-size: var(--md-sys-typescale-label-medium-size);
+  font-weight: var(--md-sys-typescale-label-medium-weight);
+  color: var(--md-sys-color-on-surface);
+}
+
+@media (max-width: 480px) {
+  .braco-wa-thread__bubble {
+    max-width: 88%;
+  }
+}
