@@ -1,5 +1,15 @@
 -- BRAÇO — Bootstrap único da role pública (Track B / TD15).
 --
+-- ALTERNATIVA MANUAL — issue #46 (Robustez de deploy) automatizou este
+-- passo: `npm run db:ensure-public-role` (apps/api/scripts/ensure-
+-- public-role.ts) faz exatamente o que este arquivo faz, sozinho, sempre
+-- que o usuário do próprio DATABASE_URL da aplicação já tem privilégio
+-- suficiente (caso do Postgres do plugin do Railway) — é o que o
+-- `preDeployCommand` do `railway.json` já roda em todo deploy. Use ESTE
+-- arquivo manualmente só quando isso não for verdade no seu ambiente
+-- (uma role de aplicação deliberadamente restrita, sem CREATEROLE) — o
+-- próprio script automatizado detecta esse caso e aponta de volta pra cá.
+--
 -- NÃO é uma migração do Prisma. Rodar UMA VEZ por ambiente (local, staging,
 -- produção), à mão, conectado como um usuário do Postgres com o atributo
 -- CREATEROLE (ou superusuário — ex.: `postgres` no gerenciador do provedor,

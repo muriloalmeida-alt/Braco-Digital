@@ -27,16 +27,46 @@ WhatsApp/atendimento).
 ```bash
 npm install
 
-# Banco de dados
-createuser braco --pwprompt --createdb   # ou equivalente do seu ambiente
+# Banco de dados. --createrole é necessário para que
+# `npm run db:ensure-public-role` funcione em self-bootstrap (issue #46)
+# — sem ele, seria preciso rodar
+# apps/api/prisma/bootstrap/public-role.sql manualmente como um
+# superusuário à parte. Dar --createrole ao usuário de dev local é uma
+# escolha de conveniência (banco descartável, sem dado real) — nunca o
+# padrão para produção, onde a role de aplicação nunca deveria ter esse
+# atributo (ver "Provisionamento de banco" abaixo).
+createuser braco --pwprompt --createdb --createrole   # ou equivalente do seu ambiente
 createdb -O braco braco_dev
 
 cp apps/api/.env.example apps/api/.env   # ajuste DATABASE_URL/JWT_SECRET
 cd apps/api
+npm run db:ensure-public-role
 npx prisma migrate dev
 npx prisma db seed
 cd ../..
 ```
+
+### 3.1 Provisionamento de banco (ordem obrigatória, qualquer ambiente)
+
+Vale para local, staging e produção — a única coisa que muda é *quem*
+executa cada passo:
+
+1. Criar o Postgres (local: `createdb`; Railway: plugin PostgreSQL).
+2. Garantir que a role `braco_public` existe —
+   `npm run db:ensure-public-role` (issue #46). Idempotente, seguro
+   rodar em todo boot/deploy. Só falha (alto e claro, nunca em
+   silêncio) se o usuário do `DATABASE_URL` não tiver privilégio
+   suficiente — nesse caso, use
+   `apps/api/prisma/bootstrap/public-role.sql` manualmente, uma vez,
+   como um superusuário à parte.
+3. Validar a membership (o próprio `db:ensure-public-role` já valida
+   isso ao final — não é um passo manual separado).
+4. Executar as migrations — `prisma migrate dev` (local) ou
+   `prisma migrate deploy` (staging/produção).
+5. Iniciar a aplicação.
+
+No Railway, os passos 2 e 4 rodam automaticamente via
+`deploy.preDeployCommand` (`railway.json`) — ver §7.
 
 O seed cria:
 - os 5 `EmployeeType` do catálogo (`docs/04-employee-catalog.md`), com
@@ -133,7 +163,11 @@ explícitos, para não depender de detecção automática.
    - `CORS_ORIGIN` → URL pública do serviço `apps/web` (preencher depois de criá-lo).
    - `PORT` → não definir; o Railway injeta automaticamente e `main.ts` já lê `process.env.PORT`.
 4. `npm install` roda `postinstall: prisma generate` automaticamente — o Prisma Client é sempre gerado no build, mesmo em ambiente limpo.
-5. O start command (`start:railway`, já configurado em `railway.json`) roda `prisma migrate deploy` antes de subir a API — as migrações do banco de produção são aplicadas a cada deploy, sem passo manual.
+5. Lifecycle do deploy (issue #46 — migration e runtime deliberadamente
+   separados, `railway.json` já configurado):
+   - **Build:** `npm run build` (`nest build`).
+   - **Pre-Deploy:** `npm run db:ensure-public-role && npm run prisma:deploy` — roda uma única vez por deploy, **antes** da promoção da nova versão. Se a migration falhar aqui, a versão nova nunca sobe (o Railway mantém a versão anterior no ar) — logs de migration ficam separados dos logs de runtime.
+   - **Start:** `npm run start:prod` (`node dist/main.js`) — o processo principal nunca executa migration.
 
 ### 7.2 Serviço `apps/web`
 
