@@ -8,7 +8,6 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main.js",
-    "start:railway": "prisma migrate deploy && node dist/main.js",
     "postinstall": "prisma generate",
     "lint": "eslint \"src/**/*.ts\"",
     "test": "jest",
@@ -20,7 +19,8 @@
     "prisma:deploy": "prisma migrate deploy",
     "prisma:seed": "ts-node prisma/seed.ts",
     "zernio:register-webhook": "ts-node scripts/register-zernio-webhook.ts",
-    "google:reencrypt-credentials": "ts-node scripts/reencrypt-google-credentials.ts"
+    "google:reencrypt-credentials": "ts-node scripts/reencrypt-google-credentials.ts",
+    "db:ensure-public-role": "ts-node scripts/ensure-public-role.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.0",
